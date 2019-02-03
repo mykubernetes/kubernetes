@@ -14,3 +14,6 @@ for imageName in ${images[@]} ; do
 done
 
 
+或者用 keveon 源 
+例子
+docker pull keveon/kube-apiserver:v1.12.1

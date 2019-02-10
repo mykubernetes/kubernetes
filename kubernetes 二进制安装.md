@@ -1,6 +1,6 @@
 kubernetes 二进制安装
 ==================== 
-![image](https://github.com/mykubernetes/linux-install/blob/master/image/kubernetes3.png)  
+
 1. 部署Etcd集群  
 使用cfssl来生成自签证书，先下载cfssl工具：  
 ```
@@ -186,9 +186,6 @@ cluster is healthy
 # systemctl enable docker
 ```  
 3. 部署Flannel网络  
-
-工作原理：  
-![image](https://github.com/mykubernetes/linux-install/blob/master/image/kubernetes2.png)
 
 Falnnel要用etcd存储自身一个子网信息，所以要保证能成功连接Etcd，写入预定义子网段：  
 ```
@@ -569,9 +566,6 @@ controller-manager   Healthy   ok
 
 Master apiserver启用TLS认证后，Node节点kubelet组件想要加入集群，必须使用CA签发的有效证书才能与apiserver通信，当Node节点很多时，签署证书是一件很繁琐的事情，因此有了TLS Bootstrapping机制，kubelet会以一个低权限用户自动向apiserver申请证书，kubelet的证书由apiserver动态签署。
 
-认证大致工作流程如图所示：  
-![image](https://github.com/mykubernetes/linux-install/blob/master/image/kubernetes1.png)
-  
 5.1 将kubelet-bootstrap用户绑定到系统集群角色  
 ```
 kubectl create clusterrolebinding kubelet-bootstrap \

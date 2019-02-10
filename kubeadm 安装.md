@@ -1,79 +1,61 @@
-Kubernetes文章专栏地址：http://blog.51cto.com/cloumn/detail/10
-
-
-官方提供Kubernetes部署3种方式
-minikube
-Minikube是一个工具，可以在本地快速运行一个单点的Kubernetes，尝试Kubernetes或日常开发的用户使用。不
-能用于生产环境。
-官方文档：https://kubernetes.io/docs/setup/minikube/
-kubeadm
-kubeadm可帮助你快速部署一套kubernetes集群。kubeadm设计目的为新用户开始尝试kubernetes提供一种简单
-的方法。目前是Beta版。
-官方文档：https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm/ https://kubernetes.io/doc
-s/setup/independent/install-kubeadm/
-二进制包
-从官方下载发行版的二进制包，手动部署每个组件，组成Kubernetes集群。目前企业生产环境中主要使用该方
-式。 下载地址：https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.11.md#v1113
-
-
-1. 安装要求
-操作系统
-Ubuntu 16.04+
-Debian 9
-CentOS 7
-RHEL 7
-Fedora 25/26 (best-effort)
-其他
-内存2GB + ，2核CPU +
-集群节点之间可以通信
-每个节点唯一主机名，MAC地址和product_uuid
-检查MAC地址：使用ip link或者ifconfig -a
-检查product_uuid：cat /sys/class/dmi/id/product_uuid
-禁止swap分区。这样才能使kubelet正常工作
-
-2. 准备环境
+kubeadm 安装
+===========
+1. 准备环境
 关闭防火墙：
+```
 # systemctl stop firewalld
 # systemctl disable firewalld
-关闭selinux：
+```  
+关闭selinux：  
 
-3. 安装Docker
+2. 安装Docker  
 
-4. 安装kubeadm，kubelet和kubectl
-kubeadm： 引导集群的命令
-kubelet：集群中运行任务的代理程序
-kubectl：命令行管理工具
-4.1 添加阿里云YUM软件源
+3. 安装kubeadm，kubelet和kubectl  
+kubeadm： 引导集群的命令  
+kubelet：集群中运行任务的代理程序  
+kubectl：命令行管理工具  
+3.1 添加阿里云YUM软件源  
+```
 # sed -i 's/enforcing/disabled/' /etc/selinux/config
 # setenforce 0
-关闭swap：
+```
+关闭swap：  
+```
 # swapoff -a # 临时
 # vim /etc/fstab # 永久
-添加主机名与IP对应关系：
+```  
+添加主机名与IP对应关系：  
+```
 # cat /etc/hosts
 192.168.0.11 k8s-master
 192.168.0.12 k8s-node1
 192.168.0.13 k8s-node2
-同步时间：
+```  
+同步时间：  
+```
 # yum install ntpdate -y
 # ntpdate ntp.api.bz
 # yum install -y yum-utils device-mapper-persistent-data lvm2
 # yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
-目前docker最大支持docker-ce-17.03，所以要指定该版本安装：
-# yum install docker-ce-17.03.3.ce -y
-如果提示container-selinux依赖问题，先安装ce-17.03匹配版本：
+```  
+目前docker最大支持docker-ce-17.03，所以要指定该版本安装：  
+``` # yum install docker-ce-17.03.3.ce -y ```
+如果提示container-selinux依赖问题，先安装ce-17.03匹配版本：  
+```
 # yum localinstall
 https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-selinux-
 17.03.3.ce-1.el7.noarch.rpm
 # systemctl enable docker && systemctl start docker
-4.2 安装kubeadm，kubelet和kubectl
-注意：使用Docker时，kubeadm会自动检查kubelet的cgroup驱动程序，并/var/lib/kubelet/kubeadm-flags.env
-在运行时将其设置在文件中。如果使用的其他CRI，则必须在/etc/default/kubelet中cgroup-driver值修改为
-cgroupfs：
+```  
+4.2 安装kubeadm，kubelet和kubectl  
+注意：使用Docker时，kubeadm会自动检查kubelet的cgroup驱动程序，并/var/lib/kubelet/kubeadm-flags.env  
+在运行时将其设置在文件中。如果使用的其他CRI，则必须在/etc/default/kubelet中cgroup-driver值修改为  
+cgroupfs：  
 
-5. 使用kubeadm创建单个Master集群
-5.1 默认下载镜像地址在国外无法访问，先从准备好所需镜像
-保存到脚本之间运行：
+5. 使用kubeadm创建单个Master集群  
+5.1 默认下载镜像地址在国外无法访问，先从准备好所需镜像  
+保存到脚本之间运行：  
+```
 # cat << EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
 name=Kubernetes
@@ -147,14 +129,16 @@ sha256:<hash>
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
-5.4 加入工作节点
-在Node节点切换到root账号：
-格式：kubeadm join --token : --discovery-token-ca-cert-hash sha256:
+```
+5.4 加入工作节点  
+在Node节点切换到root账号：  
+格式：kubeadm join --token : --discovery-token-ca-cert-hash sha256:  
 
-6. kubernetes dashboard
-修改镜像地址：
-修改Service：
-创建一个管理员角色：
+6. kubernetes dashboard  
+修改镜像地址：  
+修改Service：  
+创建一个管理员角色：  
+```
 # kubectl apply -f
 https://raw.githubusercontent.com/coreos/flannel/v0.10.0/Documentation/kube-flannel.yml
 # kubeadm join 192.168.0.11:6443 --token 6hk68y.0rdz1wdjyh85ntkr --discovery-token-ca-
@@ -216,4 +200,4 @@ f7PAzH5vcuyO4veQ9ooVjk3DKjrP4zXQChHllBB1wmD_oyLjoWxK3Z5MBTlVGzSixVwuQNpFPbuS6Z7i
 0cGZ9Tt6cXzcK81KfAEpDIP_CtFV_Jw4s98EgBex9mZh6vq1dcxr03qfuK--
 udd_8GWZctu_p_P15hZZLoKEm5GCbs6JGvKL2aao_DEHfLp3XYEnApojI91vU4qAqdkvMZ2qWQNGYv4KNi2yPOO
 JQ
-
+```  

@@ -852,9 +852,9 @@ KUBELET_ARGS="--network-plugin=cni \
     --kubeconfig=/etc/kubernetes/auth/kubelet.conf \
     --bootstrap-kubeconfig=/etc/kubernetes/auth/bootstrap.conf"
 [root@k8s-node01 ~]# 
-
-/var/lib/kubelet/config.yaml文件：
-
+```  
+/var/lib/kubelet/config.yaml文件：  
+```
 [root@k8s-node01 ~]# cat  /var/lib/kubelet/config.yaml 
 address: 0.0.0.0
 apiVersion: kubelet.config.k8s.io/v1beta1

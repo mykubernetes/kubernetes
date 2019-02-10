@@ -154,7 +154,7 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 ```  
 把刚才生成的证书拷贝到配置文件中的位置：  
-````
+```
 # cp ca*pem server*pem /opt/etcd/ssl
 ```  
 启动并设置开启启动：  

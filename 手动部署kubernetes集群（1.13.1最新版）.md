@@ -1,40 +1,40 @@
-一、机器规划
+一、机器规划  
 
-使用五台机子部署k8s集群，规划如下：
-master节点3台（同时也是etcd节点）
-node节点2台
-ip分配如下：
-ip:192.168.10.101，主机名：k8s-etcd01
-ip:192.168.10.102，主机名：k8s-etcd02
-ip:192.168.10.103，主机名：k8s-etcd03
-ip:192.168.10.104，主机名：k8s-node01
-ip:192.168.10.105，主机名：k8s-node02 
-注意：
-1、全部机子关闭防火墙、关闭selinux
-2、全部机子时间要同步
-3、全部机子的hosts文件添加以下内容：
-192.168.10.101 k8s-master01   k8s-master01.logmm.com  k8s-etcd01.logmm.com  k8s-etcd01  myk8s-api.logmm.com
-192.168.10.102 k8s-master02   k8s-master02.logmm.com  k8s-etcd02.logmm.com  k8s-etcd02
-192.168.10.103 k8s-master03   k8s-master03.logmm.com  k8s-etcd03.logmm.com  k8s-etcd03
-192.168.10.104 k8s-node01     k8s-node01.logmm.com
-192.168.10.105 k8s-node02     k8s-node02.logmm.com
-二、etcd集群
-1、etcd01、02、02、03三个节点都安装etcd
+使用五台机子部署k8s集群，规划如下：  
+master节点3台（同时也是etcd节点）  
+node节点2台  
+ip分配如下：  
+ip:192.168.10.101，主机名：k8s-etcd01  
+ip:192.168.10.102，主机名：k8s-etcd02  
+ip:192.168.10.103，主机名：k8s-etcd03  
+ip:192.168.10.104，主机名：k8s-node01  
+ip:192.168.10.105，主机名：k8s-node02   
+注意：  
+1、全部机子关闭防火墙、关闭selinux  
+2、全部机子时间要同步  
+3、全部机子的hosts文件添加以下内容：  
+192.168.10.101 k8s-master01   k8s-master01.logmm.com  k8s-etcd01.logmm.com  k8s-etcd01  myk8s-api.logmm.com  
+192.168.10.102 k8s-master02   k8s-master02.logmm.com  k8s-etcd02.logmm.com  k8s-etcd02  
+192.168.10.103 k8s-master03   k8s-master03.logmm.com  k8s-etcd03.logmm.com  k8s-etcd03  
+192.168.10.104 k8s-node01     k8s-node01.logmm.com  
+192.168.10.105 k8s-node02     k8s-node02.logmm.com  
+二、etcd集群  
+1、etcd01、02、02、03三个节点都安装etcd  
 
-为了方便，已经在etcd01节点上配置好ansible了，使用andible批量安装。如果没有ansible，则需在3个etcd节点上手动执行yum install etcd -y命令安装etcd。
-
+为了方便，已经在etcd01节点上配置好ansible了，使用andible批量安装。如果没有ansible，则需在3个etcd节点上手动执行yum install etcd -y命令安装etcd。  
+```
 [root@k8s-etcd01 ~]# ansible etcd -m yum -a "name=etcd state=present"
+```  
+2、制作etcd、k8s证书  
 
-2、制作etcd、k8s证书
-
- 在etcd01节点上安装git，使用git克隆证书制作的文件使用git克隆证书制作的文件
-
+ 在etcd01节点上安装git，使用git克隆证书制作的文件使用git克隆证书制作的文件  
+```
 [root@k8s-etcd01 ~]# yum install git -y
 [root@k8s-etcd01 ~]# git clone https://github.com/iKubernetes/k8s-certs-generator
-
-（1）生成etcd CA及相关组件的证书及私钥
-生成证书的过程中要输入域名，这里使用logmm.com
-
+```  
+（1）生成etcd CA及相关组件的证书及私钥  
+生成证书的过程中要输入域名，这里使用logmm.com  
+```
 [root@k8s-etcd01 ~]# cd k8s-certs-generator/
 [root@k8s-etcd01 k8s-certs-generator]# bash gencerts.sh etcd
 Enter Domain Name [ilinux.io]: logmm.com
@@ -195,12 +195,12 @@ Certificate is to be certified until Dec 11 16:21:50 2028 GMT (3650 days)
 Write out database with 1 new entries
 Data Base Updated
 [root@k8s-etcd01 k8s-certs-generator]# 
-
-（2）生成kubernetes CA及相关组件的证书及私钥
-域名为：logmm.com
-集群名：myk8s
-master节点名称：k8s-master01、k8s-master02、k8s-master03
-
+```  
+（2）生成kubernetes CA及相关组件的证书及私钥  
+域名为：logmm.com  
+集群名：myk8s  
+master节点名称：k8s-master01、k8s-master02、k8s-master03  
+```
 [root@k8s-etcd01 k8s-certs-generator]# bash gencerts.sh k8s
 Enter Domain Name [ilinux.io]: logmm.com
 Enter Kubernetes Cluster Name [kubernetes]: myk8s
@@ -210,11 +210,11 @@ Enter Master servers name[master01 master02 master03]: k8s-master01  k8s-master0
 Generating CA key and self signed cert.
 Generating RSA private key, 4096 bit long modulus
 。。。
+```  
+生成的证书如下：  
 
-生成的证书如下：
-
-etcd相关证书：
-
+etcd相关证书：  
+```
 [root@k8s-etcd01 k8s-certs-generator]# tree etcd
 etcd
 ├── patches
@@ -233,9 +233,9 @@ etcd
 
 2 directories, 11 files
 [root@k8s-etcd01 k8s-certs-generator]#
-
-k8s证书：
-
+```  
+k8s证书：  
+```
 [root@k8s-etcd01 k8s-certs-generator]# tree kubernetes/
 kubernetes/
 ├── CA
@@ -337,27 +337,27 @@ kubernetes/
 
 16 directories, 80 files
 [root@k8s-etcd01 k8s-certs-generator]#
-
-将生成的etcd、k8s证书复制到/etc/etcd/pki目录中
-
+```  
+将生成的etcd、k8s证书复制到/etc/etcd/pki目录中  
+```
 [root@k8s-etcd01 k8s-certs-generator]# cp -rp etcd /etc/etcd/pki
 [root@k8s-etcd01 k8s-certs-generator]# mv /etc/etcd/pki/pki/* /etc/etcd/pki/
 [root@k8s-etcd01 k8s-certs-generator]# rm -rf /etc/etcd/pki/pki/
-
-同时把/etc/etcd/pki复制到etcd02、etcd03节点的/etc/etcd目录中：
-
+```  
+同时把/etc/etcd/pki复制到etcd02、etcd03节点的/etc/etcd目录中：  
+```
 [root@k8s-etcd01 k8s-certs-generator]# scp -rp /etc/etcd/pki/ 192.168.10.102:/etc/etcd/   
 [root@k8s-etcd01 k8s-certs-generator]# scp -rp /etc/etcd/pki/ 192.168.10.103:/etc/etcd/    
 [root@k8s-etcd01 k8s-certs-generator]# 
+```  
+3、etcd集群配置模版  
 
-3、etcd集群配置模版
-
-在etcd01节点上git克隆：https://github.com/iKubernetes/k8s-bin-inst
-
+在etcd01节点上git克隆：https://github.com/iKubernetes/k8s-bin-inst  
+```
 [root@k8s-etcd01 ~]# git clone https://github.com/iKubernetes/k8s-bin-inst
-
-修改etcd.conf文件
-
+```  
+修改etcd.conf文件  
+```
 [root@k8s-etcd01 ~]# cd k8s-bin-inst/
 [root@k8s-etcd01 k8s-bin-inst]#vim etcd/etcd.conf
 #[Member]
@@ -429,86 +429,86 @@ ETCD_PEER_AUTO_TLS="false"
 #
 #[Auth]
 #ETCD_AUTH_TOKEN="simple"
-
-将此文件复制到/etc/etcd/目录中，同时复制到etcd02、etcd03节点的/etc/etcd/
-
+```  
+将此文件复制到/etc/etcd/目录中，同时复制到etcd02、etcd03节点的/etc/etcd/  
+```
 [root@k8s-etcd01 k8s-bin-inst]# cp etcd/etcd.conf /etc/etcd/
 [root@k8s-etcd01 k8s-bin-inst]# scp etcd/etcd.conf 192.168.10.102:/etc/etcd/
 etcd.conf                                                                    100% 1982   273.3KB/s   00:00    
 [root@k8s-etcd01 k8s-bin-inst]# scp etcd/etcd.conf 192.168.10.103:/etc/etcd/
 etcd.conf                                                                    100% 1982    75.8KB/s   00:00    
 [root@k8s-etcd01 k8s-bin-inst]# 
-
-etcd02节点修改etcd.conf文件：
-
+```  
+etcd02节点修改etcd.conf文件：  
+```
 [root@k8s-etcd02 ~]# vim /etc/etcd/etcd.conf 
 ETCD_LISTEN_PEER_URLS="https://192.168.10.102:2380"
 ETCD_LISTEN_CLIENT_URLS="https://192.168.10.102:2379"
 ETCD_NAME="k8s-etcd02.logmm.com"
 ETCD_INITIAL_ADVERTISE_PEER_URLS="https://k8s-etcd02.logmm.com:2380"
 ETCD_ADVERTISE_CLIENT_URLS="https://k8s-etcd02.logmm.com:2379"
+```  
+只修改上面这几项，其他的不变。  
 
-只修改上面这几项，其他的不变。
-
-etcd03节点修改etcd.conf文件：
-
+etcd03节点修改etcd.conf文件：  
+```
 [root@k8s-etcd03 ~]# vim /etc/etcd/etcd.conf 
 ETCD_LISTEN_PEER_URLS="https://192.168.10.103:2380"
 ETCD_LISTEN_CLIENT_URLS="https://192.168.10.103:2379"
 ETCD_NAME="k8s-etcd03.logmm.com"
 ETCD_INITIAL_ADVERTISE_PEER_URLS="https://k8s-etcd03.logmm.com:2380"
 ETCD_ADVERTISE_CLIENT_URLS="https://k8s-etcd03.logmm.com:2379"
+```  
+只修改上面这几项，其他的不变。  
+4、启动etcd服务  
 
-只修改上面这几项，其他的不变。
-4、启动etcd服务
-
-分别启动etcd01、02、03节点的etcd服务
-
+分别启动etcd01、02、03节点的etcd服务  
+```
 [root@k8s-etcd01 ~]# systemctl start etcd
 [root@k8s-etcd02 ~]# systemctl start etcd
 [root@k8s-etcd03 ~]# systemctl start etcd
 [root@k8s-etcd01 ~]# systemctl enable etcd
 [root@k8s-etcd02 ~]# systemctl enable etcd
 [root@k8s-etcd03 ~]# systemctl enable etcd
-
-查看一下集群是否健康：
-
+```  
+查看一下集群是否健康：  
+```
 [root@k8s-etcd01 ~]# etcdctl --key-file=/etc/etcd/pki/client.key --cert-file=/etc/etcd/pki/client.crt --ca-file=/etc/etcd/pki/ca.crt --endpoints="https://k8s-etcd01.logmm.com:2379" cluster-health
 member 97f4299c17715a9 is healthy: got healthy result from https://k8s-etcd03.logmm.com:2379
 member 3c596c9b8fc553d8 is healthy: got healthy result from https://k8s-etcd02.logmm.com:2379
 member e65386fe0aaf90fc is healthy: got healthy result from https://k8s-etcd01.logmm.com:2379
 cluster is healthy
 [root@k8s-etcd01 ~]# 
+```  
+OK，集群处于健康状态。  
+三、kubernetes集群  
+1、下载k8s二进制文件  
 
-OK，集群处于健康状态。
-三、kubernetes集群
-1、下载k8s二进制文件
+kubernetes托管在：https://github.com/kubernetes  
 
-kubernetes托管在：https://github.com/kubernetes
+相关版本：https://github.com/kubernetes/kubernetes/releases  
 
-相关版本：https://github.com/kubernetes/kubernetes/releases
+这里使用最新版本：https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.13.md#downloads-for-v1131  
 
-这里使用最新版本：https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.13.md#downloads-for-v1131
-
-etcd01节点下载1.13.1版本的服务端二进制文件：
-
+etcd01节点下载1.13.1版本的服务端二进制文件：  
+```
 [root@k8s-etcd01 ~]# curl -O https://dl.k8s.io/v1.13.1/kubernetes-server-linux-amd64.tar.gz
-
-解压到/usr/local/目录中
-
+```  
+解压到/usr/local/目录中  
+```
 [root@k8s-etcd01 ~]# tar xf kubernetes-server-linux-amd64.tar.gz -C /usr/local/
-
-配置环境变量：
-
+```  
+配置环境变量：  
+```
 [root@k8s-etcd01 ~]# vim /etc/profile.d/k8s.sh
 export PATH=$PATH:/usr/local/kubernetes/server/bin
 [root@k8s-etcd01 ~]# source /etc/profile.d/k8s.sh
 [root@k8s-etcd01 ~]#
+```  
+2、k8s证书  
 
-2、k8s证书
-
-在前面中，k8s证书已经生成好。
-
+在前面中，k8s证书已经生成好。  
+```
 [root@k8s-etcd01 k8s-certs-generator]# pwd
 /root/k8s-certs-generator
 [root@k8s-etcd01 k8s-certs-generator]# tree kubernetes/
@@ -616,23 +616,23 @@ kubernetes/
 [root@k8s-etcd01 kubernetes]# ls
 CA  front-proxy  ingress  k8s-master01  k8s-master02  k8s-master03  kubelet
 [root@k8s-etcd01 kubernetes]# 
-
-将master01的此证书复制到/etc/kubernetes/pki目录中：
-
+```  
+将master01的此证书复制到/etc/kubernetes/pki目录中：  
+```
 [root@k8s-etcd01 ~]# mkdir /etc/kubernetes
 [root@k8s-etcd01 ~]# cp -rp k8s-certs-generator/kubernetes/k8s-master01/* /etc/kubernetes/
+```  
+3、模版文件  
 
-3、模版文件
+前面中已经git clone模版文件了：https://github.com/iKubernetes/k8s-bin-inst  
 
-前面中已经git clone模版文件了：https://github.com/iKubernetes/k8s-bin-inst
-
-1、复制k8s-bin-inst/master/etc/kubernetes/目录中的所有文件到/etc/kubernetes/
-
+1、复制k8s-bin-inst/master/etc/kubernetes/目录中的所有文件到/etc/kubernetes/  
+```
 [root@k8s-etcd01 ~]# cp k8s-bin-inst/master/etc/kubernetes/* /etc/kubernetes/
 [root@k8s-etcd01 ~]# 
-
-/etc/kubernetes/apiserver文件内容：
-
+```  
+/etc/kubernetes/apiserver文件内容：  
+```
 [root@k8s-etcd01 ~]# cat /etc/kubernetes/apiserver 
 ###
 # kubernetes system config
@@ -677,55 +677,55 @@ KUBE_API_ARGS="--authorization-mode=Node,RBAC \
     --tls-private-key-file=/etc/kubernetes/pki/apiserver.key \
     --token-auth-file=/etc/kubernetes/token.csv"
 [root@k8s-etcd01 ~]# 
-
-2、复制k8s-bin-inst/master/unit-files/kube-*文件到 /usr/lib/systemd/system/目录中
-
+```  
+2、复制k8s-bin-inst/master/unit-files/kube-*文件到 /usr/lib/systemd/system/目录中  
+```
 [root@k8s-etcd01 ~]# cp k8s-bin-inst/master/unit-files/kube-* /usr/lib/systemd/system/
 [root@k8s-etcd01 ~]# 
-
-执行：
-
+```  
+执行：  
+```
 [root@k8s-etcd01 ~]# systemctl daemon-reload 
+```  
+4、创建k8s运行的用户和工作目录  
 
-4、创建k8s运行的用户和工作目录
+用户为：kube  
 
-用户为：kube
-
-工作目录：/var/run/kubernets
-
+工作目录：/var/run/kubernets  
+```
 [root@k8s-etcd01 ~]# useradd -r kube
 [root@k8s-etcd01 ~]# mkdir /var/run/kubernetes
 [root@k8s-etcd01 ~]# chown kube.kube /var/run/kubernetes
 [root@k8s-etcd01 ~]# 
-
-5、启动apiserver服务
-
+```  
+5、启动apiserver服务  
+```
 [root@k8s-etcd01 ~]# systemctl daemon-reload 
 [root@k8s-etcd01 ~]# systemctl start kube-apiserver.service
 [root@k8s-etcd01 ~]# systemctl enable kube-apiserver.service 
+```  
+6、配置kubectl  
 
-6、配置kubectl
-
-这个跟使用kubeadm初始化集群的最后的操作一样
-
+这个跟使用kubeadm初始化集群的最后的操作一样  
+```
 [root@k8s-etcd01 ~]# mkdir $HOME/.kube
 [root@k8s-etcd01 ~]# cp /etc/kubernetes/auth/admin.conf $HOME/.kube/config
 [root@k8s-etcd01 ~]#
+```  
+7、创建ClusterRoleBinding，授予用户相应操作所需要的权限  
 
-7、创建ClusterRoleBinding，授予用户相应操作所需要的权限
+命令：kubectl create clusterrolebinding system:bootstrapper --group=system:bootstrappers --clusterrole=system:bootstrapper  
 
-命令：kubectl create clusterrolebinding system:bootstrapper --group=system:bootstrappers --clusterrole=system:bootstrapper
-
-或者： kubectl create clusterrolebinding system:bootstrapper --user=system:bootstrapper --clusterrole=system:node-bootstrapper
-
+或者： kubectl create clusterrolebinding system:bootstrapper --user=system:bootstrapper --clusterrole=system:node-bootstrapper  
+```
 [root@k8s-etcd01 ~]# kubectl create clusterrolebinding system:bootstrapper --user=system:bootstrapper --clusterrole=system:node-bootstrapper
 clusterrolebinding.rbac.authorization.k8s.io/system:bootstrapper created
 [root@k8s-etcd01 ~]# 
+```  
+8、启动kube-controller-manager服务    
 
-8、启动kube-controller-manager服务
-
-controller-manager配置文件：
-
+controller-manager配置文件：  
+```
 [root@k8s-etcd01 ~]# cat /etc/kubernetes/controller-manager 
 ###
 # The following values are used to configure the kubernetes controller-manager
@@ -750,16 +750,16 @@ KUBE_CONTROLLER_MANAGER_ARGS="--bind-address=127.0.0.1 \
     --service-account-private-key-file=/etc/kubernetes/pki/sa.key \
     --use-service-account-credentials=true"
 [root@k8s-etcd01 ~]# 
-
-启动服务：
-
+```  
+启动服务：  
+```
 [root@k8s-etcd01 ~]# systemctl start kube-controller-manager.service
 [root@k8s-etcd01 ~]# systemctl enable kube-controller-manager.service 
+```  
+9、schedule服务  
 
-9、schedule服务
-
-配置文件：
-
+配置文件：  
+```
 [root@k8s-etcd01 ~]# cat /etc/kubernetes/scheduler 
 ###
 # kubernetes scheduler config
@@ -771,9 +771,9 @@ KUBE_SCHEDULER_ARGS="--address=127.0.0.1 \
     --kubeconfig=/etc/kubernetes/auth/scheduler.conf \
     --leader-elect=true"
 [root@k8s-etcd01 ~]#
-
-启动服务：
-
+```  
+启动服务：  
+```
 [root@k8s-etcd01 ~]# systemctl start kube-scheduler.service
 [root@k8s-etcd01 ~]# systemctl enable kube-scheduler.service
 [root@k8s-etcd01 ~]# systemctl status kube-scheduler.service
@@ -797,45 +797,45 @@ Dec 15 13:45:09 k8s-etcd01 kube-scheduler[3232]: I1215 13:45:09.809335    3232 l
 Dec 15 13:45:09 k8s-etcd01 kube-scheduler[3232]: I1215 13:45:09.846569    3232 leaderelection.go:214] successfully acquired lease kube-system/kube-scheduler
 Hint: Some lines were ellipsized, use -l to show in full.
 [root@k8s-etcd01 ~]#
+```  
+至此，第一个master节点配置成功。  
 
-至此，第一个master节点配置成功。
+使用同样的方法部署master02、master03节点。  
 
-使用同样的方法部署master02、master03节点。
+但要注意的是，配置文件要做相应修改。  
+四、node节点配置  
+1、安装docker  
 
-但要注意的是，配置文件要做相应修改。
-四、node节点配置
-1、安装docker
-
-这里安装18.06.1版本
-
+这里安装18.06.1版本  
+```
 [root@k8s-node01 ~]#  curl -o /etc/yum.repos.d/docker-ce.repo https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
 [root@k8s-node01 ~]# yum list docker-ce --showduplicates | sort -r
 [root@k8s-node01 ~]# yum install docker-ce-18.06.1.ce-3.el7 -y
+```  
+2、kubelet配置  
 
-2、kubelet配置
-
-（1）在master01节点上已经下载好了node节点的kubelet证书相关文件，复制到node节点的/etc/kubernetes/目录中
-
+（1）在master01节点上已经下载好了node节点的kubelet证书相关文件，复制到node节点的/etc/kubernetes/目录中  
+```
 [root@k8s-etcd01 ~]# scp -rp k8s-certs-generator/kubernetes/kubelet/* 192.168.10.104:/etc/kubernetes/
 [root@k8s-etcd01 ~]# scp -rp k8s-certs-generator/kubernetes/kubelet/* 192.168.10.105:/etc/kubernetes/
-
-（2）把配置文件复制到node节点：
-
+```  
+（2）把配置文件复制到node节点：  
+```
 [root@k8s-etcd01 ~]# scp k8s-bin-inst/nodes/etc/kubernetes/* 192.168.10.104:/etc/kubernetes/
 [root@k8s-etcd01 ~]# scp k8s-bin-inst/nodes/etc/kubernetes/* 192.168.10.105:/etc/kubernetes/
 [root@k8s-etcd01 ~]# scp k8s-bin-inst/nodes/unit-files/*  192.168.10.104:/usr/lib/systemd/system
 [root@k8s-etcd01 ~]# scp k8s-bin-inst/nodes/unit-files/*  192.168.10.105:/usr/lib/systemd/system
 [root@k8s-node01 ~]# systemctl daemon-reload
 [root@k8s-node02 ~]# systemctl daemon-reload
-
-（3）复制k8s-bin-inst/nodes/var/lib/文件到node节点/var/lib/目录中
-
+```  
+（3）复制k8s-bin-inst/nodes/var/lib/文件到node节点/var/lib/目录中  
+```
 [root@k8s-etcd01 ~]# scp -rp k8s-bin-inst/nodes/var/lib/kube* 192.168.10.104:/var/lib/
 [root@k8s-etcd01 ~]# scp -rp k8s-bin-inst/nodes/var/lib/kube* 192.168.10.105:/var/lib/
 [root@k8s-etcd01 ~]# 
-
-kubelet配置文件：
-
+```  
+kubelet配置文件：  
+```
 [root@k8s-node01 ~]# cat /etc/kubernetes/kubelet 
 ###
 # kubernetes kubelet config
@@ -929,81 +929,81 @@ streamingConnectionIdleTimeout: 4h0m0s
 syncFrequency: 1m0s
 volumeStatsAggPeriod: 1m0s
 [root@k8s-node01 ~]#
-
-（4）创建/etc/kubernetes/manitests目录
-
+```  
+（4）创建/etc/kubernetes/manitests目录  
+```
 [root@k8s-node01 ~]# mkdir /etc/kubernetes/manitests
+```  
+（5）CNI插件  
 
-（5）CNI插件
-
-下载地址：https://github.com/containernetworking/plugins/releases
-
+下载地址：https://github.com/containernetworking/plugins/releases  
+```
 [root@k8s-node01 ~]# wget https://github.com/containernetworking/plugins/releases/download/v0.7.4/cni-plugins-amd64-v0.7.4.tgz
-
-解压：要解压到/opt/cni/bin/目录
-
+```  
+解压：要解压到/opt/cni/bin/目录  
+```
 [root@k8s-node01 ~]# mkdir /opt/cni/bin -p
 [root@k8s-node01 ~]# tar -xf cni-plugins-amd64-v0.7.4.tgz -C /opt/cni/bin/
+```  
+（6）下载k8s的node端文件  
 
-（6）下载k8s的node端文件
-
-下载地址：https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.13.md#downloads-for-v1131
-
+下载地址：https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.13.md#downloads-for-v1131  
+```
 [root@k8s-node01 ~]# wget https://dl.k8s.io/v1.13.1/kubernetes-node-linux-amd64.tar.gz
-
-解压到/usr/local/目录中
-
+```  
+解压到/usr/local/目录中  
+```
 [root@k8s-node01 ~]# tar xf kubernetes-node-linux-amd64.tar.gz -C /usr/local/
 [root@k8s-node01 ~]#
-
-（7）启动kubelet服务
-
+```  
+（7）启动kubelet服务  
+```
 [root@k8s-node01 ~]# systemctl restart  kubelet.service
+```  
+（8）证书签证  
 
-（8）证书签证
+在master01节点上对node节点进行签证。  
 
-在master01节点上对node节点进行签证。
-
-查看一下node节点的csr请求：
-
+查看一下node节点的csr请求：  
+```
 [root@k8s-etcd01 ~]# kubectl get csr
 NAME                                                   AGE     REQUESTOR             CONDITION
 node-csr-ALHXXR_zVFd0VD5Cei3DvkwyNE-H6NrwKQjlWFqgg60   4m28s   system:bootstrapper   Pending
 node-csr-qf7FjC2aebcAhT0dbv7psO7kKDnbUAb08TBhmzTtWlc   8m      system:bootstrapper   Pending
 [root@k8s-etcd01 ~]# 
-
-签证：
-
+```  
+签证：  
+```
 [root@k8s-etcd01 ~]# kubectl certificate approve node-csr-ALHXXR_zVFd0VD5Cei3DvkwyNE-H6NrwKQjlWFqgg60
 certificatesigningrequest.certificates.k8s.io/node-csr-ALHXXR_zVFd0VD5Cei3DvkwyNE-H6NrwKQjlWFqgg60 approved
 [root@k8s-etcd01 ~]# kubectl certificate approve node-csr-qf7FjC2aebcAhT0dbv7psO7kKDnbUAb08TBhmzTtWlc
 certificatesigningrequest.certificates.k8s.io/node-csr-qf7FjC2aebcAhT0dbv7psO7kKDnbUAb08TBhmzTtWlc approved
 [root@k8s-etcd01 ~]#
-
-查看一下：
-
+```  
+查看一下：  
+```
 [root@k8s-etcd01 ~]# kubectl get csr
 NAME                                                   AGE     REQUESTOR             CONDITION
 node-csr-ALHXXR_zVFd0VD5Cei3DvkwyNE-H6NrwKQjlWFqgg60   8m14s   system:bootstrapper   Approved,Issued
 node-csr-qf7FjC2aebcAhT0dbv7psO7kKDnbUAb08TBhmzTtWlc   11m     system:bootstrapper   Approved,Issued
 [root@k8s-etcd01 ~]# 
+```  
+状态为：Approved，证书已颁发  
 
-状态为：Approved，证书已颁发
-
-此时查看集群的节点：
-
+此时查看集群的节点：  
+```
 [root@k8s-etcd01 ~]# kubectl get nodes
 NAME         STATUS     ROLES    AGE     VERSION
 k8s-node01   NotReady   <none>   2m9s    v1.13.1
 k8s-node02   NotReady   <none>   2m16s   v1.13.1
 [root@k8s-etcd01 ~]#
+```  
+此时node01、node02已经添加进集群了，但是状态是NotReady。  
 
-此时node01、node02已经添加进集群了，但是状态是NotReady。
+（9）ipvs模块加载  
 
-（9）ipvs模块加载
-
-创建/etc/sysconfig/modules/ipvs.modules文件
-
+创建/etc/sysconfig/modules/ipvs.modules文件  
+```
 [root@k8s-node01 ~]# vim /etc/sysconfig/modules/ipvs.modules
 #!/bin/bash
 ipvs_mods_dir="/usr/lib/modules/$(uname -r)/kernel/net/netfilter/ipvs"
@@ -1015,9 +1015,9 @@ for i in $(ls $ipvs_mods_dir | grep -o "^[^.]*");do
 done
 [root@k8s-node01 ~]# sh +x /etc/sysconfig/modules/ipvs.modules
 [root@k8s-node01 ~]# bash /etc/sysconfig/modules/ipvs.modules
-
-查看一下ipvs模块
-
+```  
+查看一下ipvs模块  
+```
 [root@k8s-node01 ~]# lsmod | grep ip_vs
 ip_vs_wlc              12519  0 
 ip_vs_sed              12519  0 
@@ -1037,28 +1037,28 @@ nf_nat                 26787  3 ip_vs_ftp,nf_nat_ipv4,nf_nat_masquerade_ipv4
 nf_conntrack          133053  8 ip_vs,nf_nat,nf_nat_ipv4,xt_conntrack,nf_nat_masquerade_ipv4,nf_conntrack_netlink,nf_conntrack_sip,nf_conntrack_ipv4
 libcrc32c              12644  4 xfs,ip_vs,nf_nat,nf_conntrack
 [root@k8s-node01 ~]# 
+```  
+模块加载成功。  
 
-模块加载成功。
-
-node节点安装ipvsadm：
-
+node节点安装ipvsadm：  
+```
 [root@k8s-node01 ~]# yum install ipvsadm -y
 [root@k8s-node02 ~]# yum install ipvsadm -y
-
-（10）启动kube-proxy服务
-
+```  
+（10）启动kube-proxy服务  
+```
 [root@k8s-node01 ~]# systemctl start kube-proxy
+```  
+（11）安装flannel插件  
 
-（11）安装flannel插件
+地址：https://github.com/coreos/flannel  
 
-地址：https://github.com/coreos/flannel
-
-在master01上执行命令：
-
+在master01上执行命令：  
+```
 [root@k8s-etcd01 ~]# kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
-
-（12）查看集群的node节点
-
+```  
+（12）查看集群的node节点  
+```
 [root@k8s-etcd01 ~]# kubectl get nodes
 NAME         STATUS   ROLES    AGE   VERSION
 k8s-node01   Ready    <none>   18m   v1.13.1
@@ -1069,16 +1069,16 @@ NAME                          READY   STATUS    RESTARTS   AGE
 kube-flannel-ds-amd64-n5pnn   1/1     Running   0          3m19s
 kube-flannel-ds-amd64-nwd6p   1/1     Running   0          3m19s
 [root@k8s-etcd01 ~]#
+```  
+OK，两个节点都是Ready状态。  
 
-OK，两个节点都是Ready状态。
+至此node节点部署成功。  
+五、coredns配置  
 
-至此node节点部署成功。
-五、coredns配置
+1、在msater01（etcd01)节点部署coredns  
 
-1、在msater01（etcd01)节点部署coredns
-
-以pod的形式
-
+以pod的形式  
+```
 [root@k8s-etcd01 ~]# mkdir coredns && cd coredns
 [root@k8s-etcd01 coredns]# wget https://raw.githubusercontent.com/coredns/deployment/master/kubernetes/coredns.yaml.sed
 [root@k8s-etcd01 coredns]# wget https://raw.githubusercontent.com/coredns/deployment/master/kubernetes/deploy.sh
@@ -1090,9 +1090,9 @@ configmap/coredns created
 deployment.extensions/coredns created
 service/kube-dns created
 [root@k8s-etcd01 coredns]# 
-
-查看一下：
-
+```  
+查看一下：  
+```
 [root@k8s-etcd01 coredns]# kubectl get pods -n kube-system
 NAME                          READY   STATUS    RESTARTS   AGE
 coredns-7bb49b45c8-cxlt8      1/1     Running   0          60s
@@ -1100,11 +1100,11 @@ coredns-7bb49b45c8-ffr4t      1/1     Running   0          60s
 kube-flannel-ds-amd64-n5pnn   1/1     Running   0          15m
 kube-flannel-ds-amd64-nwd6p   1/1     Running   0          15m
 [root@k8s-etcd01 coredns]#
+```  
+coredns的pod创建成功。  
 
-coredns的pod创建成功。
-
-2、node节点的ipvs规则如下：
-
+2、node节点的ipvs规则如下：  
+```
 [root@k8s-node01 ~]# ipvsadm -Ln
 IP Virtual Server version 1.2.1 (size=4096)
 Prot LocalAddress:Port Scheduler Flags
@@ -1121,3 +1121,4 @@ UDP  10.96.0.10:53 rr
   -> 10.244.0.2:53                Masq    1      0          0         
   -> 10.244.2.2:53                Masq    1      0          0         
 [root@k8s-node01 ~]# 
+```  

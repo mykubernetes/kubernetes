@@ -1,6 +1,6 @@
 kubernetes 二进制安装
-====================
-Kubernetes v1.12 二进制部署集群（HTTPS+RBAC）  
+==================== 
+![image](https://github.com/mykubernetes/linux-install/blob/master/image/kubernetes3.png)  
 1. 部署Etcd集群  
 使用cfssl来生成自签证书，先下载cfssl工具：  
 ```
@@ -188,7 +188,7 @@ cluster is healthy
 3. 部署Flannel网络  
 
 工作原理：  
-Kubernetes v1.12 二进制部署集群（HTTPS+RBAC）  
+![image](https://github.com/mykubernetes/linux-install/blob/master/image/kubernetes2.png)
 
 Falnnel要用etcd存储自身一个子网信息，所以要保证能成功连接Etcd，写入预定义子网段：  
 ```
@@ -570,8 +570,8 @@ controller-manager   Healthy   ok
 Master apiserver启用TLS认证后，Node节点kubelet组件想要加入集群，必须使用CA签发的有效证书才能与apiserver通信，当Node节点很多时，签署证书是一件很繁琐的事情，因此有了TLS Bootstrapping机制，kubelet会以一个低权限用户自动向apiserver申请证书，kubelet的证书由apiserver动态签署。
 
 认证大致工作流程如图所示：  
-
-Kubernetes v1.12 二进制部署集群（HTTPS+RBAC）  
+![image](https://github.com/mykubernetes/linux-install/blob/master/image/kubernetes1.png)
+  
 5.1 将kubelet-bootstrap用户绑定到系统集群角色  
 ```
 kubectl create clusterrolebinding kubelet-bootstrap \
@@ -653,11 +653,11 @@ KUBELET_OPTS="--logtostderr=true \
 ```  
 参数说明：  
 
-    --hostname-override 在集群中显示的主机名  
-    --kubeconfig 指定kubeconfig文件位置，会自动生成  
-    --bootstrap-kubeconfig 指定刚才生成的bootstrap.kubeconfig文件  
-    --cert-dir 颁发证书存放位置  
-    --pod-infra-container-image 管理Pod网络的镜像  
+--hostname-override 在集群中显示的主机名  
+--kubeconfig 指定kubeconfig文件位置，会自动生成  
+--bootstrap-kubeconfig 指定刚才生成的bootstrap.kubeconfig文件  
+--cert-dir 颁发证书存放位置  
+--pod-infra-container-image 管理Pod网络的镜像  
 
 其中/opt/kubernetes/cfg/kubelet.config配置文件如下：  
 ```

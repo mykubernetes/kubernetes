@@ -264,7 +264,7 @@ WantedBy=multi-user.target
 # systemctl restart docker
 ```  
 检查是否生效：  
-``
+```
 # ps -ef |grep docker
 root     20941     1  1 Jun28 ?        09:15:34 /usr/bin/dockerd --bip=172.17.34.1/24 --ip-masq=false --mtu=1450
 # ip addr
@@ -288,6 +288,7 @@ PING 172.17.58.1 (172.17.58.1) 56(84) bytes of data.
 64 bytes from 172.17.58.1: icmp_seq=2 ttl=64 time=0.204 ms
 ```  
 如果能通说明Flannel部署成功。如果不通检查下日志：journalctl -u flannel  
+
 4. 在Master节点部署组件  
 
 在部署Kubernetes之前一定要确保etcd、flannel、docker是正常工作的，否则先解决问题再继续。  
@@ -390,10 +391,10 @@ cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kube
 # cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kube-proxy-csr.json | cfssljson -bare kube-proxy
 ```  
 最终生成以下证书文件：  
-``
+```
 # ls *pem
 ca-key.pem  ca.pem  kube-proxy-key.pem  kube-proxy.pem  server-key.pem  server.pem
-``  
+```  
 4.2 部署apiserver组件  
 
 下载二进制包：https://github.com/kubernetes/kubernetes/blob/master/CHANGELOG-1.12.md  
@@ -442,23 +443,23 @@ KUBE_APISERVER_OPTS="--logtostderr=true \
 配置好前面生成的证书，确保能连接etcd。  
 
 参数说明：  
-```
-    --logtostderr 启用日志
-    ---v 日志等级
-    --etcd-servers etcd集群地址
-    --bind-address 监听地址
-    --secure-port https安全端口
-    --advertise-address 集群通告地址
-    --allow-privileged 启用授权
-    --service-cluster-ip-range Service虚拟IP地址段
-    --enable-admission-plugins 准入控制模块
-    --authorization-mode 认证授权，启用RBAC授权和节点自管理
-    --enable-bootstrap-token-auth 启用TLS bootstrap功能，后面会讲到
-    --token-auth-file token文件
-    --service-node-port-range Service Node类型默认分配端口范围
-```  
+
+--logtostderr 启用日志  
+---v 日志等级  
+--etcd-servers etcd集群地址  
+--bind-address 监听地址  
+--secure-port https安全端口  
+--advertise-address 集群通告地址  
+--allow-privileged 启用授权  
+--service-cluster-ip-range Service虚拟IP地址段  
+--enable-admission-plugins 准入控制模块  
+--authorization-mode 认证授权，启用RBAC授权和节点自管理  
+--enable-bootstrap-token-auth 启用TLS bootstrap功能，后面会讲到  
+--token-auth-file token文件  
+--service-node-port-range Service Node类型默认分配端口范围  
+
 systemd管理apiserver：  
-``
+```
 # cat /usr/lib/systemd/system/kube-apiserver.service 
 [Unit]
 Description=Kubernetes API Server
@@ -490,10 +491,10 @@ KUBE_SCHEDULER_OPTS="--logtostderr=true \
 --leader-elect"
 ```  
 参数说明：  
-```
-    --master 连接本地apiserver
-    --leader-elect 当该组件启动多个时，自动选举（HA）
-```  
+
+--master 连接本地apiserver  
+--leader-elect 当该组件启动多个时，自动选举（HA）  
+
 systemd管理schduler组件：  
 ```
 # cat /usr/lib/systemd/system/kube-scheduler.service 

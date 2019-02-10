@@ -36,13 +36,8 @@
 ```  
 如果提示container-selinux依赖问题，先安装ce-17.03匹配版本：  
 ``` # yum localinstall https://download.docker.com/linux/centos/7/x86_64/stable/Packages/docker-ce-selinux-17.03.3.ce-1.el7.noarch.rpm ```  
-4. 安装kubeadm，kubelet和kubectl
 
-    kubeadm： 引导集群的命令  
-    kubelet：集群中运行任务的代理程序  
-    kubectl：命令行管理工具  
-
-4.1 添加阿里云YUM软件源  
+4.添加阿里云YUM软件源  
 ```
 # cat << EOF > /etc/yum.repos.d/kubernetes.repo
 [kubernetes]
@@ -54,7 +49,7 @@ repo_gpgcheck=1
 gpgkey=https://mirrors.aliyun.com/kubernetes/yum/doc/yum-key.gpg https://mirrors.aliyun.com/kubernetes/yum/doc/rpm-package-key.gpg
 EOF
 ```  
-4.2 安装kubeadm，kubelet和kubectl  
+5.安装kubeadm，kubelet和kubectl  
 ```
 # yum install -y kubelet kubeadm kubectl --disableexcludes=kubernetes
 # systemctl enable kubelet && systemctl start kubelet
@@ -66,11 +61,11 @@ KUBELET_KUBEADM_ARGS=--cgroup-driver=cgroupfs --cni-bin-dir=/opt/cni/bin --cni-c
 # systemctl daemon-reload
 # systemctl restart kubelet
 ```  
-5. 使用kubeadm创建单个Master集群  
-5.1 默认下载镜像地址在国外无法访问，先从准备好所需镜像  
+6. 使用kubeadm创建单个Master集群  
+默认下载镜像地址在国外无法访问，先从准备好所需镜像  
 
 保存到脚本之间运行：  
-
+```
 K8S_VERSION=v1.11.2
 ETCD_VERSION=3.2.18
 DASHBOARD_VERSION=v1.8.3
@@ -95,8 +90,8 @@ docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-proxy-amd64:
 docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/etcd-amd64:$ETCD_VERSION k8s.gcr.io/etcd-amd64:$ETCD_VERSION
 docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/pause:$PAUSE_VERSION k8s.gcr.io/pause:$PAUSE_VERSION
 docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:$DNS_VERSION k8s.gcr.io/coredns:$DNS_VERSION
-
-5.2 初始化Master
+```  
+5.2 初始化Master  
 ```
 # kubeadm init --kubernetes-version=1.11.2 --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address=192.168.0.11
 

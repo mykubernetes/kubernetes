@@ -1,0 +1,48 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: prometheus-rules
+  namespace: kube-system
+data:
+  general.rules: |
+    groups:
+    - name: general.rules
+      rules:
+      - alert: InstanceDown
+        expr: up == 0
+        for: 1m
+        labels:
+          severity: error 
+        annotations:
+          summary: "Instance {{ $labels.instance }} 停止工作"
+          description: "{{ $labels.instance }} job {{ $labels.job }} 已经停止5分钟以上."
+  node.rules: |
+    groups:
+    - name: node.rules
+      rules:
+      - alert: NodeFilesystemUsage
+        expr: 100 - (node_filesystem_free_bytes{fstype=~"ext4|xfs"} / node_filesystem_size_bytes{fstype=~"ext4|xfs"} * 100) > 80 
+        for: 1m
+        labels:
+          severity: warning 
+        annotations:
+          summary: "Instance {{ $labels.instance }} : {{ $labels.mountpoint }} 分区使用率过高"
+          description: "{{ $labels.instance }}: {{ $labels.mountpoint }} 分区使用大于80% (当前值: {{ $value }})"
+
+      - alert: NodeMemoryUsage
+        expr: 100 - (node_memory_MemFree_bytes+node_memory_Cached_bytes+node_memory_Buffers_bytes) / node_memory_MemTotal_bytes * 100 > 80
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Instance {{ $labels.instance }} 内存使用率过高"
+          description: "{{ $labels.instance }}内存使用大于80% (当前值: {{ $value }})"
+
+      - alert: NodeCPUUsage    
+        expr: 100 - (avg(irate(node_cpu_seconds_total{mode="idle"}[5m])) by (instance) * 100) > 60 
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Instance {{ $labels.instance }} CPU使用率过高"       
+          description: "{{ $labels.instance }}CPU使用大于60% (当前值: {{ $value }})"

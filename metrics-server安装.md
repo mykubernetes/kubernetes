@@ -4,7 +4,8 @@ metrics-server安装
 https://github.com/kubernetes/kubernetes/tree/master/cluster/addons/metrics-server  
 
 2、下载托管代码下的所有yaml文件  
-``` # for file in auth-delegator.yaml auth-reader.yaml metrics-apiservice.yaml metrics-server-deployment.yaml  metrics-server-service.yaml  resource-reader.yaml ;do wget https://raw.githubusercontent.com/kubernetes/kubernetes/master/cluster/addons/metrics-server/$file ; done ``` 
+``` # for file in auth-delegator.yaml auth-reader.yaml metrics-apiservice.yaml metrics-server-deployment.yaml metrics-server-service.yaml resource-reader.yaml;do wget https://raw.githubusercontent.com/kubernetes/kubernetes/release-1.11/cluster/addons/metrics-server/$file; done
+ ``` 
 
 3、修改配置文件  
 ```

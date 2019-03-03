@@ -143,10 +143,10 @@ kubectl get role
 kubectl describe role pod-reader
 ```  
 3、将用户绑定当rolebinding上  
-``` kubectl create rolebinding magedu-read-pods --role=pod-reader --user=magedu --dry-run -o yaml ```
+``` kubectl create rolebinding read-pods --role=pod-reader --user=magedu --dry-run -o yaml ```
 
 4、创建集群角色  
 ``` kubectl create clusterrole cluster-reader --verb=get,list,watch --resource=pods -o yaml --dry-run ```
 
 5、将用户绑定到clusterrolebinding上  
-``` kubectl create clusterrolebinding magedu-read-all-pods --clusterrole=cluster-reader --user=magedu --dry-run -o yaml ```
+``` kubectl create clusterrolebinding read-all-pods --clusterrole=cluster-reader --user=magedu --dry-run -o yaml ```

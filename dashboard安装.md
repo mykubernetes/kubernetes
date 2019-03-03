@@ -19,11 +19,11 @@ done
 3、token认证  
 1）创建dashboard用户  
 ``` kubectl create serviceaccount dashboard-admin -n kube-system ```  
-2）
+2） 
 ``` kubectl create clusterrolebinding dashboard-cluster-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin ```  
-3）
+3） 
 ``` kubectl get secret -n kube-system ```  
-4）
+4） 
 ``` kubectl describe secret dashboard-admin-token-8wz6w -n kube-system ```  
 5）第四部可现实token信息  
 ``` token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkYXNoYm9hcmQtYWRtaW4tdG9rZW4tOHd6NnciLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGFzaGJvYXJkLWFkbWluIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiNzA0MzJmZjEtZTVkNS0xMWU4LThmMDEtMDAwYzI5OGU0ODNkIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmUtc3lzdGVtOmRhc2hib2FyZC1hZG1pbiJ9.BU8Hmp4_EMovOG4QZLVm0dGA9k4U3IG1mTPbhKraN0nECe8YZXaHFzrHsJwGIcK3hfwa01UtTIuB56_ElwXTyiE4K8n0o6loABJvtZOgrOnNAmcr3vrIKe4UDiflokdKjk5OjInvVWy4Q6dXVdR-9i-1C3KWEavscnwAl7bsipxufLbgfcCERjQABJ1KXDNvq6Io9tOdbXbSuXg6-GkaRg0enTLBslIV73CRWNwz71kF0QXOK7BTUw_D3wBMRJ7txSjV9aYfBW7Ll0Xxpsvd3WHnOBmN4PhaMKEWjrj-8V3N-yChtFnymul2IUcooYa70dANGASsL7eyXzMdRg_zlg ```  
@@ -34,12 +34,12 @@ done
 
 4、证书认证  
 1、  
-``` kubectl create serviceaccount def-ns-admin -n default ```
+``` kubectl create serviceaccount def-ns-admin -n default ```  
 2、  
-``` kubectl create rolebinding def-ns-admin --clusterrole=admin --serviceaccount=default:def-ns-admin ```
-     1、kubectl get secret  
-     2、kubectl describe secret def-ns-admin-token-ptg7w  
-     3、复制token到web 只能管理default权限  
+``` kubectl create rolebinding def-ns-admin --clusterrole=admin --serviceaccount=default:def-ns-admin ```  
+     1)kubectl get secret  
+     2)kubectl describe secret def-ns-admin-token-ptg7w  
+     3)复制token到web 只能管理default权限  
 3、  
 ``` kubectl config set-cluster kubernetes --certificate-authority=/etc/kubernetes/pki/ca.crt --server="https://192.168.101.66:6443" --embed-certs=true --kubeconfig=/root/def-ns-admin.conf ```
 4、查看权限  

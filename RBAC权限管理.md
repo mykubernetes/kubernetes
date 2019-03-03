@@ -120,3 +120,33 @@ kind: Config
 preferences: {}
 users: []
 ```  
+
+RBAC  
+创建角色并拥有权限，将user或service绑定到角色上，这样user或service就有当前集群的权限  
+将user或service绑定到clusterrolebinding上，这样user或service将有来了所有集群的权限  
+将rolebindding绑定到clusterrolebinding上，这样user将有了当前集群的权限  
+```
+role
+  operations
+  objects
+rolebindding
+  user account OR service account
+  role
+clusterrole OR clusterrolebinding
+```  
+1、创建一个role  
+``` kubectl create role pod-reader --verb=get,list,watch --resource=pods --dry-run -o yaml ```
+
+2、查看权限  
+```
+kubectl get role
+kubectl describe role pod-reader
+```  
+3、将用户绑定当rolebinding上  
+``` kubectl create rolebinding magedu-read-pods --role=pod-reader --user=magedu --dry-run -o yaml ```
+
+4、创建集群角色  
+``` kubectl create clusterrole cluster-reader --verb=get,list,watch --resource=pods -o yaml --dry-run ```
+
+5、将用户绑定到clusterrolebinding上  
+``` kubectl create clusterrolebinding magedu-read-all-pods --clusterrole=cluster-reader --user=magedu --dry-run -o yaml ```

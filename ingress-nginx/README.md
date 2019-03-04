@@ -10,3 +10,4 @@ ingress-myapp.yaml
 myapp.yaml  
 4、部署接入层  
 service-nodeport.yaml  
+5、需要使用主机名访问修改主机host文件

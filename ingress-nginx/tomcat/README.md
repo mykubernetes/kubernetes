@@ -6,5 +6,5 @@
 tomcat.yaml  
 3、部署非https的tomcat前后端  
 ingress-tomcat.yaml  
-4、部署https的前后端
+4、部署https的前后端  
 ingress-tomcat-tls.yaml

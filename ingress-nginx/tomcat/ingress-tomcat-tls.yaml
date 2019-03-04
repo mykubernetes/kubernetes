@@ -8,10 +8,10 @@ metadata:
 spec:
   tls:
   - hosts:
-    - tomcat.mateedu.com
+    - www.tomcat.com
     secretName: tomcat-ingress-secret
   rules:
-  - host: tomcat.magedu.com
+  - host: wwww.tomcat.com
     http:
       paths:
       - path:

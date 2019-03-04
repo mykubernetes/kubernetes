@@ -1,0 +1,42 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tomcat
+  namespace: default
+spec:
+  selector:
+    app: tomcat
+    release: canary
+  ports:
+  - name: http
+    targetPort: 8080
+    port: 8080
+  - name: ajp
+    targetPort: 8009
+    port: 8009
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tomcat-deploy
+  namespace: default
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: tomcat
+      release: canary
+  template:
+    metadata:
+      labels:
+        app: tomcat
+        release: canary
+    spec:
+      containers:
+      - name: tomcat
+        image: tomcat:8.5.32-jre8-alpine
+        ports:
+        - name: http
+          containerPort: 8080
+        - name: ajp
+          containerPort: 8009

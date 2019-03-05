@@ -18,4 +18,4 @@ spec:
     - name: redisdata
       nfs:
         server: nfs.ikubernetes.io
-path: /data/redis
+        path: /data/redis

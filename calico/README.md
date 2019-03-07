@@ -14,10 +14,10 @@ kubectl apply -f \
 https://docs.projectcalico.org/v3.1/getting-started/kubernetes/installation/hosted/canal/canal.yaml
 ```  
 2、说明文档  
-kubectl explain networkpolicy.spec  
+``` # kubectl explain networkpolicy.spec ```  
 
 3、规则测试  
-```
+
 1)创建两个测试名称空间  
 ```
 # kubectl create namespace dev

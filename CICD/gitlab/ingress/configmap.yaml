@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tcp-gitlab-configmap
+  namespace: gitlab
+data:
+  1022: "gitlab/gitlab:1022"

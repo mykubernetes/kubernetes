@@ -53,11 +53,11 @@ https://helm.sh
 https://hub.kubeapps.com/  
 https://hub.helm.sh/  
 
-6、使用
-搜索 
-``` helm search memcache ```
-安装
-``` helm install --name mem1 stable/memcached ```
+6、使用  
+搜索  
+``` helm search memcache ```  
+安装  
+``` helm install --name mem1 stable/memcached ```  
 
 helm常用命令  
 ```
@@ -81,7 +81,7 @@ helm下载目录
 ``` cd ~/.helm/repository/cache/archive ```  
 
 如果修改values.yaml需要指定新的文件并应用  
-helm install --name redis1 -f values.yaml stable/redis  
+``` helm install --name redis1 -f values.yaml stable/redis ```  
 
 官方介绍chart适用  
 https://helm.sh/docs/developing_charts/#charts  

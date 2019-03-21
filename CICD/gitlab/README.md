@@ -1,3 +1,7 @@
+# download
+```
+# for file in gitlab-config-storage.yaml  gitlab-deployment.yaml gitlab-storage.yaml gitlab-svc-nodeport.yaml gitlab-svc.yaml postgresql-deployment.yaml postgresql-storage.yaml  postgresql-svc.yaml redis-deployment.yaml redis-storage.yaml  redis-svc.yaml storage.yaml ; do wget https://raw.githubusercontent.com/mykubernetes/kubernetes/master/CICD/gitlab/gitlab/$file ;done
+```
 # kubernetes-gitlab
 Manifests to deploy GitLab on Kubernetes
 

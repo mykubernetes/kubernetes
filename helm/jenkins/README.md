@@ -61,5 +61,5 @@ http://192.168.101.66:NodePort
 8、回滚上一个版本  
 ``` helm rollback jenkins 0 ```  
 
-9、查看当前版本
+9、查看当前版本  
 ``` helm list ```  

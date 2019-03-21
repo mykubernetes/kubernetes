@@ -1,4 +1,4 @@
-选择Metrics Server 和 custom metrics api
+# 需要安装 Metrics Server 和 custom metrics api  
 1、创建一个测试pod  
 ``` # kubectl run myapp --image=ikubernetes/myapp:v1 --replicas=1 --requests='cpu=50m,memory=256Mi' --limits='cpu=50m,memory=256Mi' --labels='app=myapp' --expose --port=80 ```  
 

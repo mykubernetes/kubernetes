@@ -49,10 +49,10 @@ podTemplate(
 8、构建  
 ![image](https://github.com/mykubernetes/linux-install/blob/master/image/jenkins008.png)  
 9、查看控制台  
-![image](https://github.com/mykubernetes/linux-install/blob/master/image/jenkins009.png)  
-10、控制台输出完成，任务执行成功  
 ![image](https://github.com/mykubernetes/linux-install/blob/master/image/jenkins010.png)  
-11、命令查看build空间会多出一个job任务，任务完成后会消失  
+10、控制台输出完成，任务执行成功  
 ![image](https://github.com/mykubernetes/linux-install/blob/master/image/jenkins011.png)  
+11、命令查看build空间会多出一个job任务，任务完成后会消失  
+![image](https://github.com/mykubernetes/linux-install/blob/master/image/jenkins009.png)  
 12、查看管理节点，会多出一个主机，任务完成后会消失  
 ![image](https://github.com/mykubernetes/linux-install/blob/master/image/jenkins012.png)  

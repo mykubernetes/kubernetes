@@ -1,4 +1,4 @@
-helm部署jenkins
+helm 部署jenkins
 =============
 1、部署jenkins名称空间  
 ``` kubectl apply -f jenkins-ns.yaml ```  
@@ -34,3 +34,32 @@ stable/jenkins	0.35.2       	lts        	Open source continuous integration serv
 ``` helm delete jenkins --purge ```  
 查看状态不会显示jenkins  
 ``` helm status jenkins ```  
+
+Helm 定制安装和回滚
+============
+1、搜索jenkins  
+``` helm search jenkins ```
+
+2、查看 values 文件  
+``` helm inspect stable/jenkins ```  
+
+3、查看全部信息  
+``` helm inspect stable/jenkins ```  
+
+4、根据查看信息的描述定制部署jenkins修改镜像标签  
+``` helm install stable/jenkins --name jenkins --namespace jenkins --set Master.ImageTag=2.112-alpine ```  
+
+5、web访问  
+http://192.168.101.66:NodePort  
+
+6、更新新版本jenkins  
+``` helm upgrade jenkins stable/jenkins --set Master.ImageTag=2.116-alpine --reuse-values ```  
+
+7、查看jenkins更新版本  
+``` helm list ```  
+
+8、回滚上一个版本  
+``` helm rollback jenkins 0 ```  
+
+9、查看当前版本
+``` helm list ```  

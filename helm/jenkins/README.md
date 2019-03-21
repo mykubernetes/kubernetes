@@ -28,9 +28,9 @@ stable/jenkins	0.35.2       	lts        	Open source continuous integration serv
 8、删除jenkins  
 1)不删除chart文件  
 ``` helm delete jenkins ```  
-查看状态会显示jenkins
+查看状态会显示jenkins  
 ``` helm status jenkins ```  
 2)同时删除chart文件  
 ``` helm delete jenkins --purge ```  
-查看状态不会显示jenkins
+查看状态不会显示jenkins  
 ``` helm status jenkins ```  

@@ -44,7 +44,8 @@ subjects:
 
 4、添加阿里云tiller仓库  
 ``` helm repo add chart-aliyun https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts ```  
-
+官方incubator仓库
+``` helm repo add incubator https://storage.googleapis.com/kubernetes-charts-incubator ```
 
 5、helm官方网站  
 https://helm.sh  

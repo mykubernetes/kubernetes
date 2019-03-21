@@ -63,20 +63,20 @@ https://hub.helm.sh/
 helm常用命令  
 ```
 	release管理
-		install        #安装
-		delete       #删除
-		upgrade    #更新
-		rollback     #回滚
-		list              #查
+		install       #安装
+		delete        #删除
+		upgrade       #更新
+		rollback      #回滚
+		list          #查
 		history       #release历史
 		status        #获取release状态信息
 	chart管理
 		create
 		fetch         #下载并展开
-		get            #下载不展开
-		inspect      #查了chart详细信息
-		package    #本地打包
-		verify         #校验
+		get           #下载不展开
+		inspect       #查了chart详细信息
+		package       #本地打包
+		verify        #校验
 ```  
 helm下载目录  
 ``` cd ~/.helm/repository/cache/archive ```  

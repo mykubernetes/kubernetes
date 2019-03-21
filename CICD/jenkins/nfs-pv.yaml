@@ -1,0 +1,139 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv001
+  labels:
+    name: pv001
+spec:
+  nfs:
+    path: /data/nfs1
+    server: 192.168.20.174
+  accessModes: ["ReadWriteMany","ReadWriteOnce"]
+  capacity:
+    storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv002
+  labels:
+    name: pv002
+spec:
+  nfs:
+    path: /data/nfs2
+    server: 192.168.20.174
+  accessModes: ["ReadWriteMany","ReadWriteOnce"]
+  capacity:
+    storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv003
+  labels:
+    name: pv003
+spec:
+  nfs:
+    path: /data/nfs3
+    server: 192.168.20.174
+  accessModes: ["ReadWriteMany","ReadWriteOnce"]
+  capacity:
+    storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv004
+  labels:
+    name: pv004
+spec:
+  nfs:
+    path: /data/nfs4
+    server: 192.168.20.174
+  accessModes: ["ReadWriteMany","ReadWriteOnce"]
+  capacity:
+    storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv005
+  labels:
+    name: pv005
+spec:
+  nfs:
+    path: /data/nfs5
+    server: 192.168.20.174
+  accessModes: ["ReadWriteMany","ReadWriteOnce"]
+  capacity:
+    storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv006
+  labels:
+    name: pv006
+spec:
+  nfs:
+    path: /data/nfs6
+    server: 192.168.20.174
+  accessModes: ["ReadWriteMany","ReadWriteOnce"]
+  capacity:
+    storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv007
+  labels:
+    name: pv007
+spec:
+  nfs:
+    path: /data/nfs7
+    server: 192.168.20.174
+  accessModes: ["ReadWriteMany","ReadWriteOnce"]
+  capacity:
+    storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv008
+  labels:
+    name: pv008
+spec:
+  nfs:
+    path: /data/nfs8
+    server: 192.168.20.174
+  accessModes: ["ReadWriteMany","ReadWriteOnce"]
+  capacity:
+    storage: 2Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv009
+  labels:
+    name: pv009
+spec:
+  nfs:
+    path: /data/nfs9
+    server: 192.168.20.174
+  accessModes: ["ReadWriteMany","ReadWriteOnce"]
+  capacity:
+    storage: 8Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: pv010
+  labels:
+    name: pv010
+spec:
+  nfs:
+    path: /data/nfs10
+    server: 192.168.20.174
+  accessModes: ["ReadWriteMany","ReadWriteOnce"]
+  capacity:
+    storage: 8Gi

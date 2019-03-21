@@ -1,3 +1,4 @@
+选择Metrics Server 和 custom metrics api
 1、创建一个测试pod  
 ``` # kubectl run myapp --image=ikubernetes/myapp:v1 --replicas=1 --requests='cpu=50m,memory=256Mi' --limits='cpu=50m,memory=256Mi' --labels='app=myapp' --expose --port=80 ```  
 
@@ -58,3 +59,4 @@ spec:
       metricName: http_requests
       targetAverageValue: 800m
 ```  
+详细方法参考https://www.jianshu.com/p/9abb697cd833

@@ -1,0 +1,31 @@
+Master:
+  ImageTag: "2.138.2"
+  Cpu: "500m"
+  Memory: "500Mi"
+  ServiceType: ClusterIP
+  ServiceAnnotations:
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
+  InstallPlugins:
+  - durable-task:1.26
+  - blueocean:1.9.0
+  - credentials:2.1.18
+  - git:3.9.1
+  - git-client:2.7.3
+  - kubernetes:1.12.4
+  - pipeline-utility-steps:2.1.0
+  - ssh-slaves:1.28.1
+  - ssh-agent:1.17
+  - jdk-tool:1.1
+  Ingress:
+    Annotations:
+      kubernetes.io/ingress.class: "nginx"
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      nginx.ingress.kubernetes.io/proxy-body-size: 50m
+      nginx.ingress.kubernetes.io/proxy-request-buffering: "off"
+      ingress.kubernetes.io/ssl-redirect: "false"
+      ingress.kubernetes.io/proxy-body-size: 50m
+      ingress.kubernetes.io/proxy-request-buffering: "off"
+  HostName: jenkins.aishangwei.net
+rbac:
+  install: true
+  roleBindingKind: RoleBinding

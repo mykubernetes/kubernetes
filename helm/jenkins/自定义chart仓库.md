@@ -2,6 +2,7 @@
 ================
 chart仓库，nginx,http等都可以作为chart仓库  
 1、安装ChartMuseum  
+链接：https://pan.baidu.com/s/15kczilfAGHGFeTOWNw5Pww 提取码：alp8 
 ```
 # wget https://s3.amazonaws.com/chartmuseum/release/latest/bin/linux/amd64/chartmuseum 
 # chmod +x chartmuseum

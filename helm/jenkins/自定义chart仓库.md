@@ -19,7 +19,8 @@ https://jimmysong.io/posts/manage-kubernetes-native-app-with-helm/
 4、访问ChartMuseum仓库  
 ``` # curl -u admin:admin123 http://192.168.101.67:8089/index.yaml ```  
 
-
+5、后台运行
+``` # nohup chartmuseum --debug --port=8089 --storage="local" --storage-local-rootdir="./chartstorage" --basic-auth-user admin --basic-auth-pass admin123 > ./chartmuseum.out 2>&1 & ```  
 
 
 

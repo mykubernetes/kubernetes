@@ -33,6 +33,7 @@ chart仓库，nginx,http等都可以作为chart仓库
 
 3、将本地文件上传到chartmuseum仓库  
 ``` # helm push jenkins chartmuseum --username admin --password admin123 ```  
+注：jenkins是目录
 
 4、查看上传文件信息  
 ``` # curl http://192.168.101.67:8089/index.yaml -u admin:admin123 ```  

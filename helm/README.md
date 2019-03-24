@@ -73,7 +73,7 @@ helm常用命令
 		history       #release历史
 		status        #获取release状态信息
 	chart管理
-		create
+		create        #创建自定义chart
 		fetch         #下载并展开
 		get           #下载不展开
 		inspect       #查了chart详细信息

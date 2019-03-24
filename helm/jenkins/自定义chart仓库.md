@@ -8,7 +8,7 @@ chart仓库，nginx,http等都可以作为chart仓库
 # mv chartmuseum /usr/local/bin/
 ```  
 
-2、启动chartmuseum服务
+2、启动chartmuseum服务  
 ``` # chartmuseum --debug --port=8089 --storage="local" --storage-local-rootdir="./chartstorage" --basic-auth-user admin --basic-auth-pass admin123 ```  
 
 3、检查健康状态  

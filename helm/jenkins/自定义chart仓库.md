@@ -48,5 +48,5 @@ chart仓库，nginx,http等都可以作为chart仓库
 8、查看详细信息  
 ``` # helm inspect chartmuseum/go-demo-3 ```  
 
-9、删除文件
-``` # curl -XDELETE "http://192.168.101.67:8089/api/charts/jenkins/0.0.1" -u admin:admin123 ```
+9、删除文件  
+``` # curl -XDELETE "http://192.168.101.67:8089/api/charts/jenkins/0.0.1" -u admin:admin123 ```  

@@ -1,6 +1,7 @@
 安装 ChartMuseum仓库
 ================
 chart仓库，nginx,http等都可以作为chart仓库  
+https://jimmysong.io/posts/manage-kubernetes-native-app-with-helm/  
 1、安装ChartMuseum  
 链接：https://pan.baidu.com/s/15kczilfAGHGFeTOWNw5Pww 提取码：alp8 
 ```

@@ -84,7 +84,7 @@ for imageName in ${images[@]} ; do
 done
 ```
 
-4、部署Kubernetes Master  
+5、部署Kubernetes Master  
 ```
 $ kubeadm init \
 --kubernetes-version=v1.13.3 \
@@ -93,7 +93,7 @@ $ kubeadm init \
 --ignore-preflight-errors=Swap
 ```  
 
-5、使用kubectl工具：  
+6、使用kubectl工具：  
 ```
 mkdir -p $HOME/.kube
 sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
@@ -101,19 +101,19 @@ sudo chown $(id -u):$(id -g) $HOME/.kube/config
 $ kubectl get nodes
 ```  
 
-6、安装Pod网络插件（CNI）  
+7、安装Pod网络插件（CNI）  
 ```
 $ kubectl apply -f
 https://raw.githubusercontent.com/coreos/flannel/a70459be0084506e4ec919aa1c114638878db11b/Documentation/kube-flannel.yml
 ```  
 
-7、加入Kubernetes Node  
+8、加入Kubernetes Node  
 向集群添加新节点，执行在kubeadm init输出的kubeadm join命令：  
 ```
 $ kubeadm join 192.168.31.64:6443 --token l79g5t.6ov4jkddwqki1dxe --discovery-token-ca-cert-hash sha256:4f07f9068c543130461c9db368d62b4aabc22105451057f887defa35f47fa076
 ```  
 
-8、部署Dashboard  
+9、部署Dashboard  
 ``` $ kubectl apply -f https://raw.githubusercontent.com/kubernetes/dashboard/v1.10.1/src/deploy/recommended/kubernetes-dashboard.yaml ```  
 
 默认Dashboard只能集群内部访问，修改Service为NodePort类型，暴露到外部：  

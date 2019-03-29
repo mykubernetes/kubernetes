@@ -66,6 +66,24 @@ $ yum install -y kubelet-1.13.3 kubeadm-1.13.3 kubectl-1.13.3
 $ systemctl enable kubelet
 ```  
 
+4、手动下载镜像
+```
+images=(
+    kube-apiserver:v1.13.3
+    kube-controller-manager:v1.13.3
+    kube-scheduler:v1.13.3
+    kube-proxy:v1.13.3
+    pause:3.1
+    etcd:3.2.24
+    coredns:1.2.6
+)
+
+for imageName in ${images[@]} ; do
+    docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
+    docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName k8s.gcr.io/$imageName
+done
+```
+
 4、部署Kubernetes Master  
 ```
 $ kubeadm init \

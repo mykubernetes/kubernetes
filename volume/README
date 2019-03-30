@@ -13,8 +13,7 @@ https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
 
     Retain – 需要管理员手工回收。
     Recycle – 清除 PV 中的数据，效果相当于执行 rm -rf /thevolume/*。
-    Delete – 删除 Storage Provider 上的对应存储资源，例如 AWS EBS、GCE PD、Azure
-    Disk、OpenStack Cinder Volume 等。
+    Delete – 删除 Storage Provider 上的对应存储资源，例如 AWS EBS、GCE PD、Azure Disk、OpenStack Cinder Volume 等。
 
 ④ storageClassName 指定 PV 的 class 为 nfs。相当于为 PV 设置了一个分类，PVC 可以指定 class 申请相应 class 的 PV。
 ⑤ 指定 PV 在 NFS 服务器上对应的目录。

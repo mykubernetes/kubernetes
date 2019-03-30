@@ -46,3 +46,32 @@ willdockerhub/fluentd-elasticsearch:v2.3.2
 #kibana-deployment.yaml
 docker.elastic.co/kibana/kibana-oss:6.5.4
 ```  
+
+4、Node节点打标签  
+Fluentd是以DaemonSet的形式运行在Kubernetes集群中，这样就可以保证集群中每个Node上都会启动一个Fluentd 
+
+发现NODE-SELECTOR选项beta.kubernetes.io/fluentd-ds-ready=true 只会调度到标签beta.kubernetes.io/fluentd-ds-ready=true 的节点,否则无法正常启动  
+
+发现没有这个标签，为需要收集日志的Node 打上这个标签：  
+```
+$ kubectl label node k8s-node1 beta.kubernetes.io/fluentd-ds-ready=true
+node/k8s-node1 labeled
+$ kubectl label node k8s-node2 beta.kubernetes.io/fluentd-ds-ready=true
+node/k8s-node2 labeled
+```  
+
+5、所有准备工作完成后，通过kubectl apply -f .直接进行部署：  
+```
+$ kubectl apply -f .
+service/elasticsearch-logging created serviceaccount/elasticsearch-logging created
+clusterrole.rbac.authorization.k8s.io/elasticsearch-logging created
+clusterrolebinding.rbac.authorization.k8s.io/elasticsearch-logging created
+statefulset.apps/elasticsearch-logging created
+configmap/fluentd-es-config-v0.1.6 created
+serviceaccount/fluentd-es created
+clusterrole.rbac.authorization.k8s.io/fluentd-es created
+clusterrolebinding.rbac.authorization.k8s.io/fluentd-es created
+daemonset.apps/fluentd-es-v2.2.1 created
+deployment.apps/kibana-logging created
+service/kibana-logging created
+```  

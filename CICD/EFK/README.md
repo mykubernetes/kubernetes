@@ -75,3 +75,28 @@ daemonset.apps/fluentd-es-v2.2.1 created
 deployment.apps/kibana-logging created
 service/kibana-logging created
 ```  
+
+6、查看pod状态：
+```
+$ kubectl get pod -n kube-system -o wide
+NAME                                    READY STATUS   RESTARTS   AGE   IP           NODE       NOMINATED NODE READINESS GATES 
+coredns-78d4cf999f-7hv9m                1/1  Running   6        15d   10.244.0.15    k8s-master   <none>        <none>
+coredns-78d4cf999f-lj5rg                1/1  Running   6        15d   10.244.0.14    k8s-master   <none>        <none>
+elasticsearch-logging-0                 1/1  Running   0        97m   10.244.1.105   k8s-node1    <none>        <none>
+elasticsearch-logging-1                 1/1  Running   0        96m   10.244.2.95    k8s-node2    <none>        <none>
+etcd-k8s-master                         1/1  Running   6        15d   192.168.92.56  k8s-master   <none>        <none>
+fluentd-es-v2.3.2-jkkgp                 1/1  Running   0        97m   10.244.1.104   k8s-node1    <none>        <none>
+fluentd-es-v2.3.2-kj4f7                 1/1  Running   0        97m   10.244.2.93    k8s-node2    <none>        <none>
+kibana-logging-7b59799486-wg97l         1/1  Running   0        97m   10.244.2.94    k8s-node2    <none>        <none>
+kube-apiserver-k8s-master               1/1  Running   6        15d   192.168.92.56  k8s-master   <none>        <none>
+kube-controller-manager-k8s-master      1/1  Running   7        15d   192.168.92.56  k8s-master   <none>        <none>
+kube-flannel-ds-amd64-ccjrp             1/1  Running   6        15d   192.168.92.56  k8s-master   <none>        <none>
+kube-flannel-ds-amd64-lzx5v             1/1  Running   9        15d   192.168.92.58  k8s-node2    <none>        <none>
+kube-flannel-ds-amd64-qtnx6             1/1  Running   7        15d   192.168.92.57  k8s-node1    <none>        <none>
+kube-proxy-89d96                        1/1  Running   0        7h32m 192.168.92.57  k8s-node1    <none>        <none>
+kube-proxy-t2vfx                        1/1  Running   0        7h32m 192.168.92.56  k8s-master   <none>        <none>
+kube-proxy-w6pl4                        1/1  Running   0        7h32m 192.168.92.58  k8s-node2    <none>        <none>
+kube-scheduler-k8s-master               1/1  Running   7        15d   192.168.92.56  k8s-master   <none>        <none>
+kubernetes-dashboard-847f8cb7b8-wrm4l   1/1  Running   8        15d   10.244.2.80   k8s-node2     <none>        <none>
+tiller-deploy-7bf99c9559-8p7w4          1/1  Running   5        6d21h 10.244.1.90
+```

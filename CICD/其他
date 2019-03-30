@@ -1,0 +1,5 @@
+rook
+https://github.com/mykubernetes/rook/tree/master/cluster/examples/kubernetes/ceph
+
+prometheus
+https://github.com/mykubernetes/prometheus-operator/tree/master/contrib/kube-prometheus/manifests

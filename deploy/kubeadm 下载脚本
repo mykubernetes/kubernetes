@@ -17,3 +17,4 @@ done
 或者用 keveon 源 
 例子
 docker pull keveon/kube-apiserver:v1.12.1
+docker pull mirrorgooglecontainers/kube-apiserver-amd64:v1.13.2

@@ -74,6 +74,7 @@ NAME             HOSTS                 ADDRESS   PORTS   AGE
 traefik-web-ui   traefik-ui.minikube             80      2m4s
 
 
+
 # kubectl describe ingress traefik-web-ui -n kube-system
 Name:             traefik-web-ui
 Namespace:        kube-system
@@ -88,6 +89,15 @@ Annotations:
   kubectl.kubernetes.io/last-applied-configuration:  {"apiVersion":"extensions/v1beta1","kind":"Ingress","metadata":{"annotations":{},"name":"traefik-web-ui","namespace":"kube-system"},"spec":{"rules":[{"host":"traefik-ui.minikube","http":{"paths":[{"backend":{"serviceName":"traefik-web-ui","servicePort":"web"},"path":"/"}]}}]}}
 
 Events:  <none>
+
+
+
+# kubectl get service -n kube-system 
+NAME                      TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                       AGE
+kube-dns                  ClusterIP   10.96.0.10       <none>        53/UDP,53/TCP                 150m
+tiller-deploy             ClusterIP   10.107.124.240   <none>        44134/TCP                     99m
+traefik-ingress-service   NodePort    10.103.194.16    <none>        80:31155/TCP,8080:31494/TCP   16m
+traefik-web-ui            ClusterIP   10.101.131.216   <none>        80/TCP                        6m
 ```  
 
 修改集群外主机hosts:  

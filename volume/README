@@ -1,3 +1,6 @@
+官方提供示例
+https://github.com/mykubernetes/examples/tree/master/staging/volumes
+
 PV PVC
 https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
 

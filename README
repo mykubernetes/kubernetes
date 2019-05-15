@@ -35,6 +35,16 @@ spec:                          #必选，Pod中容器的详细定义
       requests:                #资源请求的设置
         cpu: string            #Cpu请求，容器启动的初始可用数量
         memory: string         #内存清楚，容器启动的初始可用数量
+    lifecycle                  #对pod内的容器进行启动后钩子和结束前钩子
+      postStart                #启动后钩子
+        exec
+        httpGet
+        tcpSocket
+      preStop                  #结束前钩子
+        exec
+        httpGet
+        tcpSocket
+    readinessProbe：           #对pod内的容器就绪检查，当探测无响应几次后将自动重启该容器，检查方法有exec、httpGet和tcpSocket
     livenessProbe:             #对Pod内个容器健康检查，当探测无响应几次后将自动重启该容器，检查方法有exec、httpGet和tcpSocket
       exec:                    #对Pod容器内检查方式设置为exec方式
         command: [string]      #exec方式需要制定的命令或脚本
@@ -48,12 +58,12 @@ spec:                          #必选，Pod中容器的详细定义
           value: string
       tcpSocket:               #对Pod内个容器健康检查方式设置为tcpSocket方式
          port: number
-       initialDelaySeconds: 0  #容器启动完成后首次探测的时间，单位为秒
-       timeoutSeconds: 0       #对容器健康检查探测等待响应的超时时间，单位秒，默认1秒
-       periodSeconds: 0        #对容器监控检查的定期探测时间设置，单位秒，默认10秒一次
-       successThreshold: 0
-       failureThreshold: 0
-       securityContext:
+      initialDelaySeconds: 0  #容器启动完成后首次探测的时间，单位为秒
+      timeoutSeconds: 0       #对容器健康检查探测等待响应的超时时间，单位秒，默认1秒
+      periodSeconds: 0        #对容器监控检查的定期探测时间设置，单位秒，默认10秒一次
+      successThreshold: 0     ##对容器进行成功次数检查，默认1次
+      failureThreshold: 0     #对容器进行失败次数检查，默认3次
+      securityContext:
          privileged:false
     restartPolicy:            #Always不管以何种方式终止运行都将重启，OnFailure只有Pod以非0退出码退出才重启，Nerver不再重启该Pod
     nodeSelector: obeject     #设置NodeSelector表示将该Pod调度到包含这个label的node上，以key：value的格式指定

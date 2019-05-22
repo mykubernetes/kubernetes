@@ -1,4 +1,5 @@
-# yaml格式的pod定义文件完整内容：
+# yaml格式的pod定义文件完整内容：  
+```
 apiVersion: v1                 #必选，版本号，例如v1
 kind: Pod                      #必选，Pod
 metadata:                      #必选，元数据
@@ -85,3 +86,144 @@ spec:                          #必选，Pod中容器的详细定义
       items:
       - key: string
         path: string
+```  
+
+
+
+ReplicaSet控制器  
+```
+apiVersion: apps/v1
+kind: ReplicaSet
+metadata:                          #元数据
+  name: rs-example           #副本控制器名字
+spec:                                 #期望状态
+  replicas: 2                       #副本数
+  selector:                         #标签选择器
+     matchLabels:               
+       app: rs-demo           #标签
+  template:                       #定义pod
+    metadata: 
+      labels:
+        app: rs-demo
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.12-alpine
+        ports:
+        - name: http
+          containerPort: 80
+```
+
+
+Deployment控制器  
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: deploy-nginx
+spec:
+  replicas: 3                                #副本数
+  minReadySeconds: 10
+  strategy:                                  #定义更新策略      
+    rollingUpdate:                       #滚动更新
+      maxSurge: 1                        #最多允许多几个pod
+      maxUnavailable: 1               #最少有几个不可用
+    type: RollingUpdate              
+  selector:                                   #标签选择器
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.10-alpine
+        ports:
+        - containerPort: 80
+          name: http
+        readinessProbe:
+          periodSeconds: 1
+          httpGet:
+            path: /
+            port: http
+```
+
+
+DaemonSet控制器  
+```
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: filebeat-ds
+  labels:
+    app: filebeat
+spec:
+  selector:
+    matchLabels:
+      app: filebeat
+  template:
+    metadata:
+      labels:
+        app: filebeat
+      name: filebeat
+    spec:
+      containers:
+      - name: filebeat
+        image: ikubernetes/filebeat:5.6.5-alpine
+        env:
+        - name: REDIS_HOST
+          value: db.ikubernetes.io:6379
+        - name: LOG_LEVEL
+          value: info
+```  
+
+job控制器  
+```
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: job-multi
+spec:
+  completions: 5                       #启动个数
+  template:
+    metadata:
+      labels:
+        app: myjob
+    spec:
+      containers:
+      - name: myjob
+        image: alpine
+        command: ["/bin/sh",  "-c", "sleep 30"]
+      restartPolicy: Never
+```  
+
+
+CronJob控制器  
+```
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: cronjob-example
+  labels:
+    app: mycronjob
+spec:
+  schedule: "*/2 * * * *"                         #运行周期
+  jobTemplate:
+    metadata:
+      labels:
+        app: mycronjob-jobs
+    spec:
+      parallelism: 2
+      template:
+        spec:
+          containers:
+          - name: myjob
+            image: alpine
+            command:
+            - /bin/sh
+            - -c
+            - date; echo Hello from the Kubernetes cluster; sleep 10
+          restartPolicy: OnFailure
+```  

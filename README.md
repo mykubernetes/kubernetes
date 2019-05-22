@@ -1,4 +1,5 @@
-# yaml格式的pod定义文件完整内容：  
+yaml格式的pod定义文件完整内容：  
+---
 ```
 apiVersion: v1                 #必选，版本号，例如v1
 kind: Pod                      #必选，Pod
@@ -91,6 +92,7 @@ spec:                          #必选，Pod中容器的详细定义
 
 
 ReplicaSet控制器  
+---
 ```
 apiVersion: apps/v1
 kind: ReplicaSet
@@ -116,6 +118,7 @@ spec:                                 #期望状态
 
 
 Deployment控制器  
+---
 ```
 apiVersion: apps/v1
 kind: Deployment
@@ -152,6 +155,7 @@ spec:
 
 
 DaemonSet控制器  
+---
 ```
 apiVersion: apps/v1
 kind: DaemonSet
@@ -180,6 +184,7 @@ spec:
 ```  
 
 job控制器  
+---
 ```
 apiVersion: batch/v1
 kind: Job
@@ -201,6 +206,7 @@ spec:
 
 
 CronJob控制器  
+---
 ```
 apiVersion: batch/v1beta1
 kind: CronJob

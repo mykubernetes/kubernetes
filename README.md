@@ -191,7 +191,7 @@ kind: Job
 metadata:
   name: job-multi
 spec:
-  completions: 5                       #启动个数
+  completions: 5                       #总共运行次数
   template:
     metadata:
       labels:
@@ -233,3 +233,83 @@ spec:
             - date; echo Hello from the Kubernetes cluster; sleep 10
           restartPolicy: OnFailure
 ```  
+
+service
+---
+```
+kind: Service
+apiVersion: v1
+metadata:
+  name: myapp-svc-nodeport
+spec:
+  clusterIP: None                   #配置clusterIP为无头服务,tyep只能为clusterIP生效
+  type: NodePort                    #配置svc类型默认为clusterIP
+  sessionAffinity: ClientIP         #session绑定默认值为None   ClientIP,None
+  selector:
+    app: myapp                      #对应pod的标签
+  ports:
+  - protocol: TCP                   #协议
+    port: 80                        #server端口
+    targetPort: 80                  #pod端口
+    nodePort: 32223                 #主机端口
+```
+
+无头服务解析  
+dig -t A myapp-svc.default.svc.cluster.local @10.96.0.10  
+svc_name.ns_name.svc.cluster.local
+
+statefulset
+---
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp-svc
+  labels:
+    app: myapp-svc
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None                #配置statefulset需要配置成None
+  selector:
+    app: myapp-pod
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: myapp
+spec:
+  serviceName: myapp-svc
+  replicas: 2                    #副本模式
+  selector:
+    matchLabels:
+      app: myapp-pod
+  template:
+    metadata:
+      labels:
+        app: myapp-pod
+    spec:
+      containers:
+      - name: myapp
+        image: ikubernetes/myapp:v5
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: myappdata
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:                          #动态获取pvc
+  - metadata:
+      name: myappdata
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "gluster-dynamic"
+      resources:
+        requests:
+          storage: 2Gi
+```  
+
+解析statefulset的pod IP 地址    
+nslookup myapp-0.myapp.default.svc.cluster.local  
+pod_name.svc_name.ns_name.svc.cluster.local  

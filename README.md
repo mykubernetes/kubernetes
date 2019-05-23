@@ -191,7 +191,10 @@ kind: Job
 metadata:
   name: job-multi
 spec:
+  activeDeadlineSeconds: 100           #最大活动时间长度，超出此时长的作业将被终止
+  backoffLimit: 5                      #将作业标记为失败状态之前的重试次数，默认值为6
   completions: 5                       #总共运行次数
+  parallelism： 2                      #并行执行数量
   template:
     metadata:
       labels:
@@ -215,8 +218,10 @@ metadata:
   labels:
     app: mycronjob
 spec:
-  schedule: "*/2 * * * *"                         #运行周期
-  jobTemplate:
+  schedule: "*/2 * * * *"         #Cron格式的作业调度运行时间点；必选字段
+  concurrencyPolicy: Allow        #并发执行策略，Allow(允许)、Forbid（禁止）、Replace（替换）定义前一次作业尚未完成时是否运行后一次的作业
+  suspend：false                  #是否挂起后的任务执行，默认为false，对运行中的作业不会产生影响
+  jobTemplate:                    #Job控制器模板,用于为CronJob控制器生成Job对象；必选字段
     metadata:
       labels:
         app: mycronjob-jobs

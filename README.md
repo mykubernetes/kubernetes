@@ -253,10 +253,10 @@ spec:
   selector:
     app: myapp                      #对应pod的标签
   ports:
-  - protocol: TCP                   #协议
+  - protocol: TCP                   #协议，默认tcp
     port: 80                        #server端口
     targetPort: 80                  #pod端口
-    nodePort: 32223                 #主机端口
+    nodePort: 32223                 #集群接入，主机端口，范围30000-32767
 ```
 
 无头服务解析  

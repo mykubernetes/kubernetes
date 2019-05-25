@@ -220,7 +220,7 @@ metadata:
 spec:
   schedule: "*/2 * * * *"         #Cron格式的作业调度运行时间点；必选字段
   concurrencyPolicy: Allow        #并发执行策略，Allow(允许)、Forbid（禁止）、Replace（替换）定义前一次作业尚未完成时是否运行后一次的作业
-  suspend：false                  #是否挂起后的任务执行，默认为false，对运行中的作业不会产生影响
+  suspend：false                  #如果设置为true，后续所有执行都会被挂起。它对已经开始执行的Job不起作用
   jobTemplate:                    #Job控制器模板,用于为CronJob控制器生成Job对象；必选字段
     metadata:
       labels:

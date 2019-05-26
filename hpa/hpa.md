@@ -18,13 +18,13 @@ kind: HorizontalPodAutoscaler
 metadata:
   name: myapp-hpa-v2
 spec:
-  scaleTargetRef:
+  scaleTargetRef:                        #要缩放的目标资源
     apiVersion: apps/v1
     kind: Deployment
     name: myapp
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
+  minReplicas: 1                         #自动伸缩可缩减至的pod副本数的下限
+  maxReplicas: 10                        #自动伸缩可扩展至的pod副本数的上线，其值不能低于minReplicas
+  metrics:                               #用于计算所需pod副本数量的指标列表
   - type: Resource
     resource:
       name: cpu

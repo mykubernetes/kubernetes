@@ -295,48 +295,12 @@ data:
 5、创建后端应用和服务测试  
 ```
 # wget https://raw.githubusercontent.com/google/metallb/master/manifests/tutorial-2.yaml
-# cat tutorial-2.yaml
-apiVersion: apps/v1beta2
-kind: Deployment
-metadata:
-  name: nginx
-spec:
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-      - name: nginx
-        image: nginx:1
-        ports:
-        - name: http
-          containerPort: 80
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: nginx
-spec:
-  ports:
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: 80
-  selector:
-    app: nginx
-  type: LoadBalancer
-
-
 # kubectl apply -f tutorial-2.yaml
 ```  
 
 查看yaml文件配置，包含了一个deployment和一个LoadBalancer类型的service，默认即可。  
 ```
+# cat tutorial-2.yaml
 apiVersion: apps/v1beta2
 kind: Deployment
 metadata:

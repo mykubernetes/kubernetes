@@ -8,8 +8,236 @@ https://github.com/google/metallb：
 
 1、Metallb 支持 Helm 和 YAML 两种安装方法，这里我们使用第二种：  
 ```
-wget https://raw.githubusercontent.com/google/metallb/v0.7.3/manifests/metallb.yaml
-kubectl apply -f metallb.yaml
+# wget https://raw.githubusercontent.com/google/metallb/v0.7.3/manifests/metallb.yaml
+# cat metallb.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: metallb-system
+  labels:
+    app: metallb
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: metallb-system
+  name: controller
+  labels:
+    app: metallb
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  namespace: metallb-system
+  name: speaker
+  labels:
+    app: metallb
+
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: metallb-system:controller
+  labels:
+    app: metallb
+rules:
+- apiGroups: [""]
+  resources: ["services"]
+  verbs: ["get", "list", "watch", "update"]
+- apiGroups: [""]
+  resources: ["services/status"]
+  verbs: ["update"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create", "patch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: metallb-system:speaker
+  labels:
+    app: metallb
+rules:
+- apiGroups: [""]
+  resources: ["services", "endpoints", "nodes"]
+  verbs: ["get", "list", "watch"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: metallb-system
+  name: config-watcher
+  labels:
+    app: metallb
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch"]
+- apiGroups: [""]
+  resources: ["events"]
+  verbs: ["create"]
+---
+
+## Role bindings
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: metallb-system:controller
+  labels:
+    app: metallb
+subjects:
+- kind: ServiceAccount
+  name: controller
+  namespace: metallb-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: metallb-system:controller
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: metallb-system:speaker
+  labels:
+    app: metallb
+subjects:
+- kind: ServiceAccount
+  name: speaker
+  namespace: metallb-system
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: metallb-system:speaker
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  namespace: metallb-system
+  name: config-watcher
+  labels:
+    app: metallb
+subjects:
+- kind: ServiceAccount
+  name: controller
+- kind: ServiceAccount
+  name: speaker
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: config-watcher
+---
+apiVersion: apps/v1beta2
+kind: DaemonSet
+metadata:
+  namespace: metallb-system
+  name: speaker
+  labels:
+    app: metallb
+    component: speaker
+spec:
+  selector:
+    matchLabels:
+      app: metallb
+      component: speaker
+  template:
+    metadata:
+      labels:
+        app: metallb
+        component: speaker
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "7472"
+    spec:
+      serviceAccountName: speaker
+      terminationGracePeriodSeconds: 0
+      hostNetwork: true
+      containers:
+      - name: speaker
+        image: metallb/speaker:v0.7.3
+        imagePullPolicy: IfNotPresent
+        args:
+        - --port=7472
+        - --config=config
+        env:
+        - name: METALLB_NODE_NAME
+          valueFrom:
+            fieldRef:
+              fieldPath: spec.nodeName
+        ports:
+        - name: monitoring
+          containerPort: 7472
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - all
+            add:
+            - net_raw
+
+---
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  namespace: metallb-system
+  name: controller
+  labels:
+    app: metallb
+    component: controller
+spec:
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: metallb
+      component: controller
+  template:
+    metadata:
+      labels:
+        app: metallb
+        component: controller
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "7472"
+    spec:
+      serviceAccountName: controller
+      terminationGracePeriodSeconds: 0
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 65534 # nobody
+      containers:
+      - name: controller
+        image: metallb/controller:v0.7.3
+        imagePullPolicy: IfNotPresent
+        args:
+        - --port=7472
+        - --config=config
+        ports:
+        - name: monitoring
+          containerPort: 7472
+        resources:
+          limits:
+            cpu: 100m
+            memory: 100Mi
+          
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+            - all
+          readOnlyRootFilesystem: true
+
+---
+
+
+
+
+# kubectl apply -f metallb.yaml
 ```  
 
 2、查看运行的pod  
@@ -67,6 +295,43 @@ data:
 5、创建后端应用和服务测试  
 ```
 # wget https://raw.githubusercontent.com/google/metallb/master/manifests/tutorial-2.yaml
+# cat tutorial-2.yaml
+apiVersion: apps/v1beta2
+kind: Deployment
+metadata:
+  name: nginx
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1
+        ports:
+        - name: http
+          containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+spec:
+  ports:
+  - name: http
+    port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: nginx
+  type: LoadBalancer
+
+
 # kubectl apply -f tutorial-2.yaml
 ```  
 

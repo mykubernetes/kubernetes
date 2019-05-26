@@ -25,9 +25,9 @@ data:
 $ kubectl create -f ceph-secret-admin.yaml 
 secret "ceph-secret-admin" created
 $ kubectl get secret
-NAME                  TYPE                                                             DATA      AGE
-ceph-secret-admin     kubernetes.io/rbd                                   1           16s
-default-token-630xt   kubernetes.io/service-account-token      3           15m
+NAME                  TYPE                                     DATA       AGE
+ceph-secret-admin     kubernetes.io/rbd                         1         16s
+default-token-630xt   kubernetes.io/service-account-token       3         15m
 ```  
 
 2、创建 rbd-storage-class  
@@ -106,8 +106,8 @@ spec:
 $ kubectl create -f rbd-dyn-pv-claim.yaml 
 persistentvolumeclaim "ceph-rbd-dyn-pv-claim" created
 $ kubectl get pvc
-NAME                              STATUS     VOLUME    CAPACITY   ACCESSMODES   STORAGECLASS   AGE
-ceph-rbd-dyn-pv-claim   Pending                                                                      rbd                        29s
+NAME                     STATUS     VOLUME    CAPACITY   ACCESSMODES   STORAGECLASS   AGE
+ceph-rbd-dyn-pv-claim   Pending                                           rbd        29s
 ```  
 
 6)状态为 Pending 并没有创建成功  

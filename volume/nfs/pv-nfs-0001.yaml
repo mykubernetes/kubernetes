@@ -5,14 +5,14 @@ metadata:
   labels:
     release: stable
 spec:
-  capacity:
+  capacity:                                    #当前PV的容量
     storage: 5Gi
-  volumeMode: Filesystem
+  volumeMode: Filesystem                       #卷类型，用于指定此卷可被用作文件系统还是裸格式的块设备，默认Filesystem
   accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Recycle
-  storageClassName: slow
-  mountOptions:
+    - ReadWriteMany                             #ReadWriteOnce、ReadOnlyMany、ReadWriteMany
+  persistentVolumeReclaimPolicy: Recycle        #PV空间释放处理机制Retain(默认)、Recycle或Delete
+  storageClassName: slow                        #当前PV属于的StorageClass的名称，默认为空，即不属于任何StorageClass
+  mountOptions:                                 #挂载选项组成的列表，如ro、soft和hard等
     - hard
     - nfsvers=4.1
   nfs:

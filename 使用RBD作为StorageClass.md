@@ -77,6 +77,7 @@ parameters:
   pool: rbd
   userId: admin
   userSecretName: ceph-secret-admin
+  imageFormat: "1"
 ```  
 
 

@@ -17,6 +17,6 @@ spec:
   volumes:
     - name: redisdata
       glusterfs:
-        endpoints: glusterfs-endpoints
-        path: kube-redis
-        readOnly: false
+        endpoints: glusterfs-endpoints         #Endpoints资源的名称，此资源需要实现存在，用于提供Gluster集群的步伐节点信息，必选字段
+        path: kube-redis                       #用到的GlusterFS机器的卷路径，必选字段
+        readOnly: false                        #是否为只读卷

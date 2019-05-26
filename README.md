@@ -1,3 +1,4 @@
+官网https://kubernetes.io/zh/docs/concepts/
 yaml格式的pod定义文件完整内容：  
 ---
 ```

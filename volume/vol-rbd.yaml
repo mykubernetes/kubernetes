@@ -15,14 +15,14 @@ spec:
   volumes:
     - name: redis-rbd-vol
       rbd:
-        monitors:
+        monitors:                      #ceph存储监视器，必选字段
         - '172.16.0.56:6789'
         - '172.16.0.57:6789'
         - '172.16.0.58:6789'
-        pool: kube
-        image: redis
-        fsType: ext4
-        readOnly: false
-        user: admin
-        secretRef:
+        pool: kube                     #rados存储池名称，默认RBD
+        image: redis                   #rados image的名称，必选字段
+        fsType: ext4                   #要挂载的存储文件系统的类型，如ext4、xfs、ntfs等，默认为ext4
+        readOnly: false                #是否为只读方式进行访问
+        user: admin                    #rados用户名，默认admin
+        secretRef:                     #RBD用户认证是使用的保存secret对象，会覆盖keyring字段的定义，此处未定义keyring
           name: ceph-secret

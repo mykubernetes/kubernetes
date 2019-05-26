@@ -3,13 +3,13 @@ kind: PersistentVolumeClaim
 metadata:
   name: pvc-nfs-0001
 spec:
-  accessModes:
+  accessModes:                  #当前PVC的访问模式，其可用模式与PV相同
     - ReadWriteMany
-  volumeMode: Filesystem
-  resources:
+  volumeMode: Filesystem        #卷类型，默认Filesystem
+  resources:                    #当前PVC存储卷需要占用的资源量最小值，
     requests:
       storage: 5Gi
-  storageClassName: slow
-  selector:
+  storageClassName: slow        #所依赖的存储类的名称
+  selector:                     #绑定时对PV应用的标签选择器或匹配条件表达式，用于挑选绑定的PV
     matchLabels:
       release: "stable"

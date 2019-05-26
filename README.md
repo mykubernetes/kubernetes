@@ -98,13 +98,13 @@ ReplicaSet控制器
 apiVersion: apps/v1
 kind: ReplicaSet
 metadata:                          #元数据
-  name: rs-example           #副本控制器名字
-spec:                                 #期望状态
-  replicas: 2                       #副本数
-  selector:                         #标签选择器
+  name: rs-example                 #副本控制器名字
+spec:                              #期望状态
+  replicas: 2                      #副本数
+  selector:                        #标签选择器
      matchLabels:               
-       app: rs-demo           #标签
-  template:                       #定义pod
+       app: rs-demo                #标签
+  template:                        #定义pod
     metadata: 
       labels:
         app: rs-demo
@@ -126,14 +126,14 @@ kind: Deployment
 metadata:
   name: deploy-nginx
 spec:
-  replicas: 3                                #副本数
+  replicas: 3                            #副本数
   minReadySeconds: 10
-  strategy:                                  #定义更新策略      
-    rollingUpdate:                       #滚动更新
+  strategy:                              #定义更新策略      
+    rollingUpdate:                       #滚动更新策略定义临时减少和增加的pod
       maxSurge: 1                        #最多允许多几个pod
-      maxUnavailable: 1               #最少有几个不可用
-    type: RollingUpdate              
-  selector:                                   #标签选择器
+      maxUnavailable: 1                  #最少有几个不可用
+    type: RollingUpdate                  #更新策略
+  selector:                              #标签选择器
     matchLabels:
       app: nginx
   template:

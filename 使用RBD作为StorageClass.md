@@ -55,6 +55,11 @@ parameters:
 - adminSecretName 为上边创建的 Ceph 管理员 admin 使用的 ceph-secret-admin。
 - adminSecretNamespace 管理员 secret 使用的命名空间，默认 default，如果修改为其他的话，需要修改 ceph-secret-admin.yaml 增加 namespace: other-namespace。
 
+- imageFormat: Ceph RBD image format, “1” or “2”. Default is “1”.
+    经过查看ceph文档rbd 块镜像有支持两种格式： --image-format format-id,format-id取值为1或2，默认为 2。
+    - format 1 - 新建 rbd 映像时使用最初的格式。此格式兼容所有版本的 librbd 和内核模块，但是不支持较新的功能，像克隆。
+    - format 2 - 使用第二版 rbd 格式， librbd 和 3.11 版以上内核模块才支持（除非是分拆的模块）。此格式增加了克隆支持，使得扩展更容易，还允许以后增加新功能。
+
 
 2)rbd-storage-class.yaml 文件  
 ```
@@ -73,6 +78,7 @@ parameters:
   userId: admin
   userSecretName: ceph-secret-admin
 ```  
+
 
 3)建一下名称为 rbd 类型为 rbd 的 storage-class  
 ```

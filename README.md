@@ -250,7 +250,7 @@ metadata:
 spec:
   clusterIP: None                   #配置clusterIP为无头服务,tyep只能为clusterIP生效
   type: NodePort                    #配置svc类型默认为clusterIP
-  sessionAffinity: ClientIP         #session绑定默认值为None   ClientIP,None
+  sessionAffinity: ClientIP         #session绑定默认值为None(不启用)   ClientIP,None   效果不佳，不建议使用
   selector:
     app: myapp                      #对应pod的标签
   ports:

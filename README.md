@@ -259,7 +259,13 @@ spec:
     targetPort: 80                  #pod端口
     nodePort: 32223                 #集群接入，主机端口，范围30000-32767
 ```
-
+创建service资源会自动创建对应的Endpoints资源对象  
+```
+获取service信息
+# kubectl get svc myapp-svc-nodeport
+获取service
+# kubectl get endpoints myapp-svc-nodeport
+```  
 无头服务解析  
 dig -t A myapp-svc.default.svc.cluster.local @10.96.0.10  
 svc_name.ns_name.svc.cluster.local

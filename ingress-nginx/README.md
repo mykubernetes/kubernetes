@@ -128,6 +128,10 @@ metadata:
   annotations:
     kubernets.io/ingress.class: "nginx"
 spec:
+#  tls:                                    #tls模式需要先创建secret资源，并且为tls格式
+#  - hosts:
+#    - myapp.node01.com 
+#    secretName: tomcat-ingress-secret     #指定secret资源名
   rules:
   - host: myapp.node01.com
     http:

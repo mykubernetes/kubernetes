@@ -41,12 +41,12 @@ spec:
 ```
 # kubectl create -f kafka-pvc.yaml 
 
-创建后会自动产生pvc
+#创建后会自动产生pvc
 kubectl get pvc -n kube-system
 NAME        STATUS    VOLUME                                     CAPACITY   ACCESSMODES   STORAGECLASS               AGE
 kafka-pvc   Bound     pvc-9749a71a-c943-11e7-8ccf-00505694b7e8   20Gi       RWX           two-replica-glusterfs-sc   3m
 
-# 自动产生了一个pv
+#自动产生了一个pv
 kubectl get pv
 NAME                                       CAPACITY   ACCESSMODES   RECLAIMPOLICY   STATUS      CLAIM                  STORAGECLASS   REASON    AGE
 pvc-1c45d9a2-c76e-11e7-892e-00505694eb6a   1Gi        RWX           Delete          Bound       default/gluster-pvc1   gfs                      17m

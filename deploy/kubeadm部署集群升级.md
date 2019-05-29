@@ -51,29 +51,29 @@
 1、在master节点将升级node01节点的pod驱逐走  
 ``` # kubectl drain node01 --ignore-daemonsets --force ```  
 
-2、查看node01节点是否为不可调动状态  
+2、在master节点查看node01节点是否为不可调动状态  
 ```
 # kubectl get nodes
 NAME      STATUS                                   POLES      AGE    VERSION
 node01    Ready,SchedulingDisabled     <none>    26d      v1.14.1
 ```  
 
-3、升级node01节点三个软件包  
+3、在node节点升级node01节点三个软件包  
 ``` # yum upgrade -y kubeadm-1.14.1-0 kubelet-1.14.1-0 kubectl-1.14.1-0--disableexcludes=kubernetes ```  
 
-4、更新kubelet的配置  
+4、在node节点更新kubelet的配置  
 ``` # kubeadm upgrade node config --kubelet-version v1.14.2 ```  
 
-5、重启kubelet  
+5、在node节点重启kubelet  
 ```
 # systemctl daemon-reload
 # systemctl restart kubelet
 ```  
 
-6、将node01节点设置成可调度节点  
+6、在master节点将node01节点设置成可调度节点  
 ``` # kubectl uncordon node01 ```  
 
-7、查看work节点是否为可调动状态  
+7、在master节点查看work节点是否为可调动状态  
 ```
 # kubectl get nodes
 NAME      STATUS      POLES      AGE    VERSION

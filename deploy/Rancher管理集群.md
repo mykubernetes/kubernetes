@@ -191,7 +191,7 @@ spec:
 
 ## 使用Rancher
 
-访问地址：https://rancher.hipstershop.cn:30443/login
+访问地址：https://rancher.hipstershop.cn:30443
 
 第一次访问Rancher需要设置admin密码
 

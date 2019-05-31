@@ -56,6 +56,8 @@ kind: Ingress
 metadata:
   name: traefik-web-ui
   namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: traefik
 spec:
   rules:
   - host: traefik-ui.minikube

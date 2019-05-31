@@ -112,3 +112,42 @@ traefik-web-ui            ClusterIP   10.101.131.216   <none>        80/TCP     
 http://traefik-ui.minikube:31494/dashboard/
 
 
+9、通过域名下不同的路径转发到不同的服务上去的 Ingress 配置  
+```
+$ vim my-k8s-traefik.yaml
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: my-k8s-traefik
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    traefik.frontend.rule.type: PathPrefixStrip          #根据不同路径做转发需要配置此项
+spec:
+  rules:
+  - host: my.k8s.traefik
+    http:
+      paths:
+      - path: /dashboard
+        backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 80
+      - path: /kibana
+        backend:
+          serviceName: kibana-logging
+          servicePort: 5601
+
+$ kubectl create -f my-k8s-traefik.yaml
+ingress "my-k8s-traefik" created
+
+$ kubectl get ingress --all-namespaces
+NAMESPACE     NAME                        HOSTS                                   ADDRESS   PORTS     AGE
+kube-system   dashboard-ela-k8s-traefik   dashboard.k8s.traefik,ela.k8s.traefik             80        12m
+kube-system   my-k8s-traefik              my.k8s.traefik                                    80        4s
+kube-system   traefik-web-ui              traefik-ui.k8s                                    80        43m
+```  
+- 注意：这里我们根据路径来转发，需要指明 rule 为 PathPrefixStrip，配置为 traefik.frontend.rule.type: PathPrefixStrip  
+
+
+

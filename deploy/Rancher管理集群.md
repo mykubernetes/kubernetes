@@ -152,6 +152,35 @@ Rancher主要优势:
     rancher-dbd67bf57-b4ght   1/1       Running   0          9m        10.42.0.5    172.16.2.11
     rancher-dbd67bf57-fs7jl   1/1       Running   1          9m        10.42.2.3    172.16.2.12
 
+部署ingress-nginx
+安装过程查看此文档
+https://github.com/mykubernetes/kubernetes/tree/master/ingress-nginx
+
+配置ingress-nginx  
+```
+$ vim rancher-ingress.yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-rancher
+  namespace: cattle-system
+  annotations:
+    kubernets.io/ingress.class: "nginx"
+spec:
+  tls:
+  - hosts:
+    - rancher.hipstershop.cn
+    secretName: tls-rancher-ingress
+  rules:
+  - host: rancher.hipstershop.cn
+    http:
+      paths:
+      - path:
+        backend:
+          serviceName: rancher
+          servicePort: 80
+```  
+
 ## 使用Rancher
 
 访问地址：https://rancher.hipstershop.cn/login

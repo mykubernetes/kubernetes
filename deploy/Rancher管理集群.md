@@ -77,6 +77,14 @@ Rancher主要优势:
 
 #### 创建证书secret（需要去证书颁发机构申请ssl证书）
 
+    cd /etc/kubernetes/pki
+    (umask 077;openssl genrsa -out rancher.hipstershop.cn.key 2048; )
+    openssl req -new -key rancher.hipstershop.cn.key -out rancher.hipstershop.cn.csr -subj "/CN=rancher.hipstershop.cn"
+    openssl x509 -req -in rancher.hipstershop.cn.csr -CA ./ca.crt -CAkey ./ca.key -CAcreateserial -out rancher.hipstershop.cn.crt -days 365
+
+    查看证书
+    openssl x509 -in admin.crt -text -noout
+
 这个证书是我们用来通过HTTPS协议访问Rancher使用，我访问Rancher使用的域名是rancher.hipstershop.cn，我们需要为这个域名申请证书，并配置到Kubernetes中。
 
     $ kubectl -n cattle-system create secret tls tls-rancher-ingress --cert=./rancher.hipstershop.cn.crt --key=./rancher.hipstershop.cn.key

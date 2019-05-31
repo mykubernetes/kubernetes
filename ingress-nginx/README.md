@@ -117,7 +117,7 @@ myapp-deploy-5cc79fc966-2228d    1/1     Running   0          62s
 myapp-deploy-5cc79fc966-42w2d    1/1     Running   0          62s
 ```
 
-7、创建myapp的ingress规则  
+7、创建基于域名访问虚拟主机的Ingress配置  
 ```
 # vim  ingress-myapp.yaml 
 apiVersion: extensions/v1beta1
@@ -136,7 +136,7 @@ spec:
   - host: myapp.node01.com
     http:
       paths:
-      - path: /                             #子路径，可继续填写
+      - path: 
         backend:
           serviceName: myapp
           servicePort: 80
@@ -183,3 +183,32 @@ cat /etc/hosts
 ```  
 
 10、浏览器访问  
+
+
+11、通过域名下不同的路径转发到不同的服务上去的Ingress配置  
+```
+vim my-k8s-ingress.yaml
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: my-k8s-ingress
+  namespace: kube-system
+  annotations:
+    ingress.kubernetes.io/rewrite-target: /              #添加此端配置
+spec:
+  rules:
+  - host: my.k8s.ingress
+    http:
+      paths:
+      - path: /dashboard
+        backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 80
+      - path: /kibana
+        backend:
+          serviceName: kibana-logging
+          servicePort: 5601
+
+# 重新应用或替换 ingress
+$ kubectl apply -f my-k8s-ingress.yaml 或者 kubectl replace -f my-k8s-ingress.yaml
+```  

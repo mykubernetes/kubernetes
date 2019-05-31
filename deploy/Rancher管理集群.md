@@ -83,7 +83,7 @@ Rancher主要优势:
     openssl x509 -req -in rancher.hipstershop.cn.csr -CA ./ca.crt -CAkey ./ca.key -CAcreateserial -out rancher.hipstershop.cn.crt -days 365
 
     查看证书
-    openssl x509 -in admin.crt -text -noout
+    openssl x509 -in rancher.hipstershop.cn.crt -text -noout
 
 这个证书是我们用来通过HTTPS协议访问Rancher使用，我访问Rancher使用的域名是rancher.hipstershop.cn，我们需要为这个域名申请证书，并配置到Kubernetes中。
 
@@ -160,9 +160,9 @@ Rancher主要优势:
     rancher-dbd67bf57-b4ght   1/1       Running   0          9m        10.42.0.5    172.16.2.11
     rancher-dbd67bf57-fs7jl   1/1       Running   1          9m        10.42.2.3    172.16.2.12
 
-部署ingress-nginx
-安装过程查看此文档
-https://github.com/mykubernetes/kubernetes/tree/master/ingress-nginx
+部署ingress-nginx  
+安装过程查看此文档  
+https://github.com/mykubernetes/kubernetes/tree/master/ingress-nginx  
 
 配置ingress-nginx  
 ```
@@ -191,7 +191,7 @@ spec:
 
 ## 使用Rancher
 
-访问地址：https://rancher.hipstershop.cn/login
+访问地址：https://rancher.hipstershop.cn:30443/login
 
 第一次访问Rancher需要设置admin密码
 

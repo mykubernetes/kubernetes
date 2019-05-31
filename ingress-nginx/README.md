@@ -1,7 +1,8 @@
 官方托管代码  
 https://github.com/kubernetes/ingress-nginx/tree/master/deploy  
 https://kubernetes.github.io/ingress-nginx/deploy/
-
+官方配置文档   
+https://kubernetes.io/docs/concepts/services-networking/ingress/  
 1、下载部署文件ingress-nginx  
 ``` # wget https://raw.githubusercontent.com/kubernetes/ingress-nginx/nginx-0.21.0/deploy/mandatory.yaml ```  
 

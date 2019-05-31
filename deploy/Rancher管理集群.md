@@ -22,10 +22,8 @@ Rancher主要优势:
 
 
 ## 部署Rancher
-
+官方文档 https://rancher.com/docs/rancher/v1.6/zh/kubernetes/addons/
 ### 安装helm
-
-#### 安装helm
 
 根据你的操作系选择适合你的helm包进行下载、安装。
 

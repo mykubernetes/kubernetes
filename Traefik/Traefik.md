@@ -56,8 +56,6 @@ kind: Ingress
 metadata:
   name: traefik-web-ui
   namespace: kube-system
-  annotations:
-    kubernetes.io/ingress.class: traefik
 spec:
   rules:
   - host: traefik-ui.minikube
@@ -111,8 +109,44 @@ traefik-web-ui            ClusterIP   10.101.131.216   <none>        80/TCP     
 
 http://traefik-ui.minikube:31494/dashboard/
 
+9、部署自定义 Ingress
+```
+$ vim dashboard-ela-k8s-traefik.yaml
 
-9、通过域名下不同的路径转发到不同的服务上去的 Ingress 配置  
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: dashboard-ela-k8s-traefik
+  namespace: kube-system
+  annotations:
+    kubernetes.io/ingress.class: traefik
+spec:
+  rules:
+  - host: dashboard.k8s.traefik
+    http:
+      paths:
+      - path: /  
+        backend:
+          serviceName: kubernetes-dashboard
+          servicePort: 80
+  - host: ela.k8s.traefik
+    http:
+      paths:
+      - path: /  
+        backend:
+          serviceName: elasticsearch-logging
+          servicePort: 9200
+
+$ kubectl create -f dashboard-ela-k8s-traefik.yaml
+ingress "dashboard-ela-k8s-traefik" created
+
+$ kubectl get ingress --all-namespaces
+NAMESPACE     NAME                        HOSTS                                   ADDRESS   PORTS     AGE
+kube-system   dashboard-ela-k8s-traefik   dashboard.k8s.traefik,ela.k8s.traefik             80        25s
+kube-system   traefik-web-ui              traefik-ui.k8s                                    80        31m
+```  
+
+10、通过域名下不同的路径转发到不同的服务上去的 Ingress 配置  
 ```
 $ vim my-k8s-traefik.yaml
 

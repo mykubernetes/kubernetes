@@ -136,7 +136,7 @@ spec:
   - host: myapp.node01.com
     http:
       paths:
-      - path:
+      - path: /                             #子路径，可继续填写
         backend:
           serviceName: myapp
           servicePort: 80

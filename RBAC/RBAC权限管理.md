@@ -2,9 +2,38 @@ RBAC权限管理
 ==========
 一、Pod权限  
 ----------
-1、创建一个admin账号  
-``` kubectl create serviceaccount admin ```  
-
+1、创建一个pod账号和角色  
+```
+apiVersion: v1
+kind: ServiceAccount                        #定义一个pod的账号
+metadata:
+  name: admin
+  namespace: default
+---
+kind: Role                                  #定义一个角色
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: default
+  name: pods-reader
+rules:                                      #定义这个角色的规则
+- apiGroups: [""]                           # "" 表示核心组
+  resources: ["pods", "pods/log"]           #规则应用的目标资源名列表
+  verbs: ["get", "list", "watch"]           #操作列表，get、list、create、update、patch、watch、proxy、redirect、delete和deletecollection
+---
+kind: RoleBinding                           #将pod的账号绑定到角色上
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: resource-reader
+  namespace: default
+subjects:                                   #pod账号绑定
+- kind: User                                #资源类型
+  name: admin                               #serviceaccount名
+  apiGroup: rbac.authorization.k8s.io
+roleRef:                                    #角色绑定
+  kind: Role                                #资源类型
+  name: pods-reader                         #role名
+  apiGroup: rbac.authorization.k8s.io
+```  
 2、创建一个pod使用admin账号  
 ```
 # cat serviceaccount.yaml
@@ -22,7 +51,7 @@ spec:
     ports:
     - name: http
       containerPort: 80
-  serviceAccountName: admin
+  serviceAccountName: admin                 #serviceAccount名
 ```  
 
 二、用户权限  

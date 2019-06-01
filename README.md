@@ -7,6 +7,8 @@ pod生命周期
 pod创建过程  
 ![image](https://github.com/mykubernetes/linux-install/blob/master/image/pod.png)  
 
+pod终止过程  
+![image](https://github.com/mykubernetes/linux-install/blob/master/image/pod_kill.png)  
 yaml格式的pod定义文件完整内容：  
 ---
 ```

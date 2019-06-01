@@ -1,6 +1,12 @@
 官网https://kubernetes.io/zh/docs/concepts/  
 实用中文文档http://docs.kubernetes.org.cn/  
 
+pod生命周期
+https://github.com/mykubernetes/linux-install/blob/master/image/pod_lifecycle.png  
+
+pod创建过程
+https://github.com/mykubernetes/linux-install/blob/master/image/pod.png  
+
 yaml格式的pod定义文件完整内容：  
 ---
 ```

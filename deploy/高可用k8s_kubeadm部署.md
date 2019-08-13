@@ -87,7 +87,7 @@ devtmpfs         63G     0   63G   0% /dev
 /dev/sda5      1015G  8.8G 1006G   1% /tol
 /dev/sda1       197M  161M   37M  82% /boot
 # 2.设置docker启动参数
-# - 设置docker数据目录：选择比较大的分区（我这里是根目录就不需要配置了，默认为/var/lib/docker）
+# - 设置docker数据目录：选择比较大的分区（默认为/var/lib/docker）
 # - 设置cgroup driver（默认是cgroupfs，主要目的是与kubelet配置统一，这里也可以不设置后面在kubelet中指定cgroupfs）
 $ cat <<EOF > /etc/docker/daemon.json
 {

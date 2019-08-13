@@ -91,8 +91,8 @@ devtmpfs         63G     0   63G   0% /dev
 # - 设置cgroup driver（默认是cgroupfs，主要目的是与kubelet配置统一，这里也可以不设置后面在kubelet中指定cgroupfs）
 $ cat <<EOF > /etc/docker/daemon.json
 {
-    "graph": "/docker/data/path",
-    "exec-opts": ["native.cgroupdriver=systemd"]
+    "graph": "/docker/data/path",                  #配置修改docker数据目录
+    "exec-opts": ["native.cgroupdriver=systemd"]   #配置cgroup
 }
 EOF
 # 启动docker服务

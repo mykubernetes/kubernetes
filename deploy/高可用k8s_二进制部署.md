@@ -357,6 +357,16 @@ $ journalctl -f -u keepalived
 
 # 访问测试
 $ curl --insecure https://<master-vip>:6443/
+{
+  "kind": "Status",
+  "apiVersion": "v1",
+  "metadata": {
+    
+  },
+  "status": "Failure",
+  "message": "Unauthorized",
+  "reason": "Unauthorized",
+  "code": 401
 ```
 
 ## 5. 部署kubectl（任意节点）

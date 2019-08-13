@@ -195,7 +195,7 @@ $ yum install -y keepalived
 ```
 #### 1.2 创建keepalived配置文件
 ```bash
-# 创建目录(在git仓库内的target目录)
+# 创建目录
 $ ssh <user>@<master-ip> "mkdir -p /etc/keepalived"
 $ ssh <user>@<backup-ip> "mkdir -p /etc/keepalived"
 

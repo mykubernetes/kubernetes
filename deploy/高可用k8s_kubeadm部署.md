@@ -17,10 +17,14 @@
 # 查看主机名
 $ hostname
 # 修改主机名
-$ hostnamectl set-hostname <your_hostname>
+$ hostnamectl set-hostname node01
 # 配置host，使所有节点之间可以通过hostname互相访问
 $ vi /etc/hosts
-# <node-ip> <node-hostname>
+192.168.101.69 node01
+192.168.101.70 node02
+192.168.101.71 node03
+192.168.101.72 node04
+192.168.101.73 node05
 ```
 #### 2.2 安装依赖包
 ```bash

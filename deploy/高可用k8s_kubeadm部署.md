@@ -17,14 +17,10 @@
 # 查看主机名
 $ hostname
 # 修改主机名
-$ hostnamectl set-hostname node01
+$ hostnamectl set-hostname <your_hostname>
 # 配置host，使所有节点之间可以通过hostname互相访问
 $ vi /etc/hosts
-192.168.101.69 node01
-192.168.101.70 node02
-192.168.101.71 node03
-192.168.101.72 node04
-192.168.101.73 node05
+<node-ip> <node-hostname>
 ```
 #### 2.2 安装依赖包
 ```bash
@@ -199,15 +195,15 @@ $ yum install -y keepalived
 ```
 #### 1.2 创建keepalived配置文件
 ```bash
-# 创建目录
+# 创建目录(在git仓库内的target目录)
 $ ssh <user>@<master-ip> "mkdir -p /etc/keepalived"
 $ ssh <user>@<backup-ip> "mkdir -p /etc/keepalived"
 
-# 分发配置文件
+# 分发配置文件(在git仓库内的target目录)
 $ scp target/configs/keepalived-master.conf <user>@<master-ip>:/etc/keepalived/keepalived.conf
 $ scp target/configs/keepalived-backup.conf <user>@<backup-ip>:/etc/keepalived/keepalived.conf
 
-# 分发监测脚本
+# 分发监测脚本(在git仓库内的target目录)
 $ scp target/scripts/check-apiserver.sh <user>@<master-ip>:/etc/keepalived/
 $ scp target/scripts/check-apiserver.sh <user>@<backup-ip>:/etc/keepalived/
 ```

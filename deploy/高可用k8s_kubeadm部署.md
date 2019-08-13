@@ -184,7 +184,21 @@ $ find target/ -type f
 > 2. global-config.properties文件填写错误，需要重新生成  
 > 再执行一次./init.sh即可，不需要手动删除target
 
+#### 5.4 配置好免密登录
+为了方便文件的copy我们选择一个中转节点，配置好跟其他所有节点的免密登录
+```bash
+# 看看是否已经存在rsa公钥
+$ cat ~/.ssh/id_rsa.pub
 
+# 如果不存在就创建一个新的
+$ ssh-keygen -t rsa
+
+# 把id_rsa.pub文件内容copy到其他机器的授权文件中
+$ cat ~/.ssh/id_rsa.pub
+
+# 在其他节点执行下面命令（包括worker节点）
+$ echo "<file_content>" >> ~/.ssh/authorized_keys
+```
 
 # 二. 搭建高可用集群
 ## 1. 部署keepalived - apiserver高可用（任选两个master节点）
@@ -225,7 +239,7 @@ $ ip a
 
 ## 2. 部署第一个主节点
 ```bash
-# 准备配置文件
+# 准备配置文件(在git仓库内的target目录)
 $ scp target/configs/kubeadm-config.yaml <user>@<node-ip>:~
 # ssh到第一个主节点，执行kubeadm初始化系统（注意保存最后打印的加入集群的命令）
 $ kubeadm init --config=kubeadm-config.yaml --experimental-upload-certs

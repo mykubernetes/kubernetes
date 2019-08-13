@@ -200,6 +200,28 @@ $ cat ~/.ssh/id_rsa.pub
 $ echo "<file_content>" >> ~/.ssh/authorized_keys
 ```
 
+#### 5.5 预先下载安装所需要的镜像
+```
+$ cat <<EOF > pull_k8s_images.sh
+images=(
+    kube-apiserver:v1.14.0
+    kube-controller-manager:v1.14.0
+    kube-scheduler:v1.14.0
+    kube-proxy:v1.14.0
+    pause:3.1
+    etcd:3.2.24
+    coredns:1.2.2
+)
+
+for imageName in ${images[@]} ; do
+    docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
+    docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName k8s.gcr.io/$imageName
+done
+EOF
+
+$ sh pull_k8s_images.sh
+```
+
 # 二. 搭建高可用集群
 ## 1. 部署keepalived - apiserver高可用（任选两个master节点）
 #### 1.1 安装keepalived

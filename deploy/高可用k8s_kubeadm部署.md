@@ -188,7 +188,7 @@ $ find target/ -type f
 > 2. global-config.properties文件填写错误，需要重新生成  
 > 再执行一次./init.sh即可，不需要手动删除target
 
-```
+
 
 # 二. 搭建高可用集群
 ## 1. 部署keepalived - apiserver高可用（任选两个master节点）

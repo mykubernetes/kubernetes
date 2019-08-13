@@ -220,7 +220,8 @@ $ wget https://pkg.cfssl.org/R1.2/cfssljson_linux-amd64 -O ~/bin/cfssljson
 $ chmod +x ~/bin/cfssl ~/bin/cfssljson
 
 # 设置PATH
-$ vi ~/.bash_profile
+$ vim ~/.bash_profile
+export PATH=$PATH:~/bin
 $ source ~/.bash_profile
 
 # 验证

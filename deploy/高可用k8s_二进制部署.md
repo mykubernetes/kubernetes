@@ -367,6 +367,7 @@ $ curl --insecure https://<master-vip>:6443/
   "message": "Unauthorized",
   "reason": "Unauthorized",
   "code": 401
+}
 ```
 
 ## 5. 部署kubectl（任意节点）

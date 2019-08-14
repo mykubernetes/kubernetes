@@ -8,9 +8,11 @@ tiller下载
 
 一、安装  
 1、下载  
+```
 https://github.com/helm/helm 各种版本  
 wget https://storage.googleapis.com/kubernetes-helm/helm-v2.9.1-linux-amd64.tar.gz  
 mv helm /usr/bin  
+```  
 
 2、配置权限  
 配置RBAC权限让helm 初始化首先联系apiserver  

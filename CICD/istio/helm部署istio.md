@@ -35,5 +35,8 @@ certmanager:
 
 应用配置文件
 # kubectl apply -f istio-init.yaml
+
+查看部署状态
+# kubectl get pod -n istio-system
 ```  
 

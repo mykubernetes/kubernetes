@@ -38,5 +38,8 @@ certmanager:
 
 查看部署状态
 # kubectl get pod -n istio-system
+
+查看部署后的crd
+kubectl get crds | grep istio
 ```  
 

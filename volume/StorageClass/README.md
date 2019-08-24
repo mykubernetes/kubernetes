@@ -1,0 +1,1 @@
+ceph和glusterfs自动申请pv

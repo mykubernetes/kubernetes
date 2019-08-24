@@ -90,3 +90,8 @@ helm下载目录
 
 官方介绍chart适用  
 https://helm.sh/docs/developing_charts/#charts  
+
+生成模板文件  
+```
+helm template . --name istio --name istio-system > istio.yaml
+```  

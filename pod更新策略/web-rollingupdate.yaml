@@ -1,0 +1,83 @@
+#deploy
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-rollingupdate
+  namespace: dev
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: web-rollingupdate
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: web-rollingupdate
+    spec:
+      containers:
+      - name: web-rollingupdate
+        image: hub.mooc.com/kubernetes/web:v1
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: 1024Mi
+            cpu: 500m
+          limits:
+            memory: 2048Mi
+            cpu: 2000m
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /hello?name=test
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 1
+          successThreshold: 1
+          timeoutSeconds: 5
+---
+#service
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-rollingupdate
+  namespace: dev
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: web-rollingupdate
+  type: ClusterIP
+
+---
+#ingress
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web-rollingupdate
+  namespace: dev
+spec:
+  rules:
+  - host: web-rollingupdate.mooc.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: web-rollingupdate
+          servicePort: 80

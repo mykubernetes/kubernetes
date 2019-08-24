@@ -1,0 +1,73 @@
+#deploy
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-recreate
+  namespace: dev
+spec:
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: web-recreate
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: web-recreate
+    spec:
+      containers:
+      - name: web-recreate
+        image: hub.mooc.com/kubernetes/web:v1
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 2
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /examples/index.html
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 10
+          periodSeconds: 5
+          failureThreshold: 1
+          successThreshold: 1
+          timeoutSeconds: 5
+---
+#service
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-recreate
+  namespace: dev
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: web-recreate
+  type: ClusterIP
+
+---
+#ingress
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web-recreate
+  namespace: dev
+spec:
+  rules:
+  - host: web-recreate.mooc.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: web-recreate
+          servicePort: 80

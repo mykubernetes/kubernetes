@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-demo-node
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: web-demo-node
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: web-demo-node
+    spec:
+      containers:
+      - name: web-demo-node
+        image: hub.mooc.com/kubernetes/web:v1
+        ports:
+        - containerPort: 8080
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 1
+            preference:
+              matchExpressions:
+              - key: disktype
+                operator: NotIn
+                values:
+                - ssd

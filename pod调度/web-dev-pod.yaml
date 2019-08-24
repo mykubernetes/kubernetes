@@ -1,0 +1,40 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-demo-pod
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: web-demo-pod
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: web-demo-pod
+    spec:
+      containers:
+      - name: web-demo-pod
+        image: hub.mooc.com/kubernetes/web:v1
+        ports:
+        - containerPort: 8080
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - web-demo
+            topologyKey: kubernetes.io/hostname
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - web-demo-node
+              topologyKey: kubernetes.io/hostname

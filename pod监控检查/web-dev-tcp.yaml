@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-demo
+  namespace: dev
+spec:
+  selector:
+    matchLabels:
+      app: web-demo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: web-demo
+    spec:
+      containers:
+      - name: web-demo
+        image: hub.mooc.com/kubernetes/web:v1
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 2
+          successThreshold: 1
+          timeoutSeconds: 5

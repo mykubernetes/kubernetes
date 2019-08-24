@@ -11,7 +11,8 @@ spec:
     protocol: TCP
     targetPort: 8080
   selector:
-    app: web-blue
+    app: web-bluegreen
+    version: v1.0
   type: ClusterIP
 
 ---

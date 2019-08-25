@@ -5,7 +5,7 @@ metadata:
 spec:
   hostAliases:
   - ip: "10.155.20.120"
-    hostname:
+    hostnames:
     - "web.tomcat.com"
   containers:
   - name: web

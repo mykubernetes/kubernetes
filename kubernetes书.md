@@ -41,3 +41,7 @@ https://github.com/open-falcon/book
 Ceph实践  
 https://github.com/mykubernetes/gitbook-ceph
 ---
+
+千峰教育培训文档  
+https://www.funtl.com/zh/service-mesh-kubernetes/#%E4%BB%8E%E4%BC%A0%E7%BB%9F%E5%88%B0%E5%AE%B9%E5%99%A8%E5%8C%96%E9%83%A8%E7%BD%B2
+---

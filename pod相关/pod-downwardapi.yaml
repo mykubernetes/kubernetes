@@ -29,7 +29,7 @@ spec:
               - path: "namespace"
                 fieldRef:
                   fieldPath: metadata.namespace 
-              - path: "cpu-request"
+              - path: "mem-request"
                 resourceFieldRef:
                   containerName: web
                   resource: limits.memory

@@ -57,7 +57,7 @@ https://helm.sh
 官方仓库  
 https://hub.kubeapps.com/  
 https://hub.helm.sh/  
-https://developer.aliyun.com/hub#/?_k=6zd4g9&tdsourcetag=s_pctim_aiomsg 
+https://developer.aliyun.com/hub#/?_k=6zd4g9&tdsourcetag=s_pctim_aiomsg  
 
 6、使用  
 搜索  
@@ -88,6 +88,9 @@ helm下载目录
 
 如果修改values.yaml需要指定新的文件并应用  
 ``` helm install --name redis1 -f values.yaml stable/redis ```  
+
+阿里github_chart仓库  
+https://github.com/cloudnativeapp/charts  
 
 官方介绍chart适用  
 https://helm.sh/docs/developing_charts/#charts  

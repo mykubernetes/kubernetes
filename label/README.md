@@ -28,3 +28,8 @@
 修改pod标签  
 ``` # kubectl label pods pod-demon release=stable --overwrite ```  
 
+给节点打标签  
+``` # kubectl label node node01 disktype=ssd ```  
+
+查看节点标签  
+``` # kubectl get nodes --show-labels ```  

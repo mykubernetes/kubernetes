@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-game
+spec:
+  containers:
+  - name: web
+    image: hub.mooc.com/kubernetes/springboot-web:v1
+    ports:
+    - containerPort: 8080
+    volumeMounts:
+    - name: game
+      mountPath: /etc/config/game
+      readOnly: true
+  volumes:
+  - name: game
+    configMap:
+      name: web-game

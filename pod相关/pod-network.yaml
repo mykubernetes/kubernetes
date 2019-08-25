@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-network
+spec:
+  containers:
+  - name: web
+    image: hub.mooc.com/kubernetes/web:v1
+    ports:
+    - containerPort: 8080
+  - name: dubbo
+    env:
+    - name: DUBBO_PORT
+      value: "20881"
+    image: hub.mooc.com/kubernetes/dubbo:v1
+    ports:
+    - containerPort: 20881
+      hostPort: 20881
+      protocol: TCP

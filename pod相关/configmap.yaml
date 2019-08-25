@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: configs
+data:
+  JAVA_OPTS: -Xms1024m
+  LOG_LEVEL: DEBUG

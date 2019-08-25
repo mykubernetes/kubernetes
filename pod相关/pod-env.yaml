@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-env
+spec:
+  containers:
+  - name: web
+    image: hub.mooc.com/kubernetes/springboot-web:v1
+    ports:
+    - containerPort: 8080
+    env:
+      - name: LOG_LEVEL_CONFIG
+        valueFrom:
+          configMapKeyRef:
+            name: configs
+            key: LOG_LEVEL

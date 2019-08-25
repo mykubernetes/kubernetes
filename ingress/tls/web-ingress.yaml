@@ -1,0 +1,18 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: web-demo
+  namespace: dev
+spec:
+  rules:
+  - host: web-dev.mooc.com
+    http:
+      paths:
+      - backend:
+          serviceName: web-demo
+          servicePort: 80
+        path: /
+  tls:
+    - hosts:
+      - web-dev.mooc.com
+      secretName: mooc-tls

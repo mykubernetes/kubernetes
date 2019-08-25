@@ -1,0 +1,11 @@
+kind: ConfigMap
+apiVersion: v1
+metadata:
+  name: nginx-configuration
+  namespace: ingress-nginx
+  labels:
+    app: ingress-nginx
+data:
+  proxy-body-size: "64m"
+  proxy-read-timeout: "180"
+  proxy-send-timeout: "180"

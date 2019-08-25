@@ -1,0 +1,60 @@
+#deploy
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: web-canary-a
+  namespace: canary
+spec:
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app: web-canary-a
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: web-canary-a
+    spec:
+      containers:
+      - name: web-canary-a
+        image: hub.mooc.com/kubernetes/web:v1
+        ports:
+        - containerPort: 8080
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 3
+          successThreshold: 1
+          timeoutSeconds: 5
+        readinessProbe:
+          httpGet:
+            path: /hello?name=test
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 20
+          periodSeconds: 10
+          failureThreshold: 1
+          successThreshold: 1
+          timeoutSeconds: 5
+---
+#service
+apiVersion: v1
+kind: Service
+metadata:
+  name: web-canary-a
+  namespace: canary
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: web-canary-a
+  type: ClusterIP
+

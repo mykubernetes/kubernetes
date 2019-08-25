@@ -1,0 +1,17 @@
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    nginx.ingress.kubernetes.io/configuration-snippet: |
+      more_set_headers "Request-Id: $req_id";
+  name: web-demo
+  namespace: dev
+spec:
+  rules:
+  - host: web-dev.mooc.com
+    http:
+      paths:
+      - backend:
+          serviceName: web-demo
+          servicePort: 80
+        path: /

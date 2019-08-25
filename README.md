@@ -190,6 +190,10 @@ spec:
   selector:
     matchLabels:
       app: filebeat
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 1
+    type: RollingUpdate
   template:
     metadata:
       labels:

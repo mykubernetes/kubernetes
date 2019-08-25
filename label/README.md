@@ -1,1 +1,30 @@
+获取所有标签  
+``` # kubectl get pods --show-labels ```  
+
+获取标签为app和run的值  
+``` # kubectl get pods -L app,run ```  
+
+获取带app标签的pod  
+``` # kubectl get pods -l app ```  
+
+获取带app标签的pod并显示此pod的所有标签  
+``` # kubectl get pods -l app --show-lables ```  
+
+获取标签为release=canary的  
+``` # kubectl get pods -l release=canary ```  
+
+获取标签为release!=canary的  
+``` # kubectl get pods -l release!=canary ```  
+
+获取集合  
+```                      key              value
+# kubectl get pods -l "release in (canary,beta,alpha)"
+# kubectl get pods -l "release notin (canary,beta,alpha)"
+```  
+
+给pod打标签  
+``` # kubectl label pods pod-demon release=canary ```  
+
+修改pod标签  
+``` # kubectl label pods pod-demon release=stable --overwrite ```  
 

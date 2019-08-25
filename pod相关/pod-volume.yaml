@@ -3,6 +3,10 @@ kind: Pod
 metadata:
   name: pod-volume
 spec:
+  hostAliases:
+  - ip: "10.155.20.120"
+    hostname:
+    - "web.tomcat.com"
   containers:
   - name: web
     image: hub.mooc.com/kubernetes/web:v1

@@ -1,5 +1,7 @@
 官网  
 https://istio.io/zh/  
+官方helm安装文档  
+https://istio.io/zh/docs/setup/kubernetes/install/helm/  
 
 1、下载istio  
 https://github.com/istio/istio/releases  

@@ -247,6 +247,9 @@ metadata:
     app: mycronjob
 spec:
   schedule: "*/2 * * * *"         #Cron格式的作业调度运行时间点；必选字段
+  successfulJobsHistoryLimit: 3   #为成功的任务执行保留历史记录数，默认为3
+  failedJobHistoryLimit: 1        #为失败的任务执行保留的历史记录数，默认为1
+  startingDeadlineSeconds： 3     #因各种原因缺乏执行作业的时间点所导致的启动作业错误的超时时长，会被记入错误历史记录
   concurrencyPolicy: Allow        #并发执行策略，Allow(允许)、Forbid（禁止）、Replace（替换）定义前一次作业尚未完成时是否运行后一次的作业
   suspend：false                  #如果设置为true，后续所有执行都会被挂起。它对已经开始执行的Job不起作用
   jobTemplate:                    #Job控制器模板,用于为CronJob控制器生成Job对象；必选字段

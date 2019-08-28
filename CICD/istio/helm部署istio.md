@@ -15,7 +15,7 @@ https://github.com/istio/istio/releases
 # cd istio-1.2.4/install/kubernetes/helm/istio-init
 
 生成yaml配置文件
-# helm template . --name imooc-istio-init --namespace istio-system > istio-init.yaml
+# helm template . --name istio-init --namespace istio-system > istio-init.yaml
 
 应用配置文件
 # kubectl apply -f istio-init.yaml

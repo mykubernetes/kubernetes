@@ -27,6 +27,7 @@ istio-init-crd-10-ljgsq   0/1     ContainerCreating   0          2s
 istio-init-crd-11-plqtm   0/1     ContainerCreating   0          2s
 istio-init-crd-12-ktn5s   0/1     ContainerCreating   0          2s
 
+创建完成
 # kubectl get pod -n istio-system -w
 NAME                      READY   STATUS      RESTARTS   AGE
 istio-init-crd-10-ljgsq   0/1     Completed   0          8m35s

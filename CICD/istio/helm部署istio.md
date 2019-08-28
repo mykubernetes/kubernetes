@@ -88,4 +88,7 @@ istio-policy-8596cc6554-8tdcr             2/2     Running                4      
 istio-sidecar-injector-76f487845d-rrtnf   1/1     Running                1          29m
 istio-telemetry-5c6b6d59f6-nljxl          2/2     Running                8          29m
 prometheus-5679cb4dcd-28s46               1/1     Running                2          29m
+
+查看系统日志是否有报错
+# journalctl -f 
 ```  

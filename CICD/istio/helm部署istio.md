@@ -74,5 +74,18 @@ virtualservices.networking.istio.io     2019-08-28T09:14:50Z
 或者安装官方文档直接部署
 # helm install . --name istio --namespace istio-system
 
-
+查看部署的容器
+# kubectl get pod -n istio-system
+NAME                                      READY   STATUS                 RESTARTS   AGE
+istio-citadel-76f9586b8b-mrrzv            1/1     Running                1          29m
+istio-galley-78f65c8469-jg89t             1/1     Running                1          29m
+istio-ingressgateway-677756fc66-fcplj     1/1     Running                1          29m
+istio-init-crd-10-ljgsq                   0/1     Completed              0          59m
+istio-init-crd-11-plqtm                   0/1     Completed              0          59m
+istio-init-crd-12-ktn5s                   0/1     Completed              0          59m
+istio-pilot-65cb5648bf-ntrpf              2/2     Running                0          29m
+istio-policy-8596cc6554-8tdcr             2/2     Running                4          29m
+istio-sidecar-injector-76f487845d-rrtnf   1/1     Running                1          29m
+istio-telemetry-5c6b6d59f6-nljxl          2/2     Running                8          29m
+prometheus-5679cb4dcd-28s46               1/1     Running                2          29m
 ```  

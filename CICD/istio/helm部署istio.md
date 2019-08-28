@@ -68,7 +68,11 @@ virtualservices.networking.istio.io     2019-08-28T09:14:50Z
 # cd istio-1.2.4/install/kubernetes/helm/istio
 生成模板文件
 # helm template . --name imooc-istio --name istio-system > istio.yaml
-
 #应用配置文件
 # kubectl apply -f istio.yaml
+
+或者安装官方文档直接部署
+# helm install . --name istio --namespace istio-system
+
+
 ```  

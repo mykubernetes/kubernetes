@@ -107,3 +107,16 @@ node-exporter-x8lv4                     1/1     Running            0          25
 # curl 127.0.0.1:9100/metrics
 ```  
 
+
+
+prometheus的服务发现  
+```
+    - job_name: 'kubernetes-node'
+      kubernetes_sd_configs:
+      - role: node
+
+添加服务器发现配置
+kubectl apply -f prometheus.configmap.yaml
+热更新刷新配置
+curl -X POST http://10.101.143.162:9090/-/reload
+```  

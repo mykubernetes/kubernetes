@@ -199,7 +199,55 @@ Service 监控
       - source_labels: [__meta_kubernetes_service_name]
         action: replace
         target_label: kubernetes_name
-        
+
+只有如下配置的才会被发现
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: redis
+  namespace: abcdocker
+  annotations:
+    prometheus.io/scrape: "true"      #添加标签
+    prometheus.io/port: "9121"        #添加标签端口
+spec:
+  template:
+    metadata:
+      labels:
+        app: redis
+    spec:
+      containers:
+      - name: redis
+        image: redis:4
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 6379
+      - name: redis-exporter
+        image: oliver006/redis_exporter:latest
+        resources:
+          requests:
+            cpu: 100m
+            memory: 100Mi
+        ports:
+        - containerPort: 9121
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: redis
+  namespace: abcdocker
+spec:
+  selector:
+    app: redis
+  ports:
+  - name: redis
+    port: 6379
+    targetPort: 6379
+  - name: prom
+    port: 9121
+    targetPort: 9121
 
 添加服务器发现配置
 kubectl apply -f prometheus.configmap.yaml

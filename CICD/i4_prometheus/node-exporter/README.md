@@ -109,7 +109,7 @@ node-exporter-x8lv4                     1/1     Running            0          25
 
 
 
-prometheus的配置
+prometheus的服务发现配置
 ```
 关于服务发现
     - job_name: 'kubernetes-node'

@@ -109,11 +109,97 @@ node-exporter-x8lv4                     1/1     Running            0          25
 
 
 
-prometheus的服务发现  
+prometheus的配置
 ```
+关于服务发现
     - job_name: 'kubernetes-node'
       kubernetes_sd_configs:
       - role: node
+
+metrics监听的端口是10250而并不是我们设置的9100，这里使用__address__标签替换10250端口为9100
+    - job_name: 'kubernetes-node'
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - source_labels: [__address__]
+        regex: '(.*):10250'
+        replacement: '${1}:9100'
+        target_label: __address__
+        action: replace
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+
+cAdvisor是一个容器资源监控工具，包括容器的内存，CPU，网络IO，资源IO等资源，同时提供了一个Web页面用于查看容器的实时运行状态。 
+cAvisor已经内置在了kubelet组件之中，所以我们不需要单独去安装，cAdvisor的数据路径为/api/v1/nodes//proxy/metrics
+
+    - job_name: 'kubernetes-cadvisor'
+      kubernetes_sd_configs:
+      - role: node
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - action: labelmap
+        regex: __meta_kubernetes_node_label_(.+)
+      - target_label: __address__
+        replacement: kubernetes.default.svc:443
+      - source_labels: [__meta_kubernetes_node_name]
+        regex: (.+)
+        target_label: __metrics_path__
+        replacement: /api/v1/nodes/${1}/proxy/metrics/cadvisor
+
+Api-Service 监控
+apiserver作为Kubernetes最核心的组件，它的监控也是非常有必要的，对于apiserver的监控，我们可以直接通过kubernetes的service来获取
+
+   - job_name: 'kubernetes-apiserver'
+     kubernetes_sd_configs:
+     - role: endpoints
+
+这里我们使用keep动作，将符合配置的保留下来，例如我们过滤default命名空间下服务名称为kubernetes的元数据，这里可以根据__meta_kubernetes_namespace和__mate_kubertnetes_service_name2个元数据进行relabel
+    - job_name: 'kubernetes-apiservers'
+      kubernetes_sd_configs:
+      - role: endpoints
+      scheme: https
+      tls_config:
+        ca_file: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
+      bearer_token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_namespace, __meta_kubernetes_service_name, __meta_kubernetes_endpoint_port_name]
+        action: keep
+        regex: default;kubernetes;https
+ 
+Service 监控
+这里我们对service进行过滤，只有在service配置了prometheus.io/scrape: "true"过滤出来
+    - job_name: 'kubernetes-service-endpoints'
+      kubernetes_sd_configs:
+      - role: endpoints
+      relabel_configs:
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scrape]
+        action: keep
+        regex: true
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_scheme]
+        action: replace
+        target_label: __scheme__
+        regex: (https?)
+      - source_labels: [__meta_kubernetes_service_annotation_prometheus_io_path]
+        action: replace
+        target_label: __metrics_path__
+        regex: (.+)
+      - source_labels: [__address__, __meta_kubernetes_service_annotation_prometheus_io_port]
+        action: replace
+        target_label: __address__
+        regex: ([^:]+)(?::\d+)?;(\d+)
+        replacement: $1:$2
+      - action: labelmap
+        regex: __meta_kubernetes_service_label_(.+)
+      - source_labels: [__meta_kubernetes_namespace]
+        action: replace
+        target_label: kubernetes_namespace
+      - source_labels: [__meta_kubernetes_service_name]
+        action: replace
+        target_label: kubernetes_name
+        
 
 添加服务器发现配置
 kubectl apply -f prometheus.configmap.yaml

@@ -15,3 +15,12 @@ data:
     - job_name: 'kubernetes-node'
       kubernetes_sd_configs:
       - role: node
+    - job_name: 'kubernetes-node'
+      kubernetes_sd_configs:
+      - role: node
+      relabel_configs:
+      - source_labels: [__address__]
+        regex: '(.*):10250'
+        replacement: '${1}:9100'
+        target_label: __address__
+        action: replace

@@ -20,3 +20,9 @@ https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
 
 ④ storageClassName 指定 PV 的 class 为 nfs。相当于为 PV 设置了一个分类，PVC 可以指定 class 申请相应 class 的 PV。
 ⑤ 指定 PV 在 NFS 服务器上对应的目录。
+
+
+Available：空闲状态。
+Bound：已经绑定到某个PVC上。
+Released：对应的PVC已经被删除，但资源还没有被集群收回。
+Failed：PV自动回收失败。

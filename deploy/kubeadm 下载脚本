@@ -11,6 +11,7 @@ images=(
 for imageName in ${images[@]} ; do
     docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
     docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName k8s.gcr.io/$imageName
+    docker rmi registry.cn-hangzhou.aliyuncs.com/google_containers/$imageName
 done
 
 
@@ -19,5 +20,7 @@ done
 docker pull keveon/kube-apiserver:v1.12.1
 docker pull mirrorgooglecontainers/kube-apiserver-amd64:v1.13.2
 
+此仓库定期克隆google镜像并重命名anjia0532/google-containers.
+docker pull anjia0532/google-containers.kube-apiserver-amd64:${K8S_VERSION}
 
 http://mirror.azure.cn/help/gcr-proxy-cache.html

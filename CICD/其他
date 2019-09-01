@@ -4,5 +4,8 @@ https://github.com/mykubernetes/rook/tree/master/cluster/examples/kubernetes/cep
 prometheus
 https://github.com/mykubernetes/prometheus-operator/tree/master/contrib/kube-prometheus/manifests
 
+prometheus
+https://github.com/mykubernetes/prometheus/blob/master/manifests-all.yaml
+
 k8s插件
 https://github.com/kubernetes-incubator

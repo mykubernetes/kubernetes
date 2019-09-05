@@ -143,6 +143,7 @@ spec:
 # docker cp 34dc:/etc/nginx/template/nginx.tmpl .
 拷贝到master主机上
 将配置文件创建成configmap资源
-# kubectl create cm nginx-template --from-file nginx.tmpl
- 
+# kubectl create cm nginx-template --from-file nginx.tmpl -n ingress-nginx
+
+# kubect get cm -n ingress-nginx nginx-template -o yaml
 ```  

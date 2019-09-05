@@ -255,3 +255,26 @@ spec:
               path: nginx.tmpl
 
 ```  
+
+
+自定义日志格式  
+官方文档
+https://kubernetes.github.io/ingress-nginx/user-guide/nginx-configuration/configmap/#log-format-upstream  
+```
+kubectl apply -f - <<EOF
+apiVersion: v1
+data:
+  log-format-upstream: '{"time": "$time_iso8601","remote_addr": "$remote_addr","x-forward-for":
+    "$proxy_add_x_forwarded_for","request_id": "$req_id","remote_user": "$remote_user","bytes_sent":
+    "$bytes_sent","request_time": "$request_time","status": "$status","vhost": "$host","request_proto":
+    "$server_protocol","path": "$uri","request_query": "$args","request_length": "$request_length","duration":
+    "$request_time","method": "$request_method","http_referrer": "$http_referer","http_user_agent":
+    "$http_user_agent"}'
+kind: ConfigMap
+metadata:
+  labels:
+    app: ingress-nginx
+  name: nginx-configuration
+  namespace: ingress-nginx
+EOF
+```  

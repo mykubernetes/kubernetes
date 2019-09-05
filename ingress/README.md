@@ -137,4 +137,12 @@ spec:
             items:
             - key: nginx.tmpl
               path: nginx.tmpl
+              
+创建对应的configmap
+在运行的ingress-nginx主机上将配置导出
+# docker cp 34dc:/etc/nginx/template/nginx.tmpl .
+拷贝到master主机上
+将配置文件创建成configmap资源
+# kubectl create cm nginx-template --from-file nginx.tmpl
+ 
 ```  

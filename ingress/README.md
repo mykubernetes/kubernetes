@@ -278,3 +278,20 @@ metadata:
   namespace: ingress-nginx
 EOF
 ```  
+
+ingress-nginx后端pod容器获取客服端真实ip
+```
+kubectl apply -f - <<EOF
+apiVersion: v1
+data:
+  compute-full-forwarded-for: "true"
+  forwarded-for-header: X-Forwarded-For
+  use-forwarded-headers: "true"
+kind: ConfigMap
+metadata:
+  labels:
+    app: ingress-nginx
+  name: nginx-configuration
+  namespace: ingress-nginx
+EOF
+```  

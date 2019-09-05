@@ -62,7 +62,7 @@ service/ingress-nginx created
 编辑配置文件添加标签选择
 # vim mandatory.yaml
 apiVersion: extensions/v1beta1
-kind: Deployment
+kind: aemonSet               #修改控制器
 metadata:
   name: nginx-ingress-controller
   namespace: ingress-nginx
@@ -70,7 +70,7 @@ metadata:
     app.kubernetes.io/name: ingress-nginx
     app.kubernetes.io/part-of: ingress-nginx
 spec:
-  replicas: 1
+  replicas: 4                #修改副本数
   selector:
     matchLabels:
       app.kubernetes.io/name: ingress-nginx

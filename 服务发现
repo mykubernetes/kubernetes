@@ -18,3 +18,6 @@ podA通过HeadlessService（无头服务）资源，通过coreDNS解析直接匹
 通过hostPort,服务跑着某台主机上，然后在该主机开启一个端口，进行监听
 
 通过ingress方式
+
+
+https://www.cnblogs.com/baishuchao/p/9429757.html

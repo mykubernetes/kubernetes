@@ -200,7 +200,7 @@ spec:
             - --udp-services-configmap=$(POD_NAMESPACE)/udp-services
             - --publish-service=$(POD_NAMESPACE)/ingress-nginx
             - --annotations-prefix=nginx.ingress.kubernetes.io
-            - --default-ssl-certificate=default/mooc-tls
+            - --default-ssl-certificate=default/mooc-tls               #配置证书文件
         volumeMounts:                                                  #自定义挂载
           - mountPath: /etc/nginx/template
             name: nginx-template-volume

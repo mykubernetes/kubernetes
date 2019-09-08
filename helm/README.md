@@ -105,28 +105,50 @@ helm常用命令
 		verify        #校验
 		
 搜索  
-helm search mysql
+# helm search mysql
 
 查看详细信息
-helm inspect stable/mysql
+# helm inspect stable/mysql
 
 查看mysql的所有选项
-helm inspect values stable/mysql
+# helm inspect values stable/mysql
 
 安装  
-helm install --name mysql stable/mysql
+# helm install --name mysql stable/mysql
 
 修改配置安装
-helm install stable/mysql --set service.type=NodePort
+# helm install stable/mysql --set service.type=NodePort
 
 指定values.yaml文件安装  
-helm install --name redis1 -f values.yaml stable/redis
+# helm install --name redis1 -f values.yaml stable/redis
+
+查看运行的服务
+# helm list
 
 获取release状态
-helm status mysql
+# helm status mysql
+
+通过修改value.yaml文件进行更新
+# helm upgrade mysql -f value.yaml stable/mysql
+
+查看更新的历史版本,每次更新版版会+1，回滚也会+1
+# helm history mysql
+
+回滚到指定版本
+# helm rollback mysql 1
+
+删除,保留configmap方式
+# helm delete mysql
+
+保留configmap的方式是可以查看被删除的信息
+# helm ls --deleted
+# helm ls --all
+
+彻底删除服务
+helm delete mysql --purge
 
 生成模板文件
-helm template . --name istio --name istio-system > istio.yaml
+# helm template . --name istio --name istio-system > istio.yaml
 
 ```  
 

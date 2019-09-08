@@ -61,7 +61,7 @@ subjects:
 # helm repo add chart-aliyun https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
 
 官方incubator仓库
-#helm repo add incubator https://storage.googleapis.com/kubernetes-charts-incubator
+# helm repo add incubator https://storage.googleapis.com/kubernetes-charts-incubator
 
 每天自动向谷歌拉取最新的chart
 # helm repo add stable https://cnych.github.io/kube-charts-mirror/
@@ -75,7 +75,7 @@ subjects:
 # helm repo update
 
 列出所有仓库
-helm repo list
+# helm repo list
 NAME URL
 stable https://cnych.github.io/kube-charts-mirror/
 local http://127.0.0.1:8879/charts
@@ -110,12 +110,17 @@ helm search mysql
 查看详细信息
 helm inspect stable/mysql
 
+查看mysql的所有选项
+helm inspect values stable/mysql
+
 安装  
 helm install --name mysql stable/mysql
 
-
 指定values.yaml文件安装  
 helm install --name redis1 -f values.yaml stable/redis
+
+获取release状态
+helm status mysql
 
 生成模板文件
 helm template . --name istio --name istio-system > istio.yaml

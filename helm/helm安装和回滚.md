@@ -1,7 +1,63 @@
 helm 部署jenkins
 =============
 1、部署jenkins名称空间  
-``` kubectl apply -f jenkins-ns.yaml ```  
+```
+# cat jenkins-ns.yaml
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: jenkins
+
+---
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: build
+
+---
+
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins
+  namespace: jenkins
+
+---
+
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: jenkins
+  namespace: build
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/exec", "pods/log"]
+  verbs: ["*"]
+- apiGroups: [""]
+  resources: ["secrets"]
+  verbs: ["get"]
+
+---
+
+apiVersion: rbac.authorization.k8s.io/v1beta1
+kind: RoleBinding
+metadata:
+  name: jenkins
+  namespace: build
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: jenkins
+subjects:
+- kind: ServiceAccount
+  name: jenkins
+  namespace: jenkins
+
+
+
+# kubectl apply -f jenkins-ns.yaml
+```  
 
 2、搜索jenkins  
 ```

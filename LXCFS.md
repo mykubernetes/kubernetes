@@ -59,6 +59,7 @@ cd lxcfs-initializer
 
 2、其manifest文件如下  
 ```
+# cat lxcfs-daemonset.yaml
 apiVersion: apps/v1beta2
 kind: DaemonSet
 metadata:
@@ -101,7 +102,7 @@ kubectl create -f lxcfs-daemonset.yaml
 
 4、manifest 文件如下  
 ```
-# vim lxcfs-initializer.yaml
+# cat lxcfs-initializer.yaml
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:

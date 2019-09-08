@@ -1,44 +1,50 @@
----
 apiVersion: extensions/v1beta1
 kind: DaemonSet
 metadata:
   name: log-pilot
-  namespace: kube-system
   labels:
-    k8s-app: log-pilot
-    kubernetes.io/cluster-service: "true"
+    app: log-pilot
+  # 设置期望部署的namespace
+  namespace: kube-system
 spec:
+  updateStrategy:
+    type: RollingUpdate
   template:
     metadata:
       labels:
-        k8s-app: log-es
-        kubernetes.io/cluster-service: "true"
-        version: v1.22
+        app: log-pilot
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
+      # 是否允许部署到Master节点上
       tolerations:
       - key: node-role.kubernetes.io/master
         effect: NoSchedule
-      serviceAccountName: dashboard-admin
       containers:
       - name: log-pilot
-        image: registry.cn-hangzhou.aliyuncs.com/imooc/log-pilot:0.9-filebeat
+        # 版本请参考https://github.com/AliyunContainerService/log-pilot/releases
+        image: registry.cn-hangzhou.aliyuncs.com/acs/log-pilot:0.9.6-filebeat
         resources:
           limits:
-            memory: 200Mi
+            memory: 500Mi
           requests:
-            cpu: 100m
+            cpu: 200m
             memory: 200Mi
         env:
-          - name: "FILEBEAT_OUTPUT"
+          - name: "NODE_NAME"
+            valueFrom:
+              fieldRef:
+                fieldPath: spec.nodeName
+          - name: "LOGGING_OUTPUT"
             value: "elasticsearch"
-          - name: "ELASTICSEARCH_HOST"
-            value: "elasticsearch-api"
-          - name: "ELASTICSEARCH_PORT"
-            value: "9200"
-          - name: "ELASTICSEARCH_USER"
-            value: "elastic"
-          - name: "ELASTICSEARCH_PASSWORD"
-            value: "changeme"
+          # 请确保集群到ES网络可达
+          - name: "ELASTICSEARCH_HOSTS"
+            value: "elasticsearch-logging:9200"
+          # 配置ES访问权限
+          #- name: "ELASTICSEARCH_USER"
+          #  value: "{es_username}"
+          #- name: "ELASTICSEARCH_PASSWORD"
+          #  value: "{es_password}"
         volumeMounts:
         - name: sock
           mountPath: /var/run/docker.sock
@@ -49,6 +55,18 @@ spec:
           mountPath: /var/lib/filebeat
         - name: varlog
           mountPath: /var/log/filebeat
+        - name: localtime
+          mountPath: /etc/localtime
+          readOnly: true
+        livenessProbe:
+          failureThreshold: 3
+          exec:
+            command:
+            - /pilot/healthz
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 2
         securityContext:
           capabilities:
             add:
@@ -69,4 +87,6 @@ spec:
         hostPath:
           path: /var/log/filebeat
           type: DirectoryOrCreate
-
+      - name: localtime
+        hostPath:
+          path: /etc/localtime

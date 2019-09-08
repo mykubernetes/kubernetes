@@ -14,6 +14,7 @@ https://github.com/cloudnativeapp/charts
 
 官方介绍chart适用  
 https://helm.sh/docs/developing_charts/#charts  
+https://github.com/helm/helm/blob/master/docs/charts.md  
 
 一、安装  
 1、下载  

@@ -29,6 +29,35 @@ spec:
     port: 9300
     protocol: TCP
 ---
+# RBAC authn and authz
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: elasticsearch-logging
+  namespace: kube-system
+  labels:
+    k8s-app: elasticsearch-logging
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: elasticsearch-logging
+  labels:
+    k8s-app: elasticsearch-logging
+    kubernetes.io/cluster-service: "true"
+    addonmanager.kubernetes.io/mode: Reconcile
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - "services"
+  - "namespaces"
+  - "endpoints"
+  verbs:
+  - "get"
+---
 apiVersion: apps/v1beta1
 kind: StatefulSet
 metadata:
@@ -50,7 +79,7 @@ spec:
       tolerations:
       - effect: NoSchedule
         key: node-role.kubernetes.io/master
-      serviceAccountName: dashboard-admin
+      serviceAccountName: elasticsearch-logging
       initContainers:
       - name: init-sysctl
         image: busybox:1.27

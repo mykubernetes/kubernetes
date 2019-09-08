@@ -46,10 +46,33 @@ subjects:
 ``` helm init --service-account tiller ```  
 
 
-4、添加阿里云tiller仓库  
-``` helm repo add chart-aliyun https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts ```  
-官方incubator仓库  
-``` helm repo add incubator https://storage.googleapis.com/kubernetes-charts-incubator ```
+4、仓库管理  
+```
+添加阿里云仓库
+# helm repo add chart-aliyun https://kubernetes.oss-cn-hangzhou.aliyuncs.com/charts
+
+官方incubator仓库
+#helm repo add incubator https://storage.googleapis.com/kubernetes-charts-incubator
+
+每天自动向谷歌拉取最新的chart
+# helm repo add stable https://cnych.github.io/kube-charts-mirror/
+"stable" has been added to your repositories
+
+删除仓库
+# helm repo remove stable
+"stable" has been removed from your repositories
+
+更新仓库
+# helm repo update
+
+列出所有仓库
+helm repo list
+NAME URL
+stable https://cnych.github.io/kube-charts-mirror/
+local http://127.0.0.1:8879/charts
+```  
+
+
 
 5、helm官方网站  
 https://helm.sh  

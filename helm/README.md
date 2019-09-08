@@ -117,7 +117,7 @@ helm inspect values stable/mysql
 helm install --name mysql stable/mysql
 
 修改配置安装
-helm install stable/mysql --set image=mysql
+helm install stable/mysql --set service.type=NodePort
 
 指定values.yaml文件安装  
 helm install --name redis1 -f values.yaml stable/redis

@@ -244,3 +244,30 @@ clusterrolebinding.rbac.authorization.k8s.io/jenkins unchanged
 # kubectl apply -f jenkins_svc.yaml
 service/jenkins created
 ```  
+
+8、创建完毕后，我们进行检查  
+```
+#首先查看pvc状态
+kubectl get pv,pvc -n jenkins
+NAME                     CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS   CLAIM              STORAGECLASS   REASON   AGE
+persistentvolume/opspv   20Gi       RWX            Delete           Bound    abcdocker/opspvc                           65s
+
+NAME                           STATUS   VOLUME   CAPACITY   ACCESS MODES   STORAGECLASS   AGE
+persistentvolumeclaim/opspvc   Bound    opspv    20Gi       RWX                           65s
+
+
+#接下来查看rbac
+kubectl get serviceaccounts -n jenkins |grep jenkins
+jenkins   1         104s
+
+#最后检查pod和svc
+kubectl get pod,svc -n jenkins
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/jenkins-6b874b8d7-dhv57   1/1     Running   0          8m26s
+
+NAME              TYPE       CLUSTER-IP       EXTERNAL-IP   PORT(S)                          AGE
+service/jenkins   NodePort   10.254.154.161           8080:30002/TCP,50000:21866/TCP   62s
+
+#需要说明一下8080端口为我们jenkins访问端口
+#50000端口为jenkins save发现端口
+```  

@@ -1,3 +1,9 @@
+log-pilot官方介绍  
+github地址：https://github.com/AliyunContainerService/log-pilot  
+log-pilot官方介绍：https://yq.aliyun.com/articles/674327  
+log-pilot官方搭建：https://yq.aliyun.com/articles/674361?spm=a2c4e.11153940.0.0.21ae21c3mTKwWS  
+
+
 安装  
 ```
 kubectl apply -f .

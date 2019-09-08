@@ -116,6 +116,9 @@ helm inspect values stable/mysql
 安装  
 helm install --name mysql stable/mysql
 
+修改配置安装
+helm install stable/mysql --set image=mysql
+
 指定values.yaml文件安装  
 helm install --name redis1 -f values.yaml stable/redis
 

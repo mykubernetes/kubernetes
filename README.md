@@ -298,9 +298,9 @@ spec:
 获取service
 # kubectl get endpoints myapp-svc-nodeport
 ```  
-无头服务解析  
+服务解析  
 dig -t A myapp-svc.default.svc.cluster.local @10.96.0.10  
-svc_name.ns_name.svc.cluster.local
+svc_name.svc_ns_name.svc.cluster.local
 
 ExternalName资源类型  
 通过DNS引入集群外部资源

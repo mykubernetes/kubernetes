@@ -123,9 +123,3 @@ helm template . --name istio --name istio-system > istio.yaml
 ```  
 
 
-
-如果修改values.yaml需要指定新的文件并应用  
-helm install --name redis1 -f values.yaml stable/redis
-
-
-

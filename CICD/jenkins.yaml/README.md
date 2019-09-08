@@ -224,19 +224,23 @@ EOF
 7、直接使用kubectl apple -f .，我为了排查错误，进行一个顺序执行  
 ```
 #这里我先执行pv然后在执行rbac，依次deployment和svc
-[root@abcdocker-k8s01 jenkins]# kubectl apply -f jenkins_pv.yaml 
+# kubectl apply -f jenkins_pv.yaml
 persistentvolume/opspv created
 persistentvolumeclaim/opspvc created
-[root@abcdocker-k8s01 jenkins]# kubectl apply -f jenkins_rbac.yaml 
+
+# kubectl apply -f jenkins_rbac.yaml
 serviceaccount/jenkins created
 clusterrole.rbac.authorization.k8s.io/jenkins created
 clusterrolebinding.rbac.authorization.k8s.io/jenkins created
-[root@abcdocker-k8s01 jenkins]# kubectl apply -f jenkins_deployment.yaml 
+
+# kubectl apply -f jenkins_deployment.yaml
 deployment.extensions/jenkins created
-[root@abcdocker-k8s01 jenkins]# kubectl apply -f jenkins_rbac.yaml 
+
+# kubectl apply -f jenkins_rbac.yaml 
 serviceaccount/jenkins unchanged
 clusterrole.rbac.authorization.k8s.io/jenkins unchanged
 clusterrolebinding.rbac.authorization.k8s.io/jenkins unchanged
-[root@abcdocker-k8s01 jenkins]# kubectl apply -f jenkins_svc.yaml 
+
+# kubectl apply -f jenkins_svc.yaml
 service/jenkins created
 ```  

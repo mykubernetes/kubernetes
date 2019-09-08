@@ -245,7 +245,7 @@ clusterrolebinding.rbac.authorization.k8s.io/jenkins unchanged
 service/jenkins created
 ```  
 
-8、创建完毕后，我们进行检查  
+8、创建完毕后，进行检查  
 ```
 #首先查看pvc状态
 kubectl get pv,pvc -n jenkins

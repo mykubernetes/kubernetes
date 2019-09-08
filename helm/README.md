@@ -82,14 +82,12 @@ local http://127.0.0.1:8879/charts
 ```  
 
 
-5、使用  
-搜索  
-``` helm search memcache ```  
-安装  
-``` helm install --name mem1 stable/memcached ```  
+5、helm的使用   
+```
+helm下载目录  
+cd ~/.helm/repository/cache/archive
 
 helm常用命令  
-```
 	release管理
 		install       #安装
 		delete        #删除
@@ -105,16 +103,29 @@ helm常用命令
 		inspect       #查了chart详细信息
 		package       #本地打包
 		verify        #校验
+		
+搜索  
+helm search mysql
+
+查看详细信息
+helm inspect stable/mysql
+
+安装  
+helm install --name mysql stable/mysql
+
+
+指定values.yaml文件安装  
+helm install --name redis1 -f values.yaml stable/redis
+
+生成模板文件
+helm template . --name istio --name istio-system > istio.yaml
+
 ```  
-helm下载目录  
-``` cd ~/.helm/repository/cache/archive ```  
+
+
 
 如果修改values.yaml需要指定新的文件并应用  
-``` helm install --name redis1 -f values.yaml stable/redis ```  
+helm install --name redis1 -f values.yaml stable/redis
 
 
 
-生成模板文件  
-```
-helm template . --name istio --name istio-system > istio.yaml
-```  

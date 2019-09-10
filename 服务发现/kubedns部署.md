@@ -227,11 +227,17 @@ metadata:
 spec:
   selector:
     k8s-app: kube-dns
-  clusterIP: 10.96.0.10
+  clusterIP: 10.96.0.10       #修改为我们设定的cluster的IP,其它默认。
   ports:
   - name: dns
     port: 53
     protocol: UDP
   - name: dns-tcp
     port: 53
+```  
+
+
+应用配置文件  
+```
+kubectl -f .
 ```  

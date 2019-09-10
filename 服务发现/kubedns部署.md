@@ -148,7 +148,7 @@ spec:
         - --cache-size=1000
         - --no-negcache
         - --log-facility=-
-        - --server=/cluster.local/127.0.0.1#10053      # 修改后
+        - --server=/cluster.local/127.0.0.1#10053       # 修改后
         - --server=/in-addr.arpa/127.0.0.1#10053
         - --server=/ip6.arpa/127.0.0.1#10053
         ports:
@@ -180,8 +180,8 @@ spec:
         args:
         - --v=2
         - --logtostderr
-        - --probe=kubedns,127.0.0.1:10053,kubernetes.default.svc.__PILLAR__DNS__DOMAIN__,5,A
-        - --probe=dnsmasq,127.0.0.1:53,kubernetes.default.svc.__PILLAR__DNS__DOMAIN__,5,A
+        - --probe=kubedns,127.0.0.1:10053,kubernetes.default.svc.cluster.local.,5,A         # 修改后
+        - --probe=dnsmasq,127.0.0.1:53,kubernetes.default.svc.cluster.local.,5,A            # 修改后
         ports:
         - containerPort: 10054
           name: metrics

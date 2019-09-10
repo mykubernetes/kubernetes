@@ -240,4 +240,26 @@ spec:
 应用配置文件  
 ```
 kubectl -f .
+configmap/kube-dns created
+deployment.extensions/kube-dns created
+serviceaccount/kube-dns created
+service/kube-dns created
+
+
+
+# kubectl get pod -n kube-system
+NAME                             READY   STATUS             RESTARTS   AGE
+etcd-node01                      1/1     Running            3          170d
+kube-apiserver-node01            1/1     Running            3          170d
+kube-controller-manager-node01   1/1     Running            4          170d
+kube-dns-5c974d6985-j5wmr        3/3     Running            0          4m42s
+kube-dns-dbb9475bc-8nqbp         3/3     Running            0          19m
+kube-flannel-ds-amd64-79qvl      1/1     Running            0          170d
+kube-flannel-ds-amd64-8qrwj      1/1     Running            2          170d
+kube-flannel-ds-amd64-qgmnv      1/1     Running            5          170d
+kube-proxy-5xbfw                 1/1     Running            0          170d
+kube-proxy-89vxp                 1/1     Running            0          170d
+kube-proxy-xl5fl                 1/1     Running            2          170d
+kube-scheduler-node01            1/1     Running            3          170d
+tiller-deploy-dbb85cb99-5t9cl    1/1     Running            0          170d
 ```  

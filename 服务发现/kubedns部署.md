@@ -263,3 +263,28 @@ kube-proxy-xl5fl                 1/1     Running            2          170d
 kube-scheduler-node01            1/1     Running            3          170d
 tiller-deploy-dbb85cb99-5t9cl    1/1     Running            0          170d
 ```  
+
+
+kubedns水平扩缩容
+---
+官方托管代码  
+https://github.com/kubernetes/kubernetes/tree/release-1.8/cluster/addons/dns-horizontal-autoscaler
+
+下载  
+```
+wget https://raw.githubusercontent.com/kubernetes/kubernetes/release-1.8/cluster/addons/dns-horizontal-autoscaler/dns-horizontal-autoscaler-rbac.yaml
+wget https://raw.githubusercontent.com/kubernetes/kubernetes/release-1.8/cluster/addons/dns-horizontal-autoscaler/dns-horizontal-autoscaler.yaml
+```  
+
+应用配置  
+```
+# kubectl -f .
+serviceaccount/kube-dns-autoscaler created
+clusterrole.rbac.authorization.k8s.io/system:kube-dns-autoscaler created
+clusterrolebinding.rbac.authorization.k8s.io/system:kube-dns-autoscaler created
+deployment.extensions/kube-dns-autoscaler created
+
+
+# kubectl get pod -n kube-system |grep kube-dns-autoscaler
+kube-dns-autoscaler-6686fffcd4-c9g7d   1/1       Running             0          1m
+```  

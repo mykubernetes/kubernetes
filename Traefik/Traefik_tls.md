@@ -14,7 +14,7 @@ TLS 认证
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: traefik.toml
+  name: traefik-conf
   namespace: kube-system 
 data:
 traefik.toml: |

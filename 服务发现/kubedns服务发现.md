@@ -40,3 +40,17 @@ data:
 | foo.acme.local                       | 自定义 DNS (1.2.3.4)                  |
 | widget.com                           | 上游 DNS (8.8.8.8, 8.8.4.4，其中之一) |
 
+另外我们还可以为每个 Pod 设置 DNS 策略。 当前 Kubernetes 支持两种 Pod 特定的 DNS 策略：“Default” 和 “ClusterFirst”。 可以通过 dnsPolicy 标志来指定这些策略。
+
+> 注意：**Default** 不是默认的 DNS 策略。如果没有显式地指定**dnsPolicy**，将会使用 **ClusterFirst**
+
+* 如果 dnsPolicy 被设置为 “Default”，则名字解析配置会继承自 Pod 运行所在的节点。自定义上游域名服务器和存根域不能够与这个策略一起使用
+* 如果 dnsPolicy 被设置为 “ClusterFirst”，这就要依赖于是否配置了存根域和上游 DNS 服务器
+    * 未进行自定义配置：没有匹配上配置的集群域名后缀的任何请求，例如 “www.kubernetes.io”，将会被转发到继承自节点的上游域名服务器。
+    * 进行自定义配置：如果配置了存根域和上游 DNS 服务器（类似于 前面示例 配置的内容），DNS 查询将基于下面的流程对请求进行路由：
+        * 查询首先被发送到 kube-dns 中的 DNS 缓存层。
+        * 从缓存层，检查请求的后缀，并根据下面的情况转发到对应的 DNS 上：
+            * 具有集群后缀的名字（例如 “.cluster.local”）：请求被发送到 kubedns。
+            * 具有存根域后缀的名字（例如 “.acme.local”）：请求被发送到配置的自定义 DNS 解析器（例如：监听在 1.2.3.4）。
+            * 未能匹配上后缀的名字（例如 “widget.com”）：请求被转发到上游 DNS（例如：Google 公共 DNS 服务器，8.8.8.8 和 8.8.4.4）。
+            

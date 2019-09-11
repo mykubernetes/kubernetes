@@ -14,3 +14,28 @@ kube-dns、dnsmasq-nanny、sidecar 这3个容器
 - dnsmasq: dsnmasq 容器则实现了 DNS 的缓存功能(在内存中预留⼀块默认⼤⼩为 1G 的地⽅，保存当前最常⽤的 DNS 查询记录，如果缓存中没有要查找的记录，它会到 kubedns 中查询，并把结果缓存起来)，通过监听 ConfigMap 来动态⽣成配置
 - sider: sidecar 容器实现了可配置的 DNS 探测，并采集对应的监控指标暴露出来供 prometheus 使⽤
 ![image](https://raw.githubusercontent.com/cnych/kubernetes-learning/master/docs/images/kubedns.jpg)
+
+DNS Pod具有静态IP并作为Kubernetes服务暴露出来。该静态IP被分配后,kubelet会将使用 --cluster-dns = <dns-service-ip>参数配置的DNS传递给每个容器。DNS名称也需要域名，本地域可以使用参数--cluster-domain = <default-local-domain>在kubelet中配置  
+
+dnsmasq容器通过监听ConfigMap来动态生成配置,可以自定义存根域和上下游域名服务器  
+
+例如，下面的 ConfigMap 建立了一个 DNS 配置，它具有一个单独的存根域和两个上游域名服务器  
+```
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: kube-dns
+  namespace: kube-system
+data:
+  stubDomains: |
+    {"acme.local": ["1.2.3.4"]}
+  upstreamNameservers: |
+    ["8.8.8.8", "8.8.4.4"]
+```  
+按如上说明，具有.acme.local后缀的DNS请求被转发到 DNS 1.2.3.4。Google 公共 DNS 服务器 为上游查询提供服务,下表描述了具有特定域名的查询如何映射到它们的目标 DNS 服务器  
+| 域名                                 | 响应查询的服务器                      |
+| ------------------------------------ | ------------------------------------- |
+| kubernetes.default.svc.cluster.local | kube-dns                              |
+| foo.acme.local                       | 自定义 DNS (1.2.3.4)                  |
+| widget.com                           | 上游 DNS (8.8.8.8, 8.8.4.4，其中之一) |
+

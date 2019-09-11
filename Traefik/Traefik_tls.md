@@ -11,30 +11,32 @@ TLS 认证
 
 3、创建configmap
 ```
-defaultEntryPoints = ["http", "https"]
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: traefik.toml
+  namespace: kube-system 
+data:
+traefik.toml: |
+  defaultEntryPoints = ["http", "https"]
 
-[entryPoints]
-  [entryPoints.http]
-  address = ":80"
-    [entryPoints.http.redirect]
-      entryPoint = "https"
-  [entryPoints.https]
-  address = ":443"
-    [entryPoints.https.tls]
-      [[entryPoints.https.tls.certificates]]
-      CertFile = "/ssl/tls.crt"
-      KeyFile = "/ssl/tls.key"
+  [entryPoints]
+    [entryPoints.http]
+    address = ":80"
+      [entryPoints.http.redirect]
+        entryPoint = "https"
+    [entryPoints.https]
+    address = ":443"
+      [entryPoints.https.tls]
+        [[entryPoints.https.tls.certificates]]
+        CertFile = "/ssl/tls.crt"
+        KeyFile = "/ssl/tls.key"
 ```  
 - [entryPoints.http] http接入
 - [entryPoints.http.redirect] 强行跳转到https
 - [entryPoints.https] https接入
 - [entryPoints.https.tls] 指定证书文件路径
 
-
-应用文件
-```
-# kubectl create configmap traefik-conf --from-file=traefik.toml -n kube-system
-```  
 
 ```
 kind: Deployment

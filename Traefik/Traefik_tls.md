@@ -81,10 +81,10 @@ spec:
         ports:
         - name: http
           containerPort: 80
-          hostPort: 80
+          hostPort: 80                    #暴露主机端口80
         - name: https
-          containerPort: 443
-          hostPort: 443
+          containerPort: 443              #添加https暴露端口
+          hostPort: 443                   #暴露主机端口443
         - name: admin
           containerPort: 8080
         args:

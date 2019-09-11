@@ -63,3 +63,104 @@ data:
 * Headless Service：无头服务，就是把 clusterIP 设置为 None 的，会被解析为指定 Pod 的 IP 列表，同样还可以通过 podname.servicename.namespace.svc.cluster.local 访问到具体的某一个 Pod。
 
 > CoreDNS 实现的功能和 KubeDNS 是一致的，不过 CoreDNS 的所有功能都集成在了同一个容器中，在最新版的1.11.0版本中官方已经推荐使用 CoreDNS了，大家也可以安装 CoreDNS 来代替 KubeDNS，其他使用方法都是一致的：https://coredns.io/
+
+
+## 测试
+
+创建nginx-service.yaml  
+```
+# cat nginx-service.yaml
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deploy
+  labels:
+    k8s-app: nginx-demo
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-service
+  labels:
+    name: nginx-service
+spec:
+  ports:
+  - port: 5000
+    targetPort: 80
+  selector:
+    app: nginx
+```  
+
+应用该服务  
+```
+# kubectl apply -f nginx-service.yaml
+```  
+
+现在我们来使用一个简单 Pod 来测试下 Service 的域名访问：
+```shell
+$ kubectl run --rm -i --tty test-dns --image=busybox /bin/sh
+If you don't see a command prompt, try pressing enter.
+/ # cat /etc/resolv.conf
+nameserver 10.96.0.10
+search default.svc.cluster.local svc.cluster.local cluster.local
+options ndots:5
+/ #
+```
+
+进入到Pod中，查看**/etc/resolv.conf**中的内容，可以看到 nameserver 的地址**10.96.0.10**，该IP地址即是在安装kubedns插件的时候集群分配的一个固定的静态IP地址，我们可以通过下面的命令进行查看  
+```shell
+$ kubectl get svc kube-dns -n kube-system
+NAME       TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)         AGE
+kube-dns   ClusterIP   10.96.0.10   <none>        53/UDP,53/TCP   62d
+```  
+
+也就是说这个Pod现在默认的nameserver就是kubedns的地址，现在来访问创建的nginx-service服务  
+```shell
+/ # wget -q -O- nginx-service.default.svc.cluster.local
+
+```
+
+可以使用wget命令去访问nginx-service服务的域名的时候被hang住了，这是因为上面我们建立Service的时候暴露的端口是5000  
+```shell
+/ # wget -q -O- nginx-service.default.svc.cluster.local:5000
+<!DOCTYPE html>
+<html>
+<head>
+<title>Welcome to nginx!</title>
+<style>
+    body {
+        width: 35em;
+        margin: 0 auto;
+        font-family: Tahoma, Verdana, Arial, sans-serif;
+    }
+</style>
+</head>
+<body>
+<h1>Welcome to nginx!</h1>
+<p>If you see this page, the nginx web server is successfully installed and
+working. Further configuration is required.</p>
+
+<p>For online documentation and support please refer to
+<a href="http://nginx.org/">nginx.org</a>.<br/>
+Commercial support is available at
+<a href="http://nginx.com/">nginx.com</a>.</p>
+
+<p><em>Thank you for using nginx.</em></p>
+</body>
+</html>
+```
+
+加上5000端口，就正常访问到服务，再试一试访问：nginx-service.default.svc、nginx-service.default、nginx-service，不出意外这些域名都可以正常访问到期望的结果  

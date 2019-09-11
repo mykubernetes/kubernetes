@@ -163,4 +163,4 @@ Commercial support is available at
 </html>
 ```
 
-加上5000端口，就正常访问到服务，再试一试访问：nginx-service.default.svc、nginx-service.default、nginx-service，不出意外这些域名都可以正常访问到期望的结果  
+加上5000端口，就正常访问到服务，再试一试访问：nginx-service.default.svc、nginx-service.default、nginx-service，在同namespace下可以直接访问  

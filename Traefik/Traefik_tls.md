@@ -59,7 +59,7 @@ spec:
     spec:
       serviceAccountName: traefik-ingress-controller
       terminationGracePeriodSeconds: 60
-      volumes:
+      volumes:                         #将文件挂载到容器
       - name: ssl
         secret:
           secretName: traefik-cert
@@ -75,9 +75,9 @@ spec:
         name: traefik-ingress-lb
         volumeMounts:
         - mountPath: "/ssl"
-          name: "ssl"
+          name: "ssl"                     #挂载证书文件
         - mountPath: "/config"
-          name: "config"
+          name: "config"                  #挂载配置文件
         ports:
         - name: http
           containerPort: 80

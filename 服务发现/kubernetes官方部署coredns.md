@@ -92,4 +92,24 @@ spec:
         ports:
         - containerPort: 53
 
+
+-----------------------
+
+        image: coredns/coredns:1.2.6     #替换镜像
+
+-------------------------
+spec:
+  selector:
+    k8s-app: kube-dns
+  clusterIP: 10.96.0.10                #修改后
+  ports:
+  - name: dns
+    port: 53
+    protocol: UDP
+  - name: dns-tcp
+    port: 53
+    protocol: TCP
+  - name: metrics
+    port: 9153
+
 ```  

@@ -235,7 +235,7 @@ spec:
       - name: myjob
         image: alpine
         command: ["/bin/sh",  "-c", "sleep 30"]
-      restartPolicy: Never
+      restartPolicy: Never           #仅支持Never和OnFailure两种，不支持Always
 ```  
 
 
@@ -270,7 +270,7 @@ spec:
             - /bin/sh
             - -c
             - date; echo Hello from the Kubernetes cluster; sleep 10
-          restartPolicy: OnFailure
+          restartPolicy: OnFailure           #仅支持Never和OnFailure两种，不支持Always
 ```  
 
 service

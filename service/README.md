@@ -1,11 +1,33 @@
-1、Service的类型
+Service的类型
+---
 - ClusterIp：默认类型，自动分配一个仅 Cluster 内部可以访问的虚拟 IP
 - NodePort：在 ClusterIP 基础上为 Service 在每台机器上绑定一个端口，这样就可以通过 : NodePort 来访问该服务
 - LoadBalancer：在 NodePort 的基础上，借助 cloud provider 创建一个外部负载均衡器，并将请求转发到: NodePort
 - ExternalName：把集群外部的服务引入到集群内部来，在集群内部直接使用。没有任何类型代理被创建，这只有 kubernetes 1.7 或更高版本的 kube-dns 才支持
 
+代理模式分类  
+---
+1、userspace代理模式  
+![image](https://github.com/mykubernetes/linux-install/blob/master/image/service1.png)  
 
-2、创建myapp-deploy.yaml文件
+2、iptables代理模式  
+查看规则  
+```
+# iptables -t nat -nvL
+```  
+![image](https://github.com/mykubernetes/linux-install/blob/master/image/service2.png)  
+
+3、ipvs代理模式  
+查看规则  
+```
+# ipvsadm -Ln
+```  
+![image](https://github.com/mykubernetes/linux-install/blob/master/image/service3.png)  
+
+
+实验  
+---
+1、创建myapp-deploy.yaml文件
 ```
 # vim myapp-deploy.yaml
 apiVersion: apps/v1
@@ -35,7 +57,7 @@ spec:
           containerPort: 80
 ```  
 
-3、ClusterIP  
+2、ClusterIP  
 ```
 # vim myapp-service.yaml
 apiVersion: v1
@@ -54,7 +76,7 @@ spec:
     targetPort: 80
 ```  
 
-4、Headless Service
+3、Headless Service
 ```
 # vim myapp-svc-headless.yaml
 apiVersion: v1

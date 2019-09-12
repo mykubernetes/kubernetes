@@ -1,4 +1,5 @@
 官网https://kubernetes.io/zh/docs/concepts/  
+https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.15/#-strong-api-overview-strong-  
 实用中文文档http://docs.kubernetes.org.cn/  
 https://v1-14.docs.kubernetes.io/zh/docs/concepts/services-networking/ingress/  
 阿里云使用kubernetes  

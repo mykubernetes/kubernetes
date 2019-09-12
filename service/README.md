@@ -5,6 +5,12 @@ Service的类型
 - LoadBalancer：在 NodePort 的基础上，借助 cloud provider 创建一个外部负载均衡器，并将请求转发到: NodePort
 - ExternalName：把集群外部的服务引入到集群内部来，在集群内部直接使用。没有任何类型代理被创建，这只有 kubernetes 1.7 或更高版本的 kube-dns 才支持
 
+工作原理  
+---
+- apiserver 用户通过kubectl命令向apiserver发送创建service的命令，apiserver接收到请求后将数据存储到etcd中
+- kube-proxy kubernetes的每个节点中都有一个叫做kube-porxy的进程，这个进程负责感知service，pod的变化，并将变化的信息写入本地的iptables规则中
+- iptables 使用NAT等技术将virtualIP的流量转至endpoint中
+
 代理模式分类  
 ---
 1、userspace代理模式  
@@ -58,6 +64,7 @@ spec:
 ```  
 
 2、ClusterIP  
+clusterIP 主要在每个 node 节点使用 iptables，将发向 clusterIP 对应端口的数据，转发到 kube-proxy 中。然后 kube-proxy 自己内部实现有负载均衡的方法，并可以查询到这个 service 下对应 pod 的地址和端口，进而把数据转发给对应的 pod 的地址和端口  
 ```
 # vim myapp-service.yaml
 apiVersion: v1
@@ -76,7 +83,8 @@ spec:
     targetPort: 80
 ```  
 
-3、Headless Service
+3、Headless Service  
+有时不需要或不想要负载均衡，以及单独的Service IP。遇到这种情况，可以通过指定Cluster IP(spec.clusterIP) 的值为 “None” 来创建 Headless Service 。这类 Service 并不会分配 Cluster IP， kube-proxy 不会处理它们，而且平台也不会为它们进行负载均衡和路由
 ```
 # vim myapp-svc-headless.yaml
 apiVersion: v1
@@ -100,6 +108,7 @@ spec:
 
 
 4、NodePort  
+nodePort的原理在于在node上开了一个端口，将向该端口的流量导入到kube-proxy，然后由kube-proxy进一步到给对应的 pod
 ```
 # vim myapp-service.yaml
 apiVersion: v1
@@ -123,6 +132,7 @@ loadBalancer 和 nodePort 其实是同一种方式。区别在于 loadBalancer �
 
 
 6、ExternalName  
+这种类型的 Service 通过返回 CNAME 和它的值，可以将服务映射到 externalName 字段的内容( 例如：www.baidu.com )。ExternalName Service 是Service 的特例，它没有 selector，也没有定义任何的端口和Endpoint。相反的，对于运行在集群外部的服务，它通过返回该外部服务的别名这种方式来提供服务
 ```
 kind: Service
 apiVersion: v1
@@ -131,7 +141,7 @@ metadata:
   namespace: default
 spec:
   type: ExternalName
-  externalName: hub.atguigu.com
+  externalName: www.baidu.com
 ```  
 
 

@@ -295,3 +295,56 @@ metadata:
   namespace: ingress-nginx
 EOF
 ```  
+
+
+
+Nginx 进行 BasicAuth
+---
+1、安装http,创建认证文件，用户叫foo
+```
+# yum -y install httpd
+# htpasswd -c auth foo
+# kubectl create secret generic basic-auth --from-file=auth
+```  
+
+2、配置ingress  
+```
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: ingress-with-auth
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: basic-auth
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required - foo'
+spec:
+  rules:
+  - host: foo2.bar.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nginx-svc
+          servicePort: 80
+```  
+
+
+Nginx 进行重写  
+---
+```
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: nginx-test
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: http://foo.bar.com:31795/hostname.html
+spec:
+  rules:
+  - host: foo10.bar.com
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: nginx-svc
+          servicePort: 80
+```  

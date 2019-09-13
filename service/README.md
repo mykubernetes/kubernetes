@@ -117,7 +117,7 @@ metadata:
   name: myapp
   namespace: default
 spec:
-  type: NodePort
+  type: LoadBalancer
   selector:
     app: myapp
     release: stabel
@@ -129,6 +129,22 @@ spec:
 
 5、LoadBalancer  
 loadBalancer 和 nodePort 其实是同一种方式。区别在于 loadBalancer 比 nodePort 多了一步，就是可以调用cloud provider 去创建 LB 来向节点导流  
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: myapp
+  namespace: default
+spec:
+  type: NodePort
+  selector:
+    app: myapp
+    release: stabel
+  ports:
+  - name: http
+    port: 80
+    targetPort: 80
+```  
 
 
 6、ExternalName  

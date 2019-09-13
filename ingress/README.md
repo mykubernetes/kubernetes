@@ -348,3 +348,12 @@ spec:
           serviceName: nginx-svc
           servicePort: 80
 ```  
+
+| 名称  | 描述 | 值 
+| :------: | :--------: | :-------: |
+| nginx.ingress.kubernetes.io/rewrite-target | 必须重定向流量的目标URI | 串 |
+| nginx.ingress.kubernetes.io/ssl-redirect | 指示位置部分是否仅可访问SSL（当Ingress包含证书时默认为True | 布尔 |
+| nginx.ingress.kubernetes.io/force-ssl-redirect | 即使Ingress未启用TLS，也强制重定向到HTTPS | 布尔 |
+| nginx.ingress.kubernetes.io/app-root | 定义Controller必须重定向的应用程序根，如果它在'/'上下文中 | 串 |
+| nginx.ingress.kubernetes.io/use-regex | 指示Ingress上定义的路径是否使用正则表达式 | 布尔 |
+

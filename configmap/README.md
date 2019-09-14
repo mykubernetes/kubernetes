@@ -232,7 +232,7 @@ spec:
 ```  
 
 
-六、通过获取主机变量的方式传递参数  
+六、通过downwardAPI获取主机变量的方式传递参数  
 ```
 apiVersion: v1
 kind: Pod

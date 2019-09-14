@@ -12,16 +12,17 @@ accessModes 指定访问模式为 ReadWriteOnce，支持的访问模式有：
 - ReadWriteMany 缩写RWX read-write 多路读写
 
 2、回收策略
-- persistentVolumeReclaimPolicy 指定当 PV 的回收策略为 Recycle，支持的策略有：
-- Retain – 需要管理员手工回收。
-- Recycle – 清除 PV 中的数据，效果相当于执行 rm -rf /thevolume/*。
-- Delete – 删除 Storage Provider 上的对应存储资源，例如 AWS EBS、GCE PD、Azure Disk、OpenStack Cinder Volume 等。
+persistentVolumeReclaimPolicy 指定当 PV 的回收策略为 Recycle，支持的策略有：
+- Retain (保留) 需要管理员手工回收。
+- Recycle (回收) PV 中的数据，效果相当于执行 rm -rf /thevolume/*。
+- Delete (清除) 关联的存储资产（例如 AWS EBS、GCE PD、Azure Disk 和 OpenStack Cinder 卷）将被删除
+当前，只有 NFS 和 HostPath 支持回收策略。AWS EBS、GCE PD、Azure Disk 和 Cinder 卷支持删除策略  
 
 3、pv状态
-- Available：空闲状态。
-- Bound：已经绑定到某个PVC上。
-- Released：对应的PVC已经被删除，但资源还没有被集群收回。
-- Failed：PV自动回收失败。
+- Available （可用）空闲状态。
+- Bound （已绑定）已经绑定到某个PVC上。
+- Released （已释放）对应的PVC已经被删除，但资源还没有被集群收回。
+- Failed （失败）PV自动回收失败。
 
 
 4、hostPath卷指定type类型有多种  

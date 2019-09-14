@@ -36,3 +36,25 @@ accessModes 指定访问模式为 ReadWriteOnce，支持的访问模式有：
 | Socket | 给定的路径下必须存在 UNIX 套接字 |
 | CharDevice | 给定的路径下必须存在字符设备 |
 | BlockDevice | 给定的路径下必须存在块设备 |
+
+hostPath示例
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pd
+spec:
+  containers:
+  - image: k8s.gcr.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /test-pd
+      name: test-volume
+  volumes:
+  - name: test-volume
+    hostPath:
+      # directory location on host
+      path: /data
+      # this field is optional
+      type: Directory
+```  

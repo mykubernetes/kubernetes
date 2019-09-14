@@ -1,7 +1,10 @@
 configmap
 =========
 1、通过命令方式创建configmap  
-``` # kubectl create configmap nginx-config --from-literal=nginx_port=80 --from-literal=server_name=www.node1.com ```  
+```
+# kubectl create configmap nginx-config --from-literal=nginx_port=80 --from-literal=server_name=www.node1.com
+```  
+-  -from-literal 参数传递配置信息，该参数可以使用多次
 
 2、通过命令方式传递配置文件创建configmap  
 ```
@@ -14,6 +17,8 @@ server {
 
 # kubectl create configmap nginx-www --from-file=./www.conf
 ```  
+- -from-file 这个参数可以使用多次
+
 3、通过配置文件方式创建configmap
 ```
 apiVersion: v1
@@ -32,6 +37,31 @@ data:
       - targets:
         - localhost:9090
 ```  
+
+4、通过目录方式创建  
+```
+#  ls /opt/configmap/dir/
+game.properties
+ui.properties
+
+# cat /opt/configmap/dir/game.properties
+enemies=aliens
+lives=3
+enemies.cheat=true
+enemies.cheat.level=noGoodRotten
+secret.code.passphrase=UUDDLRLRBABAS
+secret.code.allowed=true
+secret.code.lives=30
+
+# cat /opt/configmap/dir/ui.properties
+color.good=purple
+color.bad=yellow
+allow.textmode=true
+how.nice.to.look=fairlyNice
+
+# kubectl create configmap game-config --from-file=/opt/configmap/dir
+```  
+- -from-file 指定在目录下的所有文件都会被用在 ConfigMap 里面创建一个键值对，键的名字就是文件名，值就是文件的内容
 
 一、创建data文件，并通过env的方式传递给pod,通过env传递的环境变量只能在pod启动时读取  
 ```

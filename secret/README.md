@@ -69,7 +69,62 @@ data:
 # kubectl apply -f secrets.yaml
 ```  
 
-四、基于私钥和数字证书文件创建用于SSL/TLS通信的Secret对象  
+四、使用方式  
+---
+1、将Secret挂载到Volume中  
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    name: seret-test
+  name: seret-test
+spec:
+  volumes:
+  - name: secrets
+    secret:
+      secretName: mysecret
+  containers:
+  - image: hub.atguigu.com/library/myapp:v1
+    name: db
+    volumeMounts:
+    - name: secrets
+      mountPath: "/etc/secrets"
+      readOnly: true
+```  
+
+2、将Secret导出到环境变量中  
+```
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: pod-deployment
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: pod-deployment
+  spec:
+    containers:
+    - name: pod-1
+      image: hub.atguigu.com/library/myapp:v1
+      ports:
+      - containerPort: 80
+      env:
+      - name: TEST_USER
+        valueFrom:
+          secretKeyRef:
+            name: mysecret
+            key: username
+      - name: TEST_PASSWORD
+        valueFrom:
+          secretKeyRef:
+            name: mysecret
+            key: password
+```  
+
+五、基于私钥和数字证书文件创建用于SSL/TLS通信的Secret对象  
 ---
 1、用命令生成私钥和自签证书  
 ```
@@ -129,7 +184,7 @@ tls.key
 ```  
 
 
-五、imagePullSecret 资源对象
+六、imagePullSecret 资源对象
 ---
 1、创建imagepullsecret资源对象  
 ```

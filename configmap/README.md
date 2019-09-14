@@ -63,7 +63,11 @@ how.nice.to.look=fairlyNice
 ```  
 - -from-file 指定在目录下的所有文件都会被用在 ConfigMap 里面创建一个键值对，键的名字就是文件名，值就是文件的内容
 
-一、创建data文件，并通过env的方式传递给pod,通过env传递的环境变量只能在pod启动时读取  
+
+configmap挂载到容器
+=========
+
+一、通过env的方式将环境变量传递给pod,通过env传递的环境变量只能在pod启动时读取  
 ```
 # cat configmap-env.yaml
 apiVersion: v1
@@ -100,22 +104,25 @@ spec:
           optional: true
 ```  
 
-二、通过编写脚本在启动时传递command和args的方式传递变量在第一次启动时读取  
+二、通过envfrom方式传递环境变量  
 ```
-# cat command-demo.yaml
+# cat configmap-envfrom-pod.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: command-demo
-  labels:
-    purpose: demonstrate-command
+  name: configmap-envfrom-demo
+  namespace: default
 spec:
   containers:
-  - name: command-demo-container
-    image: busybox
-    command: ["httpd"]
-    args: ["-f"]
-  restartPolicy: OnFailure
+  - image: busybox
+    name: busybox-httpd
+    command: ["/bin/httpd"]
+    args: ["-f","-p","$(HTCFG_httpd_port)","$(HTCFG_verbose_level)"]
+    envFrom:
+    - prefix: HTCFG_
+      configMapRef:
+        name: busybox-httpd-config
+        optional: false
 ```  
 
 三、通过数据卷的方式传递环境变量  
@@ -140,43 +147,8 @@ spec:
       name: nginx-config-files
 ```  
 
-四、如果变量值有多个可以使用items的方式挑选适用的几个变量传递  
-```
-# cat myserver-gzip.cfg
-gzip on;
-gzip_comp_level 5;
-gzip_proxied     expired no-cache no-store private auth;
-gzip_types text/plain text/html text/css application/xml text/javascript;
 
-
-
-# cat configmap-volume-pod-2.yaml
-apiVersion: v1
-kind: Pod
-metadata:
-  name: configmap-volume-demo-2
-  namespace: default
-spec:
-  containers:
-  - image: nginx:alpine
-    name: web-server
-    volumeMounts:
-    - name: ngxconfig
-      mountPath: /etc/nginx/conf.d/
-      readOnly: true
-  volumes:
-  - name: ngxconfig
-    configMap:
-      name: nginx-config-files
-      items:
-      - key: myserver.conf
-        path: myserver.conf
-        mode: 0644
-      - key: myserver-gzip.cfg
-        path: myserver-compression.cfg
-```  
-
-五、根据文件方式传递变量  
+四、根据卷挂载的方式挂载多个文件configmap  
 ```
 # cat myserver-status.cfg
 location /nginx-status {
@@ -223,6 +195,43 @@ spec:
       name: nginx-config-file
 ```  
 
+五、如果变量值有多个可以使用items的方式挑选适用的几个变量传递  
+```
+# cat myserver-gzip.cfg
+gzip on;
+gzip_comp_level 5;
+gzip_proxied     expired no-cache no-store private auth;
+gzip_types text/plain text/html text/css application/xml text/javascript;
+
+
+
+# cat configmap-volume-pod-2.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: configmap-volume-demo-2
+  namespace: default
+spec:
+  containers:
+  - image: nginx:alpine
+    name: web-server
+    volumeMounts:
+    - name: ngxconfig
+      mountPath: /etc/nginx/conf.d/
+      readOnly: true
+  volumes:
+  - name: ngxconfig
+    configMap:
+      name: nginx-config-files
+      items:
+      - key: myserver.conf
+        path: myserver.conf
+        mode: 0644
+      - key: myserver-gzip.cfg
+        path: myserver-compression.cfg
+```  
+
+
 六、通过获取主机变量的方式传递参数  
 ```
 apiVersion: v1
@@ -255,23 +264,21 @@ spec:
   restartPolicy: OnFailure
 ```  
 
-七、通过envfrom方式在原有configmap的key名添加前缀后生产新的key传递  
+
+七、通过command和args的方式添加启动参数  
 ```
-# cat configmap-envfrom-pod.yaml
+# cat command-demo.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: configmap-envfrom-demo
-  namespace: default
+  name: command-demo
+  labels:
+    purpose: demonstrate-command
 spec:
   containers:
-  - image: busybox
-    name: busybox-httpd
-    command: ["/bin/httpd"]
-    args: ["-f","-p","$(HTCFG_httpd_port)","$(HTCFG_verbose_level)"]
-    envFrom:
-    - prefix: HTCFG_
-      configMapRef:
-        name: busybox-httpd-config
-        optional: false
+  - name: command-demo-container
+    image: busybox
+    command: ["httpd"]
+    args: ["-f"]
+  restartPolicy: OnFailure
 ```  

@@ -80,10 +80,6 @@ metadata:
     name: seret-test
   name: seret-test
 spec:
-  volumes:
-  - name: secrets
-    secret:
-      secretName: mysecret
   containers:
   - image: wangyanglinux/myapp:v1
     name: db
@@ -91,6 +87,10 @@ spec:
     - name: secrets
       mountPath: "/etc/secrets"
       readOnly: true
+  volumes:
+  - name: secrets
+    secret:
+      secretName: mysecret
 ```  
 
 2、将Secret导出到环境变量中  

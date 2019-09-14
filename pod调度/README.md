@@ -35,7 +35,7 @@ spec:
         app: myweb
     spec:
       nodeSelector:
-        type: backEndNode1
+        disk: ssd
       containers:
       - name: myweb
         image: ikubernetes/myapp:v1

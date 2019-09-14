@@ -18,10 +18,10 @@ accessModes 指定访问模式为 ReadWriteOnce，支持的访问模式有：
 - Delete – 删除 Storage Provider 上的对应存储资源，例如 AWS EBS、GCE PD、Azure Disk、OpenStack Cinder Volume 等。
 
 3、pv状态
-Available：空闲状态。
-Bound：已经绑定到某个PVC上。
-Released：对应的PVC已经被删除，但资源还没有被集群收回。
-Failed：PV自动回收失败。
+- Available：空闲状态。
+- Bound：已经绑定到某个PVC上。
+- Released：对应的PVC已经被删除，但资源还没有被集群收回。
+- Failed：PV自动回收失败。
 
 
 4、hostPath卷指定type类型有多种  

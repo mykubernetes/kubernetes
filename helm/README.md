@@ -6,7 +6,7 @@ https://helm.sh
 
 官方仓库  
 https://hub.kubeapps.com/  
-https://hub.helm.sh/  
+https://hub.helm.sh/charts/stable
 https://developer.aliyun.com/hub#/?_k=6zd4g9&tdsourcetag=s_pctim_aiomsg  
 
 阿里github_chart仓库  

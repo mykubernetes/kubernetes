@@ -16,7 +16,7 @@ spec:
       nodeName: k8s-node01
       containers:
       - name: myweb
-        image: hub.atguigu.com/library/myapp:v1
+        image: ikubernetes/myapp:v1
         ports:
         - containerPort: 80
 ```  

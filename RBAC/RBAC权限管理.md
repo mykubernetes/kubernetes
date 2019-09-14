@@ -207,3 +207,12 @@ kubectl config use-context kubernetes --kubeconfig=devuser.kubeconfig
 cp -f ./devuser.kubeconfig /root/.kube/config
 kubectl create rolebinding devuser-admin-binding --clusterrole=admin --user=devuser --namespace=dev
 ```  
+- --certificate-authority 指定ca证书
+- --embed-certs=true 指定是否加密认证
+- --server 指定服务器api_server
+- --kubeconfig 创建用户的kubeconfig的文件
+- --client-certificate 指定证书
+- --client-key 指定私钥
+- --cluster 指定集群
+- --user 指定用户
+- --namespace 指定名称空间

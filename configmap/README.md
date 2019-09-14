@@ -118,7 +118,7 @@ spec:
   restartPolicy: OnFailure
 ```  
 
-三、通过挂着配置文件方式传递配置文件可以在更改配置文件后pod内变量随之改变  
+三、通过数据卷的方式传递环境变量  
 ```
 # cat configmap-volume-pod.yaml
 apiVersion: v1

@@ -1,5 +1,7 @@
 RBAC权限管理
 ==========
+RoloBinding可以将角色中定义的权限授予用户或用户组，RoleBinding包含一组权限列表(subjects)，权限列表中包含有不同形式的待授予权限资源类型(users, groups, or service accounts)；RoloBinding可以绑定一个Role也可以绑定一个ClusterRole，而ClusterRoleBinding只能绑定ClusterRole
+
 一、Pod权限  
 ----------
 1、创建一个pod账号和角色  

@@ -85,7 +85,7 @@ spec:
     secret:
       secretName: mysecret
   containers:
-  - image: hub.atguigu.com/library/myapp:v1
+  - image: wangyanglinux/myapp:v1
     name: db
     volumeMounts:
     - name: secrets
@@ -108,7 +108,7 @@ spec:
   spec:
     containers:
     - name: pod-1
-      image: hub.atguigu.com/library/myapp:v1
+      image: wangyanglinux/myapp:v1
       ports:
       - containerPort: 80
       env:

@@ -6,13 +6,13 @@ https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
 
 
 1、访问模式
-accessModes 指定访问模式为 ReadWriteOnce，支持的访问模式有：
+accessModes支持的访问模式有：
 - ReadWriteOnce 缩写RWO read-write 单路读写
 - ReadOnlyMany 缩写ROX read-only 多路只读
 - ReadWriteMany 缩写RWX read-write 多路读写
 
 2、回收策略
-persistentVolumeReclaimPolicy 指定当 PV 的回收策略为 Recycle，支持的策略有：
+persistentVolumeReclaimPolicy支持的策略有：
 - Retain (保留) 需要管理员手工回收。
 - Recycle (回收) PV 中的数据，效果相当于执行 rm -rf /thevolume/*。
 - Delete (清除) 关联的存储资产（例如 AWS EBS、GCE PD、Azure Disk 和 OpenStack Cinder 卷）将被删除

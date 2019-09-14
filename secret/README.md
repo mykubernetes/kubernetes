@@ -45,7 +45,30 @@ ikubernetes
 # kubectl create secret generic ssh-key-secret --from-file=ssh-privatekey=${HOME}/.ssh/id_rsa --from-file=ssh-publickey=${HOME}/.ssh/id_rsa.pub
 ```  
 
-三、基于私钥和数字证书文件创建用于SSL/TLS通信的Secret对象  
+三、通过配置文件方式创建  
+```
+1、将明文转换为密文
+# echo -n "admin" | base64
+YWRtaW4=
+
+# echo -n "1f2d1e2e67df" | base64
+MWYyZDFlMmU2N2Rm
+
+2、创建配置文件
+# vim secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: mysecret
+type: Opaque
+data:
+  password: MWYyZDFlMmU2N2Rm
+  username: YWRtaW4=
+
+# kubectl apply -f secrets.yaml
+```  
+
+四、基于私钥和数字证书文件创建用于SSL/TLS通信的Secret对象  
 ---
 1、用命令生成私钥和自签证书  
 ```

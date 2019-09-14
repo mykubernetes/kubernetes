@@ -38,7 +38,7 @@ spec:
         type: backEndNode1
       containers:
       - name: myweb
-        image: harbor/tomcat:8.5-jre8
+        image: ikubernetes/myapp:v1
         ports:
         - containerPort: 80
 ```  

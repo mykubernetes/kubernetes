@@ -46,6 +46,7 @@ ikubernetes
 ```  
 
 三、通过配置文件方式创建  
+---
 ```
 1、将明文转换为密文
 # echo -n "admin" | base64
@@ -128,7 +129,7 @@ tls.key
 ```  
 
 
-四、imagePullSecret 资源对象
+五、imagePullSecret 资源对象
 ---
 1、创建imagepullsecret资源对象  
 ```

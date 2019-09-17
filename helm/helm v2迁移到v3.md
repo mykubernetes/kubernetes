@@ -9,7 +9,12 @@ Helm V3 版本已经发布了第三个 Beta 版本了，由于 V2 和 V3 版本�
 
 helm下载地址  
 https://github.com/helm/helm/releases  
-
+安装  
+```
+# wget https://get.helm.sh/helm-v3.0.0-beta.3-linux-amd64.tar.gz
+# tar -xvf helm-v3.0.0-beta.3-linux-amd64.tar.gz
+# cp linux-amd64/helm  /usr/local/bin/
+```  
 
 验证  
 ```

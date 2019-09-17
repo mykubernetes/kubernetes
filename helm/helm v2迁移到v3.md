@@ -13,7 +13,8 @@ https://github.com/helm/helm/releases
 ```
 # wget https://get.helm.sh/helm-v3.0.0-beta.3-linux-amd64.tar.gz
 # tar -xvf helm-v3.0.0-beta.3-linux-amd64.tar.gz
-# cp linux-amd64/helm  /usr/local/bin/
+# cp linux-amd64/helm  /usr/local/bin/heml3
+# helm3 init
 ```  
 
 验证  

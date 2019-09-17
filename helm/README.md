@@ -4,6 +4,9 @@ helm安装
 helm官方网站  
 https://helm.sh  
 
+官方使用说明  
+https://daemonza.github.io/2017/02/20/using-helm-to-deploy-to-kubernetes/
+
 官方仓库  
 https://hub.kubeapps.com/  
 https://hub.helm.sh/charts/stable

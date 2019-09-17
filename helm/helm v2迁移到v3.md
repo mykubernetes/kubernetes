@@ -191,7 +191,7 @@ minio    argo        1           2019-09-11 03:47:51.239461137 +0000 UTC deploye
 
 
 
-可用性发生了几次CLI更改  
+命令行参数的更改  
 ---
 - helm inspect 现在改成 helm show
 - helm fetch 现在改成 helm pull

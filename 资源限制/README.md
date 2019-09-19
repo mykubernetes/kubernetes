@@ -138,6 +138,10 @@ spec:
 # kubectl create -f limits-test.yaml -n dev
 查看namespace的资源限制
 # kubectl describe limits -n dev
+查看控制器是否进行资源限制
+# kubectl get deploy -n dev web-demo -o yaml
+查看pod是否进行资源限制
+# kubectl get pod -n dev -o yaml
 ```  
 - pod没有默认值，因为Container可以包含多个容器，一个pod可以给默认值，多个pod无法给多个默认值，所有不能设置默认值
 - Container有默认值

@@ -36,6 +36,7 @@ spec:
     limits.cpu: "40"
     limits.memory: 200Gi
 ```  
+注意：部署的时候需要指定namespace
 
 3、配置对象数量配额限制
 ```

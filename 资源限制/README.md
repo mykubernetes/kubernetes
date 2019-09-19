@@ -131,6 +131,13 @@ spec:
       cpu: 5                    #cpu的limit最大可以比cpu的Request大5倍
       memory: 4
     type: Container             #类型是容器
+    
+
+
+应用配置到指定namespace
+# kubectl create -f limits-test.yaml -n dev
+查看namespace的资源限制
+# kubectl describe limits -n dev
 ```  
 - pod没有默认值，因为Container可以包含多个容器，一个pod可以给默认值，多个pod无法给多个默认值，所有不能设置默认值
 - Container有默认值

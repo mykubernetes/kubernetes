@@ -97,7 +97,7 @@ spec:
     limits.ephemeral-storage: "20"               #所有Pod可用的本地临时存储限制的总量
 ```  
 
-
+不指定resource的值会使用默认设置
 ```
 apiVersion: v1
 kind: LimitRange
@@ -128,8 +128,9 @@ spec:
       cpu: 100m
       memory: 100Mi
     maxLimitRequestRatio:       #Request和Limit的比值最大不能超过多少，也就是最小用量的指定倍数
-      cpu: 5
+      cpu: 5                    #cpu的limit最大可以比cpu的Request大5倍
       memory: 4
     type: Container             #类型是容器
-
 ```  
+- pod没有默认值，因为Container可以包含多个容器，一个pod可以给默认值，多个pod无法给多个默认值，所有不能设置默认值
+- Container有默认值

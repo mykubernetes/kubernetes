@@ -1,3 +1,7 @@
+- Request == Limits 说明是可靠的
+- 不设置 最不可靠
+- Limits > Requests 比较可靠的
+
 1、pod资源限制  
 ```
 spec:

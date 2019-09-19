@@ -114,7 +114,7 @@ spec:
     maxLimitRequestRatio:
       cpu: 3
       memory: 2
-    type: Pod
+    type: Pod                   #类型是POD
   - default:                    #用于定义默认的资源限制
       cpu: 300m
       memory: 200Mi

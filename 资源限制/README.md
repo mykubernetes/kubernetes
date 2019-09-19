@@ -93,23 +93,39 @@ spec:
     limits.ephemeral-storage: "20"               #所有Pod可用的本地临时存储限制的总量
 ```  
 
+
 ```
 apiVersion: v1
 kind: LimitRange
 metadata:
-  name: cpu-limit-range
+  name: test-limits
 spec:
   limits:
-  - default:                          #用于定义默认的资源限制 
-      cpu: 1000m
-    defaultRequest:                   #定义默认的资源需求
-      cpu: 1000m
-    min:                              #定义最小的资源用量
-      cpu: 500m
-    max:                              #定义最大的资源用量
+  - max:
+      cpu: 4000m
+      memory: 2Gi
+    min:
+      cpu: 100m
+      memory: 100Mi
+    maxLimitRequestRatio:
+      cpu: 3
+      memory: 2
+    type: Pod
+  - default:                    #用于定义默认的资源限制
+      cpu: 300m
+      memory: 200Mi
+    defaultRequest:             #定义默认的资源需求
+      cpu: 200m
+      memory: 100Mi
+    max:                        #定义最大的资源用量
       cpu: 2000m
-    maxLimitRequestRatio:             #最小用量的指定倍数
-      cpu: 4
-    type: Container                   #类型是容器
+      memory: 1Gi
+    min:                        #定义最小的资源用量
+      cpu: 100m
+      memory: 100Mi
+    maxLimitRequestRatio:       #最小用量的指定倍数
+      cpu: 5
+      memory: 4
+    type: Container             #类型是容器
 
 ```  

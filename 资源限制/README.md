@@ -127,7 +127,7 @@ spec:
     min:                        #定义最小的资源用量
       cpu: 100m
       memory: 100Mi
-    maxLimitRequestRatio:       #最小用量的指定倍数
+    maxLimitRequestRatio:       #Request和Limit的比值最大不能超过多少，也就是最小用量的指定倍数
       cpu: 5
       memory: 4
     type: Container             #类型是容器

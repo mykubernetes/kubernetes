@@ -36,7 +36,11 @@ spec:
     limits.cpu: "40"
     limits.memory: 200Gi
 ```  
-注意：部署的时候需要指定namespace
+注意：部署的时候需要指定namespace  
+查看限制  
+```
+# kubectl get quota -n dev 
+```  
 
 3、配置对象数量配额限制
 ```

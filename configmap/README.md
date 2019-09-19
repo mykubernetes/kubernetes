@@ -270,8 +270,8 @@ spec:
 - status.podIP: POD的IP地址
 - spec.serviceAccountName: POD使用的ServiceAccount资源的名称
 - metadata.uid: POD的UID
-- metadata.labels['<KEY>']: POD对象标签指定键的值，例如 metadata.labels['mylabel']
-- metadata.annotations['<KEY>']:  POD对象注解信息中的指定键的值
+- metadata.labels['KEY']: POD对象标签指定键的值，例如 metadata.labels['mylabel']
+- metadata.annotations['KEY']:  POD对象注解信息中的指定键的值
 
 七、通过command和args的方式添加启动参数  
 ```

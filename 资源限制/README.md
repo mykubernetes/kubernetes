@@ -68,3 +68,48 @@ spec:
 ```  
 - default 即 limit 的值
 - defaultRequest 即 request 的值
+
+```
+
+我的手机 2019/9/19 10:59:57
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota-example
+spec:
+  hard:
+    pods: "5"                                    #POD 资源限制的总量限额
+    requests.cpu: "1"                            #CPU 资源需求的总量限额
+    requests.memory: 1Gi                         #内存资源需求的总量限额
+    limits.cpu: "2"                              #CPU 资源限制的总量限
+    limits.memory: 2Gi                           #内存资源限制的总量限额
+    count/deployments.apps: "2"
+    count/deployments.extensions: "2"
+    persistentvolumeclaims: "2"                  #可以创建的 PVC 总数
+    requests.storage: "5"                        #所有 PVC 存储需求的总量限额
+    <storage-class-name>.storageclass.storage.k8s.io/requests.storage: "10"          #指定存储类上可使用的所有PVC存储需求的总量限额
+    <storage-class-name>.storageclass.storage.k8s.io/persistentvolumeclaims: "10"    #指定存储类上可使用的PVC总数
+    requests.ephemeral-storage: "20"             #所有Pod可用的本地临时存储需求的总量
+    limits.ephemeral-storage: "20"               #所有Pod可用的本地临时存储限制的总量
+```  
+
+```
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: cpu-limit-range
+spec:
+  limits:
+  - default:                          #用于定义默认的资源限制 
+      cpu: 1000m
+    defaultRequest:                   #定义默认的资源需求
+      cpu: 1000m
+    min:                              #定义最小的资源用量
+      cpu: 500m
+    max:                              #定义最大的资源用量
+      cpu: 2000m
+    maxLimitRequestRatio:             #最小用量的指定倍数
+      cpu: 4
+    type: Container                   #类型是容器
+
+```  

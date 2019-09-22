@@ -8,3 +8,8 @@ journalctl -l -u kube-proxy
 journalctl -l -u etcd
 journalctl -l -u flanneld
 ```  
+
+查看证书时间  
+```
+openssl x509 -in apiserver.crt -text -noout
+```  

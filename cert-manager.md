@@ -39,3 +39,4 @@ cert-manager-cainjector-577f6d9fd7-tr77l   1/1     Running   0          2m
 cert-manager-webhook-787858fcdb-nlzsq      1/1     Running   0          2m
 ```  
 
+https://cloud.tencent.com/developer/article/1326543

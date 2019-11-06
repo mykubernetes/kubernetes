@@ -73,7 +73,30 @@ docker build -t ${IMAGE_NAME} .
 docker push ${IMAGE_NAME}
 ```  
 
-3、编写部署脚本  
+3、编写dockerfile
+```
+# vim  Dockerfile 
+FROM hub.mooc.com/kubernetes/tomcat:8.0.51-alpine
+
+COPY ROOT /usr/local/tomcat/webapps/ROOT
+
+COPY dockerfiles/start.sh /usr/local/tomcat/bin/start.sh
+
+ENTRYPOINT ["sh" , "/usr/local/tomcat/bin/start.sh"]
+```  
+
+```
+# mkdir dockerfiles
+# vim  dockerfiles/start.sh 
+#!/bin/bash
+
+sh /usr/local/tomcat/bin/startup.sh
+
+tail -f /usr/local/tomcat/logs/catalina.out
+
+```  
+
+5、编写部署脚本  
 ```
 #!/bin/bash
 

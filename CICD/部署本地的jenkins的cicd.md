@@ -68,8 +68,13 @@ IMAGE_NAME=hub.mooc.com/kubernetes/${JOB_NAME}:${VERSION}
 echo "${IMAGE_NAME}" > ${WORKSPACE}/IMAGE
 
 echo "building image: ${IMAGE_NAME}"
+#构建docker镜像
 docker build -t ${IMAGE_NAME} .
 
+#登录docker仓库
+
+
+#上床docker镜像到docker仓库
 docker push ${IMAGE_NAME}
 ```  
 

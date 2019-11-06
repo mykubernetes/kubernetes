@@ -96,7 +96,7 @@ tail -f /usr/local/tomcat/logs/catalina.out
 
 ```  
 
-5、编写部署脚本  
+4、编写部署脚本  
 ```
 #!/bin/bash
 
@@ -141,4 +141,60 @@ if [ ${success} -ne 1 ];then
     echo "health check failed!"
     exit 1
 fi
+```  
+
+5、编写对应yaml
+```
+# vim web.yaml
+
+#deploy
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{name}}
+spec:
+  selector:
+    matchLabels:
+      app: {{name}}
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app: {{name}}
+    spec:
+      containers:
+      - name: {{name}}
+        image: {{image}}
+        ports:
+        - containerPort: 8080
+---
+#service
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{name}}
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 8080
+  selector:
+    app: {{name}}
+  type: ClusterIP
+
+---
+#ingress
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: {{name}}
+spec:
+  rules:
+  - host: {{host}}
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: {{name}}
+          servicePort: 80
 ```  

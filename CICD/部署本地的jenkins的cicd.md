@@ -72,7 +72,7 @@ echo "building image: ${IMAGE_NAME}"
 docker build -t ${IMAGE_NAME} .
 
 #登录docker仓库
-
+docker login -u harbor -p 123456 web.mooc.com
 
 #上床docker镜像到docker仓库
 docker push ${IMAGE_NAME}

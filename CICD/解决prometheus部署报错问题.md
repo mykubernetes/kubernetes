@@ -51,6 +51,12 @@ NAME      TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)     AGE
 kubelet   ClusterIP   None         <none>        10250/TCP   3d
 ```
 
+查看是否发现后端服务
+```
+# kubectl get ep -n kube-system |grep kubelet
+kubelet                                        10.4.192.35:10255,10.4.192.35:4194,10.4.192.35:10250       3d
+```
+
 3、查看crd是否部署成功
 ```
 # kubectl get crd |grep coreos
@@ -330,6 +336,12 @@ NAME                                  TYPE        CLUSTER-IP   EXTERNAL-IP   POR
 kube-scheduler-prometheus-discovery   ClusterIP   None         <none>        10251/TCP   3d
 ```
 
+查看是否发现后端服务
+```
+# kubectl get ep -n kube-system |grep kube-scheduler
+kube-scheduler-prometheus-discovery            10.4.192.35:10251,10.4.192.35:10251                        3d
+```
+
 10、解决kube-controller未发现相关pod  
 查看标签
 ```
@@ -364,4 +376,10 @@ spec:
 # kubectl get svc -n kube-system -l k8s-app=kube-controller-manager
 NAME                                           TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)     AGE
 kube-controller-manager-prometheus-discovery   ClusterIP   None         <none>        10252/TCP   3d
+```
+
+查看是否发现后端服务
+```
+# kubectl get ep -n kube-system |grep controller
+kube-controller-manager-prometheus-discovery   10.4.192.35:10252                                          3d
 ```

@@ -51,6 +51,14 @@ NAME      TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)     AGE
 kubelet   ClusterIP   None         <none>        10250/TCP   3d
 ```
 
+此处忽略，理解即可
+```
+  endpoints:
+  - port: http
+    scheme: http
+    path: /prometheus/metrics
+```
+
 查看是否发现后端服务
 ```
 # kubectl get ep -n kube-system |grep kubelet

@@ -107,3 +107,240 @@ kubectl edit svc -n monitoring alertmanager-main
 
 修改 type: NodePort
 ```  
+
+
+8、解决kube-controller连接拒绝的问题
+```
+# cat /etc/kubernetes/manifests/kube-controller-manager-kubeconfig.yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-controller-manager
+  namespace: kube-system
+  labels:
+    k8s-app: kube-controller-manager
+  annotations:
+    kubespray.etcd-cert/serial: "840C46312E82CBFB"
+    kubespray.controller-manager-cert/serial: "C22517CF831DDCC5"
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirst
+  containers:
+  - name: kube-controller-manager
+    image: 10.4.192.35:5000/quay.io/coreos/hyperkube:v1.9.0_viper_pach3_coreos.0
+    imagePullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1024M
+      requests:
+        cpu: 100m
+        memory: 100M
+    command:
+    - /hyperkube
+    - controller-manager
+    - --kubeconfig=/etc/kubernetes/kube-controller-manager-kubeconfig.yaml
+    - --leader-elect=true
+    - --service-account-private-key-file=/etc/kubernetes/ssl/apiserver-key.pem
+    - --root-ca-file=/etc/kubernetes/ssl/ca.pem
+    - --cluster-signing-cert-file=/etc/kubernetes/ssl/ca.pem
+    - --cluster-signing-key-file=/etc/kubernetes/ssl/ca-key.pem
+    - --enable-hostpath-provisioner=false
+    - --node-monitor-grace-period=60s
+    - --node-monitor-period=20s
+    - --pod-eviction-timeout=10s
+    - --profiling=false
+    - --terminated-pod-gc-threshold=12500
+    - --v=2
+    - --use-service-account-credentials=true
+    - --allocate-node-cidrs=true
+    - --cluster-cidr=10.224.0.0/13
+    - --service-cluster-ip-range=10.233.0.0/18
+    - --node-cidr-mask-size=24
+    - --feature-gates=CustomPodDNS=true,Initializers=true,PersistentLocalVolumes=true,VolumeScheduling=true,MountPropagation=true,Accelerators=true
+    - --address=127.0.0.1     #将监听地址修改为0.0.0.0
+    livenessProbe:
+      httpGet:
+        host: 127.0.0.1
+        path: /healthz
+        port: 10252
+      initialDelaySeconds: 30
+      timeoutSeconds: 10
+    volumeMounts:
+    - mountPath: /etc/ssl
+      name: ssl-certs-host
+      readOnly: true
+    - mountPath: /etc/pki/tls
+      name: etc-pki-tls
+      readOnly: true
+    - mountPath: /etc/pki/ca-trust
+      name: etc-pki-ca-trust
+      readOnly: true
+    - mountPath: "/etc/kubernetes/ssl"
+      name: etc-kube-ssl
+      readOnly: true
+    - mountPath: "/etc/kubernetes/kube-controller-manager-kubeconfig.yaml"
+      name: kubeconfig
+      readOnly: true
+  volumes:
+  - name: ssl-certs-host
+    hostPath:
+      path: /etc/ssl
+  - name: etc-pki-tls
+    hostPath:
+      path: /etc/pki/tls
+  - name: etc-pki-ca-trust
+    hostPath:
+      path: /etc/pki/ca-trust
+  - name: etc-kube-ssl
+    hostPath:
+      path: "/etc/kubernetes/ssl"
+  - name: kubeconfig
+    hostPath:
+      path: "/etc/kubernetes/kube-controller-manager-kubeconfig.yaml"
+```  
+# 修改完成后将配置文件移除，再移入
+
+
+9、解决kube-scheduler连接拒绝的问题
+```
+# cat /etc/kubernetes/manifests/kube-scheduler.manifest
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kube-scheduler
+  namespace: kube-system
+  labels:
+    k8s-app: kube-scheduler
+  annotations:
+    kubespray.scheduler-cert/serial: "C22517CF831DDCC4"
+spec:
+  hostNetwork: true
+  dnsPolicy: ClusterFirst
+  containers:
+  - name: kube-scheduler
+    image: 10.4.192.35:5000/quay.io/coreos/hyperkube:v1.9.0_viper_pach3_coreos.0
+    imagePullPolicy: IfNotPresent
+    resources:
+      limits:
+        cpu: 1000m
+        memory: 1024M
+      requests:
+        cpu: 80m
+        memory: 170M
+    command:
+    - /hyperkube
+    - scheduler
+    - --leader-elect=true
+    - --kubeconfig=/etc/kubernetes/kube-scheduler-kubeconfig.yaml
+    - --use-legacy-policy-config
+    - --policy-config-file=/etc/kubernetes/kube-scheduler-policy.json
+    - --profiling=false
+    - --v=2
+    - --feature-gates=CustomPodDNS=true,Initializers=true,PersistentLocalVolumes=true,VolumeScheduling=true,MountPropagation=true,Accelerators=true
+    - --address=127.0.0.1          #将监听地址修改为0.0.0.0
+    livenessProbe:
+      httpGet:
+        host: 127.0.0.1
+        path: /healthz
+        port: 10251
+      initialDelaySeconds: 30
+      timeoutSeconds: 10
+    volumeMounts:
+    - mountPath: /etc/ssl
+      name: ssl-certs-host
+      readOnly: true
+    - mountPath: /etc/pki/tls
+      name: etc-pki-tls
+      readOnly: true
+    - mountPath: /etc/pki/ca-trust
+      name: etc-pki-ca-trust
+      readOnly: true
+    - mountPath: "/etc/kubernetes/ssl"
+      name: etc-kube-ssl
+      readOnly: true
+    - mountPath: "/etc/kubernetes/kube-scheduler-kubeconfig.yaml"
+      name: kubeconfig
+      readOnly: true
+    - mountPath: "/etc/kubernetes/kube-scheduler-policy.json"
+      name: kube-scheduler-policy
+      readOnly: true
+  volumes:
+  - name: ssl-certs-host
+    hostPath:
+      path: /etc/ssl
+  - name: etc-pki-tls
+    hostPath:
+      path: /etc/pki/tls
+  - name: etc-pki-ca-trust
+    hostPath:
+      path: /etc/pki/ca-trust
+  - name: etc-kube-ssl
+    hostPath:
+      path: "/etc/kubernetes/ssl"
+  - name: kubeconfig
+    hostPath:
+      path: "/etc/kubernetes/kube-scheduler-kubeconfig.yaml"
+  - name: kube-scheduler-policy
+    hostPath:
+      path: "/etc/kubernetes/kube-scheduler-policy.json"
+```
+# 修改完成后将配置文件移除，再移入
+
+10、解决kube-scheduler未发现相关pod  
+查看标签
+```
+# kubectl get pod -n kube-system |grep kube-scheduler
+kube-scheduler                        1/1       Running            1          5h
+
+# kubectl describe  pod -n kube-system kube-scheduler |grep Labels:
+Labels:       k8s-app=kube-scheduler
+```
+
+自定义一个svc配置并应用注意标签配置
+```
+# cat prometheus-kubeSchedulerService.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: kube-system
+  name: kube-scheduler
+  labels:
+    k8s-app=kube-scheduler
+spec:
+  selector:
+    k8s-app=kube-controller-manager
+  ports:
+  - name: http-metrics
+    port: 10251
+    targetPort: 10251
+```  
+
+10、解决kube-controller未发现相关pod  
+查看标签
+```
+# kubectl get pod -n kube-system |grep kube-controller
+kube-controller-manager               1/1       Running            4          5h
+
+# kubectl describe pod kube-controller-manager -n kube-system |grep Labels:
+Labels:       k8s-app=kube-controller-manager
+```
+
+自定义一个svc配置并应用注意标签配置
+```
+# cat prometheus-kubeControllerService.yaml 
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: kube-system
+  name: kube-Controller
+  labels:
+    k8s-app: kube-Controller
+spec:
+  selector:
+    k8s-app=kube-controller-manager
+  ports:
+  - name: http-metrics
+    port: 10252
+    targetPort: 10252
+```  

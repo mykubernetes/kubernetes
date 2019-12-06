@@ -316,6 +316,13 @@ spec:
     targetPort: 10251
 ```  
 
+查看svc是否有标签
+```
+# kubectl get svc -n kube-system -l k8s-app=kube-scheduler
+NAME                                  TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)     AGE
+kube-scheduler-prometheus-discovery   ClusterIP   None         <none>        10251/TCP   3d
+```
+
 10、解决kube-controller未发现相关pod  
 查看标签
 ```
@@ -344,3 +351,10 @@ spec:
     port: 10252
     targetPort: 10252
 ```  
+
+查看svc是否有标签
+```
+# kubectl get svc -n kube-system -l k8s-app=kube-controller-manager
+NAME                                           TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)     AGE
+kube-controller-manager-prometheus-discovery   ClusterIP   None         <none>        10252/TCP   3d
+```

@@ -16,23 +16,23 @@ kind: ServiceMonitor
 metadata:
   labels:
     k8s-app: kubelet
-  name: kubelet
+  name: kubelet                    #定义的名称
   namespace: monitoring
 spec:
   endpoints:
   - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
     honorLabels: true
     interval: 30s
-    port: http-metrics              #去掉https-metrics的s
-    scheme: https
+    port: http-metrics              #去掉https-metrics的s    #这里定义的就是在svc上的端口名称
+    scheme: http                    #去掉https的s
 #    tlsConfig:                     #注释证书
 #      insecureSkipVerify: true     #
   - bearerTokenFile: /var/run/secrets/kubernetes.io/serviceaccount/token
     honorLabels: true
     interval: 30s
     path: /metrics/cadvisor
-    port: http-metrics              #去掉https-metrics的s
-    scheme: https
+    port: http-metrics              #去掉https-metrics的s    #这里定义的就是在svc上的端口名称
+    scheme: http                    #去掉https的s
 #    tlsConfig:                     #注释证书
 #      insecureSkipVerify: true     #
   jobLabel: k8s-app
@@ -97,4 +97,13 @@ prometheus-adapter      ClusterIP   10.105.34.241           443/TCP             
 prometheus-k8s          ClusterIP   10.102.246.32           9090/TCP            59m
 prometheus-operated     ClusterIP   None                    9090/TCP            57m
 prometheus-operator     ClusterIP   None                    8080/TCP            59m
+```  
+
+7、集群外访问prometheus
+```
+kubectl edit svc -n monitoring prometheus-k8s
+kubectl edit svc -n monitoring grafana
+kubectl edit svc -n monitoring alertmanager-main
+
+修改 type: NodePort
 ```  

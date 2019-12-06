@@ -44,6 +44,13 @@ spec:
       k8s-app: kubelet
 ```
 
+查看svc是否有标签
+```
+# kubectl get svc -n kube-system -l k8s-app=kubelet
+NAME      TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)     AGE
+kubelet   ClusterIP   None         <none>        10250/TCP   3d
+```
+
 3、查看crd是否部署成功
 ```
 # kubectl get crd |grep coreos

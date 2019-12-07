@@ -130,4 +130,47 @@ spec:
 
 关于 ServiceMonitor 属性的更多用法可以查看文档：https://github.com/coreos/prometheus-operator/blob/master/Documentation/api.md
 
+创建 Service
+---
 
+ServiceMonitor 创建完成了，但是现在还没有关联的对应的 Service 对象，所以需要我们去手动创建一个 Service 对象
+
+# vim prometheus-etcdService.yaml
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: etcd-k8s
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: port
+    port: 2379
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  name: etcd-k8s
+  namespace: kube-system
+  labels:
+    k8s-app: etcd
+subsets:
+- addresses:
+  - ip: 10.151.30.57
+    nodeName: etc-master
+  ports:
+  - name: port
+    port: 2379
+    protocol: TCP
+```
+
+应用配置文件
+```
+$ kubectl create -f prometheus-etcdService.yaml
+```

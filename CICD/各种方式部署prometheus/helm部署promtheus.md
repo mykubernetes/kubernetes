@@ -465,3 +465,17 @@ kubelet:
 ##
 ```
 
+更新
+---
+```
+# helm upgrade prom ./prometheus-operator/ -f ./prometheus-operator/values.yaml
+如果报错，删除重新安装
+
+删除prom和对应crd
+#helm delete prom --purge
+#kubectl delete crd $(kubectl get crd |grep cores |awk '{print $1}')
+
+重新部署
+# helm install ./prometheus-operator/ --name prom --namespace monitoring
+
+```

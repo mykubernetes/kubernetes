@@ -1,5 +1,17 @@
 二进制部署需要修改
 
+安装
+```
+# git clone https://github.com/helm/charts.git
+# cp -r charts/stable/prometheus-operator/ .
+# mkdir /prometheus-operator/
+# cp -r charts/stable/kube-state-metrics/ /prometheus-operator/charts/
+# cp -r charts/stable/prometheus-node-exporter/ /prometheus-operator/charts/
+# cp -r charts/stable/grafana/ /prometheus-operator/charts/
+# helm install ./prometheus-operator/ --name prom --namespace monitoring
+```
+
+
 发现ControllerManager
 ---
 ```

@@ -65,6 +65,11 @@ kubelet   ClusterIP   None         <none>        10250/TCP   3d
 kubelet                                        10.4.192.35:10255,10.4.192.35:4194,10.4.192.35:10250       3d
 ```
 
+如果kubelet需要认证，需要手动添加正式测试
+```
+curl -k --cert /etc/kubernetes/ssl/node.pem --key /etc/kubernetes/ssl/node-key.pem https://10.4.192.35:10250/metrics/cadvisor
+```
+
 3、查看crd是否部署成功
 ```
 # kubectl get crd |grep coreos

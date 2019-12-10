@@ -396,3 +396,79 @@ kube-controller-manager-prometheus-discovery   ClusterIP   None         <none>  
 # kubectl get ep -n kube-system |grep controller
 kube-controller-manager-prometheus-discovery   10.4.192.35:10252                                          3d
 ```
+
+
+
+# 二进制部署k8s管理组件和新版本kubeadm部署的都会发现在prometheus server的页面上发现kube-controller和kube-schedule的target为0/0。这是因为serviceMonitor是根据label去选取svc的，可以看到对应的serviceMonitor是选取的ns范围是kube-system
+```
+
+# 解决方法
+kubectl apply -f other/kube-controller-manager-svc-ep.yaml
+kubectl apply -f other/kube-scheduler-svc-ep.yaml
+
+# vim kube-controller-manager-svc-ep.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: kube-system
+  name: kube-controller-manager
+  labels:
+    k8s-app: kube-controller-manager
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: http-metrics
+    port: 10252
+    targetPort: 10252
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  labels:
+    k8s-app: kube-controller-manager
+  name: kube-controller-manager
+  namespace: kube-system
+subsets:
+- addresses:
+  - ip: 172.16.3.9
+  ports:
+  - name: http-metrics
+    port: 10252
+    protocol: TCP
+    
+# vim kube-scheduler-svc-ep.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  namespace: kube-system
+  name: kube-scheduler
+  labels:
+    k8s-app: kube-scheduler
+spec:
+  type: ClusterIP
+  clusterIP: None
+  ports:
+  - name: http-metrics
+    port: 10251
+    targetPort: 10251
+    protocol: TCP
+
+---
+apiVersion: v1
+kind: Endpoints
+metadata:
+  labels:
+    k8s-app: kube-scheduler
+  name: kube-scheduler
+  namespace: kube-system
+subsets:
+- addresses:
+  - ip: 172.16.3.9
+  ports:
+  - name: http-metrics
+    port: 10251
+    protocol: TCP
+```

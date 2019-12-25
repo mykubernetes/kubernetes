@@ -17,6 +17,9 @@ pod的几种常见状态
 - Unkown 为api_server没有收到相关pod的汇报（kubelet和api的通信问题）
 - Terminating 为pod终止时的状态
 
+解决pod一直未被终止问题  
+kubectl delete pod [pod name] --force --grace-period=0 -n [namespace]  
+
 pod生命周期  
 ![image](https://github.com/mykubernetes/linux-install/blob/master/image/pod_lifecycle.png)  
 

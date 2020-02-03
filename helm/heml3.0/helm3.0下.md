@@ -1,4 +1,4 @@
-## 3.6 Chart模板
+## Chart模板
 
 Helm最核心的就是模板，即模板化的K8S manifests文件。
 

@@ -4,7 +4,7 @@
 
 K8S上的应用对象，都是由特定的资源描述组成，包括deployment、service等。都保存各自文件中或者集中写到一个配置文件。然后kubectl apply –f 部署。
 
-![](https://k8s-1252881505.cos.ap-beijing.myqcloud.com/k8s-2/yaml-all.png)
+![image](https://k8s-1252881505.cos.ap-beijing.myqcloud.com/k8s-2/yaml-all.png)
 
 如果应用只由一个或几个这样的服务组成，上面部署方式足够了。
 

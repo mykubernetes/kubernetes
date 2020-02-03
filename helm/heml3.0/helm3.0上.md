@@ -703,7 +703,3 @@ env:
              value: world
 
 
-
->讲师：李振良
->
->官方网站： http://www.ctnrs.com  

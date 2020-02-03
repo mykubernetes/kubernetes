@@ -138,7 +138,7 @@ helm repo remove aliyun
 
 - chart install
 
-- chart update
+- chart upgrade
 
 - chart rollback
 

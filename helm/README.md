@@ -120,6 +120,10 @@ helm常用命令
 安装  
 # helm install --name mysql stable/mysql
 
+
+查看渲染后的yaml文件
+# helm get manifest mysql
+
 修改配置安装
 # helm install stable/mysql --set service.type=NodePort
 

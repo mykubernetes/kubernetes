@@ -584,7 +584,7 @@ metadata:
 
 上面包含一个名为 `demo.labels` 的模板，然后将值 `.` 传递给模板，最后将该模板的输出传递给 `nindent` 函数。
 
-## 3.7 开发自己的Chart：Java应用为例
+## 开发自己的Chart：Java应用为例
 
 1. 先创建模板
 
@@ -597,7 +597,7 @@ metadata:
 3. 在templates目录下创建部署镜像所需要的yaml文件，并变量引用yaml里经常变动的字段
 
 
-## 3.8 使用Harbor作为Chart仓库
+## 使用Harbor作为Chart仓库
 
 **1、启用Harbor的Chart仓库服务**
 

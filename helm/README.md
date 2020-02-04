@@ -158,6 +158,9 @@ helm delete mysql --purge
 生成模板文件
 # helm template . --name istio --name istio-system > istio.yaml
 
+将charts文件打包
+# helm package mychart/
+mychart-0.1.0.tgz
 ```  
 
 

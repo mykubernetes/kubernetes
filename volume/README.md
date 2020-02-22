@@ -4,6 +4,8 @@ https://github.com/mykubernetes/examples/tree/master/staging/volumes
 PV PVC  
 https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes  
 
+https://github.com/kubernetes-incubator/external-storage
+---
 
 1、访问模式
 accessModes支持的访问模式有：

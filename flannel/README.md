@@ -264,44 +264,44 @@ net-conf.json: |
 
 1. **容器路由：**容器根据路由表从eth0发出
 
-   ```
-   / # ip route
-   default via 10.244.0.1 dev eth0 
-   10.244.0.0/24 dev eth0 scope link  src 10.244.0.45 
-   10.244.0.0/16 via 10.244.0.1 dev eth0 
-   ```
+```
+/ # ip route
+default via 10.244.0.1 dev eth0 
+10.244.0.0/24 dev eth0 scope link  src 10.244.0.45 
+10.244.0.0/16 via 10.244.0.1 dev eth0 
+```
 
  2. **主机路由：**数据包进入到宿主机虚拟网卡cni0，根据路由表转发到flannel.1虚拟网卡，也就是，来到了隧道的入口。
 
-    ```
-    # ip route
-    default via 192.168.31.1 dev ens33 proto static metric 100 
-    10.244.0.0/24 dev cni0 proto kernel scope link src 10.244.0.1 
-    10.244.1.0/24 via 10.244.1.0 dev flannel.1 onlink 
-    10.244.2.0/24 via 10.244.2.0 dev flannel.1 onlink 
-    ```
+```
+# ip route
+default via 192.168.31.1 dev ens33 proto static metric 100 
+10.244.0.0/24 dev cni0 proto kernel scope link src 10.244.0.1 
+10.244.1.0/24 via 10.244.1.0 dev flannel.1 onlink 
+10.244.2.0/24 via 10.244.2.0 dev flannel.1 onlink 
+```
 
   3. **VXLAN封装：**而这些VTEP设备（二层）之间组成二层网络必须要知道目的MAC地址。这个MAC地址从哪获取到呢？其实在flanneld进程启动后，就会自动添加其他节点ARP记录，可以通过ip命令查看，如下所示：
 
-     ```
-     # ip neigh show dev flannel.1
-     10.244.1.0 lladdr ca:2a:a4:59:b6:55 PERMANENT
-     10.244.2.0 lladdr d2:d0:1b:a7:a9:cd PERMANENT
-     ```
+```
+# ip neigh show dev flannel.1
+10.244.1.0 lladdr ca:2a:a4:59:b6:55 PERMANENT
+10.244.2.0 lladdr d2:d0:1b:a7:a9:cd PERMANENT
+```
 
 4. **二次封包：**知道了目的MAC地址，封装二层数据帧（容器源IP和目的IP）后，对于宿主机网络来说这个帧并没有什么实际意义。接下来，Linux内核还要把这个数据帧进一步封装成为宿主机网络的一个普通数据帧，好让它载着内部数据帧，通过宿主机的eth0网卡进行传输。
 
-   ![](https://k8s-1252881505.cos.ap-beijing.myqcloud.com/k8s-2/vxlan-pkg.png)
+![](https://k8s-1252881505.cos.ap-beijing.myqcloud.com/k8s-2/vxlan-pkg.png)
 
 5. **封装到UDP包发出去：**现在能直接发UDP包嘛？到目前为止，我们只知道另一端的flannel.1设备的MAC地址，却不知道对应的宿主机地址是什么。
 
    flanneld进程也维护着一个叫做FDB的转发数据库，可以通过bridge fdb命令查看：
 
-   ```
+```
 # bridge fdb show  dev flannel.1
    d2:d0:1b:a7:a9:cd dst 192.168.31.61 self permanent
    ca:2a:a4:59:b6:55 dst 192.168.31.63 self permanent
-   ```
+```
    
    可以看到，上面用的对方flannel.1的MAC地址对应宿主机IP，也就是UDP要发往的目的地。使用这个目的IP进行封装。
 

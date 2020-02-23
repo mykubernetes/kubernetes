@@ -235,8 +235,8 @@ kubeadm init --pod-network-cidr=10.244.0.0/16
 
 # 二进制部署指定
 cat /opt/kubernetes/cfg/kube-controller-manager.conf
---allocate-node-cidrs=true \
---cluster-cidr=10.244.0.0/16 \
+--allocate-node-cidrs=true \      #允许node自动分配网络
+--cluster-cidr=10.244.0.0/16 \    #指定pod网络的网段
 ```
 
 

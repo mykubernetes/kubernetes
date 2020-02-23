@@ -1,7 +1,7 @@
 
 K8S集群网络
 
-## 4.1 网络基础知识
+## 网络基础知识
 
 ### 1、公司网络架构
 
@@ -207,7 +207,7 @@ CNI配置文件路径：
  --cni-bin-dir=/opt/cni/bin
 ```
 
-## 4.3 Kubernetes网络组件之 Flannel
+## Kubernetes网络组件之 Flannel
 
 Flannel是CoreOS维护的一个网络组件，Flannel为每个Pod提供全局唯一的IP，Flannel使用ETCD来存储Pod子网与Node IP之间的关系。flanneld守护进程在每台主机上运行，并负责维护ETCD信息和路由数据包。
 

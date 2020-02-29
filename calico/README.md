@@ -128,7 +128,8 @@ Calico 维护的网络在默认是（Node-to-Node Mesh）全互联模式，Calic
 
 确定一个或多个Calico节点充当路由反射器，让其他节点从这个RR节点获取路由信息。
 
-具体步骤如下：  
+具体步骤如下：
+
 1、关闭node-to-node BGP网络
 ---
 添加default BGP配置，调整nodeToNodeMeshEnabled和asNumber:

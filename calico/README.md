@@ -11,7 +11,7 @@ Calico在每一个计算节点利用Linux Kernel 实现了一个高效的虚拟�
 实际上，Calico项目提供的网络解决方案，与Flannel的host-gw模式几乎一样。也就是说，Calico也是基于路由表实现容器的数据包转发，但不同于Flannel使用flanneld进程来维护路由信息的做法，而Calico项目使用BGP协议来自动维护整个集群的路由信息。
 
 BGP英文全称是Border Gateway Protocol,即边界网关协议，它是一种自治系统间的动态路由发现协议，与其他BGP系统交换网络可达信息。
-
+![image](https://github.com/mykubernetes/kubernetes/blob/master/calico/image/BGP1.png)
 
 在这个图中，有两个自治系统（autonomous system,简称为AS）: AS1 和 AS2。
 
@@ -20,3 +20,4 @@ BGP英文全称是Border Gateway Protocol,即边界网关协议，它是一种�
 在正常情况下，自治系统之间不会有任何来往。如果两个自治系统里的主机，要通过IP地址直接进行通信，我们就必须使用路由器把这两个自治系统连起来。BGP协议就是让他们互联的一种方式。
 
 2、Calico BGP实现
+---

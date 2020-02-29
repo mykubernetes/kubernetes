@@ -1,0 +1,7 @@
+kubernetes网络方案值Calico
+===
+Calico是一个纯三层的数据中心网络方案，Calico支持广泛的平台，包括kubernetes、OpenStack等。
+
+Calico在每一个计算节点利用Linux Kernel 实现了一个高效的虚拟路由器（vRouter）来负责数据转发，而每个vRouter通过BGP协议负责把自己上运行的workload的路由信息向整个Calico 网络内传输。
+
+此外，Calico项目还实现了Kubernetes网络策略，提供ACL功能

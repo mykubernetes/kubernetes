@@ -83,5 +83,14 @@ IPv4 BGP status
 IPv6 BGP status
 No IPv6 peers found.
 
+# calicoctl get nodes
+NAME
+k8s-master1
+k8s-node1
+k8s-node2
 
+查看IPAM的IP地址池：
+# calicoctl get ippool
+NAME                     CIDR                  SELECTOR
+default-ipv4-ippool      10.244.0.0/16         all() 
 ```

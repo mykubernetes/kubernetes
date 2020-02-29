@@ -67,3 +67,21 @@ spec:
   etcdCertFile: "/opt/etcd/ssl/server.pem"
   etcdCACertFile: "/opt/etcd/ssl/ca.pem"
 ```
+使用calicoctl查看服务状态
+```
+# calicoctl node status
+Calico process is running.
+
+IPv4 BGP status
++---------------+-------------------+-------+----------+-------------+
+| PEER ADDRESS  |     PEER TYPE     | STATE |  SINCE   |    INFO     |
++---------------+-------------------+-------+----------+-------------+
+| 192.168.31.63 | node-to-node mesh | up    | 09:03:56 | Established |
+| 192.168.31.62 | node-to-node mesh | up    | 09:04:08 | Established |
++---------------+-------------------+-------+----------+-------------+
+
+IPv6 BGP status
+No IPv6 peers found.
+
+
+```

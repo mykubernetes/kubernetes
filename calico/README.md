@@ -23,5 +23,17 @@ BGP英文全称是Border Gateway Protocol,即边界网关协议，它是一种�
 ---
 ![image](https://github.com/mykubernetes/kubernetes/blob/master/calico/image/calico%20BGP%E5%AE%9E%E7%8E%B0.png)
 
+Calico主要由三个部分组成：
+
+- Felix: 以DaemonSet方式部署，运行在每一个Node节点上，主要负责维护宿主机上路由规则以及ACL规则。
+- BGP Client (BIRD): 主要负责把Felix写入kernel的路由信息分发到集群Calico网络。
+- Etcd: 分布式键值存储，保存Calico的策略和网络配置状态。
+- calicoctl: 允许您从简单的命令行界面实现高级策略和网络。
+
+3、Calico 部署
+---
+```
+crul https://docs.projectcalico.org/v3.9/manifests/calico-etcd.yaml -o calico.yaml
+```
 
 

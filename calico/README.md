@@ -117,3 +117,30 @@ Pod 1 访问 Pod 2大致流程如下：
 10.244.235.192/26 via 192.168.31.61 dev ens33 proto bird
 ```
 其中，这里最核心的“下一跳”路由规则，就是由Calico的Felix进程负责维护的。这些路由规则信息，则是通过BGP Client也是就是BIRD组件，使用BGP协议传世而来的。
+
+6、Route Reflector 模式（RR）
+---
+https://docs.projectcalico.org/master/networking/bgp
+
+Calico 维护的网络在默认是（Node-to-Node Mesh）全互联模式，Calico集群中的节点之间都会相互建立连接，用于路由交换。但是随着集群规模的扩大，mesh模式将形成一个巨大服务网络，连接数成倍增加。
+
+这时就需要使用Route Reflector（路由器反射）模式解决这个问题。
+
+确定一个或多个Calico节点充当路由反射器，让其他节点从这个RR节点获取路由信息。
+
+具体步骤如下：  
+1、关闭node-to-node BGP网络
+---
+添加default BGP配置，调整nodeToNodeMeshEnabled和asNumber:
+```
+cat << EOF | calicoctl create -f -
+apiVersion: projectcalico.org/v3
+kind: BGPConfiguration
+metadata:
+  name: default
+spec:
+  logServerityScreen: Info
+  nodeToNodeMeshEnabled: false
+  asNumber: 63400
+EOF
+```

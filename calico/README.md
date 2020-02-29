@@ -181,3 +181,45 @@ spec:
     orchestrator: k8s
 ```
 现在，很容易使用标签选择器将路由反射器节点与其他非路由反射器节点配置为对等：
+```
+apiVersion: projectcalico.org/v3
+kind: BGPPeer
+metadata:
+  name: peer-with-route-reflectors
+spec:
+  nodeSelector: all()
+  peerSelector: route-reflector == 'true'
+```
+查看节点的BGP连接状态：
+```
+calicoctl node status
+```
+
+7、IPIP模式
+---
+在前面提到过，Flannel host-gw模式最主要的限制，就是要求集群宿主机之间是二层连通的。而这个限制于Calico来说，也同样存在。
+修改为IPIP模式：
+```
+# calicoctl get ipPool -o yaml > ipip.yaml
+# vim ipip.yaml
+apiVersion: projectcalico.org/v3
+kind: IPPool
+metadata:
+  name: default-ipv4-ippool
+spec:
+  blockSize: 26
+  cidr: 10.244.0.0/16
+  ipipMode: Always
+  natOutgoing: true
+
+# calicoctl apply -f ipip.yaml
+# calicoctl get ippool -o wide
+```
+
+Pod1 访问 Pod2 大致流程如下：
+  1.数据包从容器1出到达Veth Pair 另一端（宿主机上，以cali前缀开头）；
+  2.进入IP隧道设备（tunl0）,由Linux内核IPIP驱动封装在宿主机网络的IP包中（新的IP包目的地址源IP的下一跳地址，即192.168.31.63），这样就成了Node1到Node2的数据包；
+  3.数据包经过路由器三层转发到Node2;
+  4.Node2收到数据包后，网络协议栈会使用IPIP驱动进行解包，从中拿到原始IP包；
+  5.然后根据路由规则，根据路由规则将数据包转发给cali设备，从而到达容器2。
+路由表

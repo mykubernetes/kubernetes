@@ -53,3 +53,17 @@ crul https://docs.projectcalico.org/v3.9/manifests/calico-etcd.yaml -o calico.ya
 # wget -o /usr/local/bin/calicoctl https://github.com/projectcalico/calicoctl/releases/download/v3.9.1/calicoctl
 # chmod +x /usr/local/bin/calicoctl
 ```
+
+```
+# mkdir /etc/calico
+# vim /etc/calico/calicoctl.cfg
+apiVersion: projectcalico.org/v3
+kind: CalicoAPIConfig
+metadata:
+spec:
+  datastoreType: "etcdv3"
+  etcdEndpoints: "https://192.168.31.61:2379,https://192.168.31.62:2379,https://192.168.31.63:2379"
+  etcdKeyFile: "/opt/etcd/ssl/server-key.pem"
+  etcdCertFile: "/opt/etcd/ssl/server.pem"
+  etcdCACertFile: "/opt/etcd/ssl/ca.pem"
+```

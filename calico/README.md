@@ -35,5 +35,21 @@ Calico主要由三个部分组成：
 ```
 crul https://docs.projectcalico.org/v3.9/manifests/calico-etcd.yaml -o calico.yaml
 ```
+下载完成后还需要修改里面配置项：
+具体步骤如下：
+- 配置连接etcd地址，如果使用https,还需要配置证书。
+- 根据实际网络规划修改Pod CIDR(CALICO_IPV4POOL_CIDR)。
+- 选择工作模式(CALICO_IPV4POOL_CIDR)，支持BGP,IPIP。
+修改完成应用清单：
+```
+# kubectl apply -f calico.yaml
+# kubectl get pods -n kube-system
+```
 
-
+4、Calico管理工具
+---
+下载工具：https://github.com/projectcalico/calicoctl/releases
+```
+# wget -o /usr/local/bin/calicoctl https://github.com/projectcalico/calicoctl/releases/download/v3.9.1/calicoctl
+# chmod +x /usr/local/bin/calicoctl
+```

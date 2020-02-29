@@ -98,6 +98,7 @@ default-ipv4-ippool      10.244.0.0/16         all()
 5、Calico BGP 原理剖析
 ---
 
+![image](https://github.com/mykubernetes/kubernetes/blob/master/calico/image/calico2.png)
 
 Pod 1 访问 Pod 2大致流程如下：
   1.数据包从容器1出到达Veth Pair另一端（宿主机上，以cali前缀开头）；

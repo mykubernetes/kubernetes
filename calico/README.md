@@ -100,10 +100,10 @@ default-ipv4-ippool      10.244.0.0/16         all()
 
 ![image](https://github.com/mykubernetes/kubernetes/blob/master/calico/image/calico2.png)
 
-Pod 1 访问 Pod 2大致流程如下：
-  1.数据包从容器1出到达Veth Pair另一端（宿主机上，以cali前缀开头）；
-  2.宿主机根据路由规则，将数据包转发给下一条（网关）；
-  3.到达Node2,根据路由规则将数据包转发给cali设备，从而到达容器2。
+Pod 1 访问 Pod 2大致流程如下：  
+  1.数据包从容器1出到达Veth Pair另一端（宿主机上，以cali前缀开头）；  
+  2.宿主机根据路由规则，将数据包转发给下一条（网关）；  
+  3.到达Node2,根据路由规则将数据包转发给cali设备，从而到达容器2。  
 
 路由表：
 ```
@@ -215,11 +215,11 @@ spec:
 # calicoctl apply -f ipip.yaml
 # calicoctl get ippool -o wide
 ```
-
-Pod1 访问 Pod2 大致流程如下：
-  1.数据包从容器1出到达Veth Pair 另一端（宿主机上，以cali前缀开头）；
-  2.进入IP隧道设备（tunl0）,由Linux内核IPIP驱动封装在宿主机网络的IP包中（新的IP包目的地址源IP的下一跳地址，即192.168.31.63），这样就成了Node1到Node2的数据包；
-  3.数据包经过路由器三层转发到Node2;
-  4.Node2收到数据包后，网络协议栈会使用IPIP驱动进行解包，从中拿到原始IP包；
-  5.然后根据路由规则，根据路由规则将数据包转发给cali设备，从而到达容器2。
+![image](https://github.com/mykubernetes/kubernetes/blob/master/calico/image/calico3.png)  
+Pod1 访问 Pod2 大致流程如下：  
+  1.数据包从容器1出到达Veth Pair 另一端（宿主机上，以cali前缀开头）；  
+  2.进入IP隧道设备（tunl0）,由Linux内核IPIP驱动封装在宿主机网络的IP包中（新的IP包目的地址源IP的下一跳地址，即192.168.31.63），这样就成了Node1到Node2的数据包；  
+  3.数据包经过路由器三层转发到Node2;  
+  4.Node2收到数据包后，网络协议栈会使用IPIP驱动进行解包，从中拿到原始IP包；  
+  5.然后根据路由规则，根据路由规则将数据包转发给cali设备，从而到达容器2。  
 路由表

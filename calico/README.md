@@ -145,3 +145,39 @@ spec:
   asNumber: 63400
 EOF
 ```
+ASN号可以通过获取# calicoctl get nodes --output=wide
+
+2、配置指点节点充当路由反射器
+---
+为方便让BGPPeer轻松选择节点，通过标签选择器匹配。
+
+给路由器反射节点打标签：
+```
+kubectl label node my-node route-reflector=true
+```
+然后配置路由器反射器节点routeReflectorClusterID:
+```
+# calicoctl get node k8s-node2 -o yaml > node.yaml
+
+apiVersion: projectcalico.org/v3
+kind: Node
+metadata:
+  annotation:
+    projectcalico.org/kube-labels: '{"beta.kubernetes.io/arch": "amd64","beta.kubernetes.io/os": "linux","kubernetes.io/arch": "amd64","kubernetes.io/hostname": "k8s-node2","kubernetes.io/os": "linux"}'
+  creationTimestamp: null
+  labels:
+    beta.kubernetes.io/arch: amd64
+    beta.kubernetes.io/os: linux
+    kubernetes.io/arch: amd64
+    kubernetes.io/hostname: k8s-node2
+    kubernetes.io/os: linux
+  name: k8s-node2
+spec:
+  bgp:
+    ipv4Address: 192.168.31.63/24
+    routeReflectorClusterID: 244.0.0.1   #集群ID
+  orchRefs:
+  - nodeName: k8s-node2
+    orchestrator: k8s
+```
+现在，很容易使用标签选择器将路由反射器节点与其他非路由反射器节点配置为对等：

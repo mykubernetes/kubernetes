@@ -223,3 +223,12 @@ Pod1 访问 Pod2 大致流程如下：
   4.Node2收到数据包后，网络协议栈会使用IPIP驱动进行解包，从中拿到原始IP包；  
   5.然后根据路由规则，根据路由规则将数据包转发给cali设备，从而到达容器2。  
 路由表
+```
+#node1
+10.244.36.65 dev cali4f18ce2c9a1 scope link
+10.244.169.128/26 via 192.168.31.63 dev tunl0 proto bird onlink
+#node2
+10.244.169.129 dev calia4df18ce2c9a1 scope link
+10.244.36.64/26 via 192.168.31.62 dev tunl0 proto bird onlink
+```
+不难看到，当Calico使用IPIP模式的时候，集群的网络性能可能会因为额外的封包和解包工作而下降所以建议你将所有宿主机节点放在一个子网里，避免使用IPIP.

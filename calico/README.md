@@ -21,8 +21,6 @@ BGP英文全称是Border Gateway Protocol,即边界网关协议，它是一种�
 
 2、Calico BGP实现
 ---
-
-
 ![image](https://github.com/mykubernetes/kubernetes/blob/master/calico/image/calico%20BGP%E5%AE%9E%E7%8E%B0.png)
 
 

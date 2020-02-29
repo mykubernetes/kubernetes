@@ -94,3 +94,25 @@ k8s-node2
 NAME                     CIDR                  SELECTOR
 default-ipv4-ippool      10.244.0.0/16         all() 
 ```
+
+5、Calico BGP 原理剖析
+---
+
+
+Pod 1 访问 Pod 2大致流程如下：
+  1.数据包从容器1出到达Veth Pair另一端（宿主机上，以cali前缀开头）；
+  2.宿主机根据路由规则，将数据包转发给下一条（网关）；
+  3.到达Node2,根据路由规则将数据包转发给cali设备，从而到达容器2。
+
+路由表：
+```
+# node1
+10.244.36.65 dev cali4f18ce2c9a1 scope link
+10.244.169.128/26 via 192.168.31.63 dev ens33 proto bird
+10.244.235.192/26 via 192.168.31.61 dev ens33 proto bird
+# node2
+10.244.169.129 dev calia4d5b2258bb scope link
+10.244.36.64/26 via 192.168.31.63 dev ens33 proto bird
+10.244.235.192/26 via 192.168.31.61 dev ens33 proto bird
+```
+其中，这里最核心的“下一跳”路由规则，就是由Calico的Felix进程负责维护的。这些路由规则信息，则是通过BGP Client也是就是BIRD组件，使用BGP协议传世而来的。

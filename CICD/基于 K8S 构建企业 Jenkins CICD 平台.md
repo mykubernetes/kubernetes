@@ -213,3 +213,7 @@ COPY helm kubectl /usr/bin/
 
 ENTRYPOINT ["jenkins-slave"]
 ```
+
+插件介绍：  
+https://github.com/jenkinsci/kubernetes-plugin  
+https://plugins.jenkins.io/kubernetes/  

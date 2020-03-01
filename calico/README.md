@@ -290,10 +290,68 @@ spec:
     - protocol: TCP
       port: 5978
 ```
+配置解析：
+- PodSelector: 用于选择策略应用到的Pod组
+- PolicyTypes: 其可以包括任一Ingress,Egress或两者。该policyTypes字段指示给定的策略用于Pod的入站流量、还是出站流量，或者两者都应用。如果未指定任何值，则默认为Ingress,如果网络策略有出口规则，则设置egress.
+- Ingress: from是可以访问的白名单，可以来自于IP段、命名空间、Pod标签等，ports是可以访问的端口。
+- Egress: 这个Pod组可以访问外部的IP段和端口
 
+3、入站、出站网络流量访问控制案例
+---
+Pod访问限制  
+准备测试环境，一个web pod,两个client pod
+```
+kubectl create deployment web --image=nginx
+kubectl run client1 --generator=run-pod/v1 --image=busybox --command -- sleep 36000
+kubectl run client2 --generator=run-pod/v1 --image=busybox --command -- sleep 36000
+kubectl get pods --show-labels
+```
+需求： 将default命名空间携带run=web标签的Pod隔离，只允许default命名空间携带run=client1标签的Pod访问80端口
+```
+apiVersion: networking.k8s.io/v1
+kind: Networkpolicy
+metadata:
+  name: test-network-policy
+  namespace: default
+spec:
+  podSelector:
+    matchLabels:
+      app: web
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - namespaceSelector:
+        matchLabels:
+          run: client1
+    ports:
+    - protocol: TCP
+      port: 80
+```
+隔离策略配置：  
+Pod对象： default命名空间携带run=web标签的pod  
+允许访问端口： 80  
+允许访问对象： default命名空间携带run=client1标签的Pod  
+拒绝访问对象： 除允许访问对象外的所有对象  
 
-
-
+命名空间隔离：  
+需求： default命名空间下所有pod可以互相访问，但不能访问其他命名空间Pod,其他命名空间也不能访问default命名空间Pod。
+```
+apiVersion: networking.k8s.io/v1
+kind: Networkpolicy
+metadata:
+  name: deny-from-other-namespaces
+  namespace: default
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+  ingress:
+  - from:
+    - podSelector: {}
+```
+podSelector: {} default命名空间下所有Pod
+from.podSelector: {} 如果未配置具体规则，默认不允许
 
 
 

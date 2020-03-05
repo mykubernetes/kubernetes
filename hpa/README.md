@@ -6,8 +6,6 @@
 
 ![](https://k8s-1252881505.cos.ap-beijing.myqcloud.com/k8s-2/scaling-vs.png)
 
-​																		<图片来自网络>
-
 蓝色水位线表示集群资源容量随着负载的增加不断扩容，红色曲线表示集群资源实际负载变化。
 
 弹性伸缩就是要解决当实际负载增大，而集群资源容量没来得及反应的问题。
@@ -21,8 +19,6 @@
    在一个Kubernetes集群中，通常不只包含一种规格的机器，假设集群中存在4C8G与16C32G两种规格的机器，对于10%的资源预留，这两种规格代表的意义是完全不同的。
 
 ![](https://k8s-1252881505.cos.ap-beijing.myqcloud.com/k8s-2/scaling-machine-config.png)
-
-​																				<图片来自网络>
 
 特别是在缩容的场景下，为了保证缩容后集群稳定性，我们一般会一个节点一个节点从集群中摘除，那么如何判断节点是否可以摘除其利用率百分比就是重要的指标。此时如果大规格机器有较低的利用率被判断缩容，那么很有可能会造成节点缩容后，容器重新调度后的争抢。如果优先缩容小规格机器，则可能造成缩容后资源的大量冗余。
 
@@ -59,7 +55,7 @@
 如果在云上建议 HPA 结合 cluster-autoscaler 的方式进行集群的弹性伸缩管理。
 
 
-## 2.3 Node 自动扩容/缩容
+## Node 自动扩容/缩容
 
 ### 1、Cluster AutoScaler
 
@@ -132,7 +128,7 @@ kubectl delete node $node_name
 
 这样，我们平滑移除了一个 k8s 节点。
 
-## 2.4 Pod自动扩容/缩容（HPA）
+## Pod自动扩容/缩容（HPA）
 
 Horizontal Pod Autoscaler（HPA，Pod水平自动伸缩），根据资源利用率或者自定义指标自动调整replication controller, deployment 或 replica set，实现部署的自动扩展和缩减，让部署的规模接近于实际服务的负载。HPA不适于无法缩放的对象，例如DaemonSet。
 
@@ -233,7 +229,7 @@ spec:
         averageValue: 30
 ```
 
-## 2.5 基于CPU指标缩放
+## 基于CPU指标缩放
 
 ### 1、 Kubernetes API Aggregation 
 
@@ -497,7 +493,7 @@ spec:
 
 **工作流程：hpa -> apiserver -> kube aggregation  -> prometheus-adapter -> prometheus -> pods**
 
-## 2.6 基于Prometheus自定义指标缩放
+## 基于Prometheus自定义指标缩放
 
 资源指标只包含CPU、内存，一般来说也够了。但如果想根据自定义指标:如请求qps/5xx错误数来实现HPA，就需要使用自定义指标了，目前比较成熟的实现是 Prometheus Custom Metrics。自定义指标由Prometheus来提供，再利用k8s-prometheus-adpater聚合到apiserver，实现和核心指标（metric-server)同样的效果。
 

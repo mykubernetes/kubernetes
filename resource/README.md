@@ -219,3 +219,113 @@ Pod 参数：
 - max： Pod 中所有容器资源总和值上限。
 - min： Po 中所有容器资源总和值下限。
 - maxLimitRequestRatio： Pod 中全部容器设置 Limits 总和与 Requests 总和的比例的值不能超过 maxLimitRequestRatio 参数设置的值，即 (All Container Limits)/(All Container Requests) ≤ maxLimitRequestRatio。
+
+5、创建 Pod 来进行测试
+
+（1）、Container 默认值测试
+
+创建下面 Pod 对象，并观察创建后是否有默认的资源限制。
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+spec:
+  containers:
+  - name: nginx1
+    image: nginx:latest
+```
+查看 Pod 的描述信息，可以看到 Limits 和 Requests 的值和上面 LimitRange 中配置的默认值一致。
+```
+Containers:
+  nginx1:
+    Limits:
+      cpu:     1000m
+      memory:  512Mi
+    Requests:
+      cpu:     500m
+      memory:  256Mi
+```
+（2）、Container Max 限制测试
+
+上面设置 Max 中 CPU 和 Memory 的值分别为 2000m 与 1024Mi，下面创建一个 Pod 并设置其中某一个容器 limits 值超过 LimitRange 中设置的值，查看是否能起到限制作用。Pod 内容如下：
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+spec:
+  containers:
+  - name: nginx1
+    image: nginx:latest
+  - name: nginx2
+    image: nginx:latest
+    resources:
+      limits:
+        cpu: "3000m"
+        memory: "512Mi"
+```
+执行 Kubectl 命令创建 Pod 时并没有通过验证，并且已经提示 CPU 不能超过 2 个：
+```
+$ kubectl apply -f test.yaml -n limit-namespace
+
+Error from server (Forbidden): error when creating "test.yaml": 
+pods "test" is forbidden: maximum cpu usage per Container is 2, but limit is 3.
+```
+（3）、Container Min 限制测试
+
+上面设置 Min 中 CPU 和 Memory 的值分别为 10m 与 128Mi，下面创建一个 Pod 并设置其中某一个容器 Requests 值小于 LimitRange 中设置的值，是否能起到限制作用。Pod 内容如下：
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+spec:
+  containers:
+  - name: nginx1
+    image: nginx:latest
+  - name: nginx2
+    image: nginx:latest
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "64Mi"
+```
+执行 Kubectl 命令创建 Pod 时并没有通过验证，并且已经提示 Memory 不能低于 128Mi 大小：
+```
+$ kubectl apply -f test.yaml -n limit-namespace
+
+Error from server (Forbidden): error when creating "test.yaml": pods "test" is forbidden: 
+[minimum memory usage per Container is 128Mi, but request is 64Mi.
+, cpu max limit to request ratio per Container is 5, but provided ratio is 10.000000.
+, memory max limit to request ratio per Container is 5, but provided ratio is 8.000000.]
+```
+（4）、Container MaxLimitRequestRatio 限制测试
+
+上面 LimitRange 中设置 maxLimitRequestRatio 值为 5，就是限制 Pod 中容器 CPU 和 Memory 的 limit/request 的值小于 5,这里测试一下设置内存 limit/request 中值超过 5 创建 Pod 是否会报错。Pod 内容如下：
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test
+spec:
+  containers:
+  - name: nginx1
+    image: nginx:latest
+  - name: nginx2
+    image: nginx:latest
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "128Mi"
+      limits:
+        cpu: "200m"
+        memory: "1024Mi"
+```
+执行 Kubectl 命令创建 Pod 时并没有通过验证，并且已经提示 limit/request ratio 为 8，超过了限制的值 5：
+```
+$ kubectl apply -f test.yaml -n limit-namespace
+
+Error from server (Forbidden): error when creating "test.yaml": 
+pods "test" is forbidden: memory max limit to request ratio per Container is 5, but provided ratio is 8.000000.
+```

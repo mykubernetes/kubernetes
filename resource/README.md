@@ -329,3 +329,181 @@ $ kubectl apply -f test.yaml -n limit-namespace
 Error from server (Forbidden): error when creating "test.yaml": 
 pods "test" is forbidden: memory max limit to request ratio per Container is 5, but provided ratio is 8.000000.
 ```
+
+三、资源配额管理对象 ResourcesQuota
+---
+Kubernetes 是一个多租户平台，更是一个镜像集群管理工具。一个 Kubernetes 集群中的资源一般是由多个团队共享的，这时候经常要考虑的是如何对这个整体资源进行分配。在 kubernetes 中提供了 Namespace 来讲应用隔离，那么是不是也能将资源的大小跟 Namespace 挂钩进行一起隔离呢？这当然是可以的，Kubernetes 提供了 Resources Quotas 工具，让集群管理员可以创建 ResourcesQuota 对象管理这个集群整体资源的配额，它可以限制某个 Namespace 下计算资源的使用量，也可以设置某个 Namespace 下某种类型对象的上限等。
+
+上面说白了就是，通过设置不同的 Namespace 与对应的 RBAC 权限将各个团队隔离，然后通过 ResourcesQuota 对象来现在该 Namespace 能够拥有的资源的多少。
+
+1、开启资源配额 ResourceQuota
+
+ResourceQuota 对象一般在 Kubernetes 中是默认开启的，如果未开启且不能创建该对象，那么可以进入 Master 的 Kubernetes 配置目录修改 Apiserver 配置文件 kube-apiserver.yaml，在添加参数 --admission-control=ResourceQuota 来开启。
+```
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    - --advertise-address=192.168.2.11
+    - --allow-privileged=true
+    - --authorization-mode=Node,RBAC
+    - --admission-control=ResourceQuota    #开启ResourceQuota
+    - ......
+```
+注意：一个 Namespace 中可以拥有多个 ResourceQuota 对象。
+
+2、配额资源类型
+- 计算资源配额： 限制一个 Namespace 中所有 Pod 的计算资源（CPU、Memory）的总和。
+- 存储资源配额： 限制一个 Namespace 中所有存储资源的总量。
+- 对象数量配额： 限制一个 Namespace 中指定类型对象的数量。
+
+（1）、ResourcesQuota 支持的计算资源：
+- cpu： 所有非终止状态的Pod中，其CPU需求总量不能超过该值。
+- limits.cpu： 所有非终止状态的Pod中，其CPU限额总量不能超过该值。
+- limits.memory： 所有非终止状态的Pod中，其内存限额总量不能超过该值。
+- memory： 所有非终止状态的Pod中，其内存需求总量不能超过该值。
+- requests.cpu： 所有非终止状态的Pod中，其CPU需求总量不能超过该值。
+- requests.memory： 所有非终止状态的Pod中，其内存需求总量不能超过该值。
+
+（2）、ResourcesQuota 支持限制的存储资源：
+requests.storage：所有 PVC 请求的存储大小总量不能超过此值。
+Persistentvolumeclaims： PVC 对象存在的最大数目。
+.storageclass.storage.k8s.io/requests.storage： 和 StorageClass 关联的 PVC 的请求存储的量大小不能超过此设置的值。
+.storageclass.storage.k8s.io/persistentvolumeclaims： 和 StorageClass 关联的 PVC 的总量。
+
+（3）、ResourcesQuota 支持限制的对象资源：
+- Configmaps： 允许存在的 ConfigMap 的数量。
+- Pods： 允许存在的非终止状态的 Pod 数量，如果 Pod 的 status.phase 为 Failed 或 Succeeded ， 那么其处于终止状态。
+- Replicationcontrollers： 允许存在的 Replication Controllers 的数量。
+- Resourcequotas： 允许存在的 Resource Quotas 的数量。
+- Services： 允许存在的 Service 的数量。
+- services.loadbalancers： 允许存在的 LoadBalancer 类型的 Service 的数量。
+- services.nodeports： 允许存在的 NodePort 类型的 Service 的数量。
+- Secrets： 允许存在的 Secret 的数量。
+
+3、配额作用域
+每个配额都有一组相关的作用域（scope），配额只会对作用域内的资源生效。当一个作用域被添加到配额中后，它会对作用域相关的资源数量作限制，如配额中指定了允许（作用域）集合之外的资源，会导致验证错误。
+- Terminating： 匹配 spec.activeDeadlineSeconds ≥ 0 的 Pod。
+- NotTerminating： 匹配 spec.activeDeadlineSeconds 是 nil（空） 的 Pod。
+- BestEffort： 匹配所有 QoS 等级是 BestEffort 级别的 Pod。
+- NotBestEffort： 匹配所有 QoS 等级不是 BestEffort 级别的 Pod。
+
+BestEffort 作用域限制配额跟踪以下资源：
+- pods
+
+Terminating、 NotTerminating 和 NotBestEffort 限制配额跟踪以下资源：
+- cpu
+- limits.cpu
+- limits.memory
+- memory
+- pods
+- requests.cpu
+- requests.memory
+
+4、ResourceQuota 使用示例
+
+（1）、设置某 Namespace 计算资源的配额
+
+创建 resources-test1.yaml 用于设置计算资源的配额：
+```
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: compute-resources
+spec:
+  hard:
+    pods: "4"
+    requests.cpu: "1"
+    requests.memory: 1Gi
+    limits.cpu: "2"
+    limits.memory: 2Gi
+```
+创建该配额对象：
+
+-n：指定限制配额的 namespace
+```
+$ kubectl apply -f resources-test1.yaml -n limit-namespace
+```
+查看创建后的 ResourcesQuota 配额的详细信息:
+```
+$ kubectl describe quota compute-resources -n limit-namespace
+
+Name:            compute-resources
+Namespace:       limit-namespace
+Resource         Used   Hard
+--------         ----   ----
+limits.cpu       2      2
+limits.memory    1Gi    2Gi
+pods             2      4
+requests.cpu     2      1
+requests.memory  512Mi  1Gi
+```
+（2）、设置某 Namespace 对象数量的配额
+
+创建 resources-test2.yaml 用于设置对象数量的配额：
+```
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: object-counts
+spec:
+  hard:
+    configmaps: "10"
+    persistentvolumeclaims: "4"
+    replicationcontrollers: "20"
+    secrets: "10"
+    services: "10"
+    services.loadbalancers: "2"
+```
+创建该配额对象：
+```
+$ kubectl apply -f resources-test2.yaml -n limit-namespace
+```
+查看创建后的 ResourcesQuota 配额的详细信息:
+```
+$ kubectl describe quota object-counts -n limit-namespace
+
+Name:                   object-counts
+Namespace:              limit-namespace
+Resource                Used  Hard
+--------                ----  ----
+configmaps              0     10
+persistentvolumeclaims  0     4
+replicationcontrollers  0     20
+secrets                 1     10
+services                0     10
+services.loadbalancers  0     2
+```
+（3）、限制 Namespace 下 Pod 数量并只作用域 BestEffort
+
+创建 resources-test3.yaml 用于设置 Pod 对象数量的配额，并设置作用域 BestEffort：
+```
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: besteffort
+spec:
+  hard:
+    pods: "5"
+  scopes:
+  - BestEffort
+```
+创建该配额对象：
+```
+$ kubectl apply -f resources-test3.yaml -n limit-namespace
+```
+查看创建后的 ResourcesQuota 配额的详细信息:
+```
+$ kubectl describe quota besteffort -n limit-namespace
+
+Name:       besteffort
+Namespace:  limit-namespace
+Scopes:     BestEffort
+ * Matches all pods that do not have resource requirements set. These pods have a best effort quality of service.
+Resource  Used  Hard
+--------  ----  ----
+pods      0     5
+```
+上面配额对象创建完成后，可以创建几个 Pod 对其配额规则进行验证。
+
+到此资源管理介绍完毕，在实际使用过程中应当统计集群资源总量，然后按需分配给各个 Namespace 一定配额，如果想限制 Pod 使用资源的大小，就可以创建 LimitRange 来完成这个限制规则。最后说一句，创建 Pod 时候最好考虑好 Pod 的 QoS 优先级。

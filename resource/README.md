@@ -190,3 +190,32 @@ spec:
 ```
 $ kubectl apply -f limit-range.yaml -n limit-namespace
 ```
+
+3、查看创建后的 LimitRange
+```
+$ kubectl describe limitrange limit-test -n limit-namespace
+
+Name:       limit-test
+Namespace:  limit-namespace
+Type        Resource  Min    Max  Default Request  Default Limit  Max Limit/Request Ratio
+----        --------  ---    ---  ---------------  -------------  -----------------------
+Pod         cpu       10m    4    -                -              5
+Pod         memory    128Mi  2Gi  -                -              5
+Container   cpu       10m    2    500m             1              5
+Container   memory    128Mi  1Gi  256Mi            512Mi          5
+```
+可以看到上面 LimitRange 对象中的配置可以了解到，如果容器使用默认值，则容器的 Request 和 Limits 一致。
+
+4、对 LimitRange 对象参数介绍
+
+Container 参数：
+- max： Pod 中所有容器的 Requests 值下限。
+- min： Pod 中所有容器的 Limits 值上限。
+- default： Pod 中容器未指定 Limits 时，将此值设置为默认值。
+- defaultRequest： Pod 中容器未指定 Requests 是，将此值设置为默认值。
+- maxLimitRequestRatio： Pod 中的容器设置 Limits 与 Requests 的比例的值不能超过 maxLimitRequestRatio 参数设置的值，即 Limits/Requests ≤ maxLimitRequestRatio。
+
+Pod 参数：
+- max： Pod 中所有容器资源总和值上限。
+- min： Po 中所有容器资源总和值下限。
+- maxLimitRequestRatio： Pod 中全部容器设置 Limits 总和与 Requests 总和的比例的值不能超过 maxLimitRequestRatio 参数设置的值，即 (All Container Limits)/(All Container Requests) ≤ maxLimitRequestRatio。

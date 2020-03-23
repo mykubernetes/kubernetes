@@ -133,3 +133,60 @@ containers:
   - name: example-container2
     resources:
 ```
+
+二、资源范围管理对象 LimitRange
+---
+默认情况下如果创建一个 Pod 没有设置 Limits 和 Requests 对其加以限制，那么这个 Pod 可能能够使用 Kubernetes 集群中全部资源， 但是每创建 Pod 资源时都加上这个动作是繁琐的，考虑到这点 Kubernetes 提供了 LimitRange 对象，它能够对一个 Namespace 下的全部 Pod 使用资源设置默认值、并且设置上限大小和下限大小等操作。这里演示将使用 LimitRange 来限制某个 namespace 下的资源的测试用例。
+  
+1、创建测试用的 Namespace  
+考虑到 LimitRange 是作用于 Namespace 的，所以这里提前创建一个用于测试的 Namespace
+```
+$ kubectl create namespace limit-namespace
+```
+2、创建 LimitRange 对 Namespace 资源限制
+
+创建一个 LimitRange 对象限制 Namespace 下的资源使用，其中 limit 的类型有两种：
+- 对 Container 使用资源进行限制，在 Pod 中的每一个容器都受此限制。
+- 对 Pod 进行限制，即 Pod 中全部 Container 使用资源总和来进行限制。
+
+资源对象 limit-range.yaml 内容如下：
+```
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: limit-test
+spec:
+  limits:
+    - type: Pod        #对Pod中所有容器资源总和进行限制
+      max:
+        cpu: 4000m
+        memory: 2048Mi 
+      min:
+        cpu: 10m
+        memory: 128Mi 
+      maxLimitRequestRatio:
+        cpu: 5
+        memory: 5
+    - type: Container  #对Pod中所有容器资源进行限制
+      max:
+        cpu: 2000m
+        memory: 1024Mi
+      min:
+        cpu: 10m
+        memory: 128Mi 
+      maxLimitRequestRatio:
+        cpu: 5
+        memory: 5
+      default:
+        cpu: 1000m
+        memory: 512Mi
+      defaultRequest:
+        cpu: 500m
+        memory: 256Mi
+```
+注意：LimitRange 类型为 Pod 中，不能设置 Default。
+
+执行 Kubectl 创建 LimitRange：
+```
+$ kubectl apply -f limit-range.yaml -n limit-namespace
+```

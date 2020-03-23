@@ -366,10 +366,10 @@ spec:
 - requests.memory： 所有非终止状态的Pod中，其内存需求总量不能超过该值。
 
 （2）、ResourcesQuota 支持限制的存储资源：
-requests.storage：所有 PVC 请求的存储大小总量不能超过此值。
-Persistentvolumeclaims： PVC 对象存在的最大数目。
-.storageclass.storage.k8s.io/requests.storage： 和 StorageClass 关联的 PVC 的请求存储的量大小不能超过此设置的值。
-.storageclass.storage.k8s.io/persistentvolumeclaims： 和 StorageClass 关联的 PVC 的总量。
+- requests.storage：所有 PVC 请求的存储大小总量不能超过此值。
+- Persistentvolumeclaims： PVC 对象存在的最大数目。
+- .storageclass.storage.k8s.io/requests.storage： 和 StorageClass 关联的 PVC 的请求存储的量大小不能超过此设置的值。
+- .storageclass.storage.k8s.io/persistentvolumeclaims： 和 StorageClass 关联的 PVC 的总量。
 
 （3）、ResourcesQuota 支持限制的对象资源：
 - Configmaps： 允许存在的 ConfigMap 的数量。

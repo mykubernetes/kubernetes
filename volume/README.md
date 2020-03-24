@@ -7,7 +7,43 @@ https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
 https://github.com/kubernetes-incubator/external-storage
 ---
 
-一、存储机制介绍  
+hostPath卷指定type类型有多种  
+---
+| 值  | 行为 |
+| :------: | :--------: |
+|   | 空字符串（默认）用于向后兼容，这意味着在挂载 hostPath 卷之前不会执行任何检查 |
+| DirectoryOrCreate | 如果在给定的路径上没有任何东西存在，那么将根据需要在那里创建一个空目录，权限设置为 0755，与 Kubelet 具有相同的组和所有权 |
+| Directory | 给定的路径下必须存在目录 |
+| FileOrCreate | 如果在给定的路径上没有任何东西存在，那么会根据需要创建一个空文件，权限设置为 0644，与 Kubelet 具有相同的组和所有权 |
+| File | 给定的路径下必须存在文件 |
+| Socket | 给定的路径下必须存在 UNIX 套接字 |
+| CharDevice | 给定的路径下必须存在字符设备 |
+| BlockDevice | 给定的路径下必须存在块设备 |
+
+hostPath示例
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: test-pd
+spec:
+  containers:
+  - image: k8s.gcr.io/test-webserver
+    name: test-container
+    volumeMounts:
+    - mountPath: /test-pd
+      name: test-volume
+  volumes:
+  - name: test-volume
+    hostPath:
+      # directory location on host
+      path: /data
+      # this field is optional
+      type: Directory
+```  
+
+一、存储机制介绍
+---
 在 Kubernetes 中，存储资源和计算资源(CPU、Memory)同样重要，Kubernetes 为了能让管理员方便管理集群中的存储资源，同时也为了让使用者使用存储更加方便，所以屏蔽了底层存储的实现细节，将存储抽象出两个 API 资源 PersistentVolume 和 PersistentVolumeClaim 对象来对存储进行管理。
 
 - PersistentVolume（持久化卷）： PersistentVolume 简称 PV， 是对底层共享存储的一种抽象，将共享存储定义为一种资源，它属于集群级别资源，不属于任何 Namespace，用户使用 PV 需要通过 PVC 申请。PV 是由管理员进行创建和配置，它和具体的底层的共享存储技术的实现方式有关，比如说 Ceph、GlusterFS、NFS 等，都是通过插件机制完成与共享存储的对接，且根据不同的存储 PV 可配置参数也是不相同。
@@ -163,43 +199,6 @@ persistentVolumeReclaimPolicy: Recycle
 ```
 
 
-
-
-4、hostPath卷指定type类型有多种  
-
-| 值  | 行为 |
-| :------: | :--------: |
-|   | 空字符串（默认）用于向后兼容，这意味着在挂载 hostPath 卷之前不会执行任何检查 |
-| DirectoryOrCreate | 如果在给定的路径上没有任何东西存在，那么将根据需要在那里创建一个空目录，权限设置为 0755，与 Kubelet 具有相同的组和所有权 |
-| Directory | 给定的路径下必须存在目录 |
-| FileOrCreate | 如果在给定的路径上没有任何东西存在，那么会根据需要创建一个空文件，权限设置为 0644，与 Kubelet 具有相同的组和所有权 |
-| File | 给定的路径下必须存在文件 |
-| Socket | 给定的路径下必须存在 UNIX 套接字 |
-| CharDevice | 给定的路径下必须存在字符设备 |
-| BlockDevice | 给定的路径下必须存在块设备 |
-
-hostPath示例
-```
-apiVersion: v1
-kind: Pod
-metadata:
-  name: test-pd
-spec:
-  containers:
-  - image: k8s.gcr.io/test-webserver
-    name: test-container
-    volumeMounts:
-    - mountPath: /test-pd
-      name: test-volume
-  volumes:
-  - name: test-volume
-    hostPath:
-      # directory location on host
-      path: /data
-      # this field is optional
-      type: Directory
-```  
-
 三、PersistentVolumeClaim 详解
 ---
 1、PVC 示例
@@ -286,6 +285,7 @@ parameters:
   archiveOnDelete: "true"
 ```
 2、StorageClass 的常用配置参数
+
 （1）、提供者（provisioner）
 
 在创建 StorageClass 之前需要 Kubernetes 集群中存在 Provisioner（存储分配提供者）应用，如 NFS 存储需要有 NFS-Provisioner （NFS 存储分配提供者）应用，如果集群中没有该应用，那么创建的 StorageClass 只能作为标记,而不能提供创建 PV 的作用。

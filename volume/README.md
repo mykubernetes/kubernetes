@@ -317,3 +317,179 @@ metadata:
   annotations:
     storageclass.kubernetes.io/is-default-class: "true"
 ```
+
+五、PV 和 PVC 的生命周期
+---
+PV 是 Kubernetes 集群的存储资源，而 PVC 则是对存储资源的需求，创建 PVC 需要对 PV 发起使用申请，即和 PV 进行绑定。 PV 和 PVC 是一一对应的关系，它们二者的交互遵循如下生命周期：
+
+![](https://mydlq-club.oss-cn-beijing.aliyuncs.com/images/kubernetes-storage-1003.png?x-oss-process=style/shuiyin)
+
+1、存储供给
+
+存储供给（Provisioning）是指为 PVC 准备可用的 PV 的一种机制。Kubernetes 支持 PV 供给方式有 静态供给 和 动态供给 两种：
+- 静态供给： 指由集群管理员手动创建一定数量的 PV，创建 PV 时需要根据后端存储的不同，配置的参数也不同。
+- 动态供给： 指不需要集群管理员手动创建 PV，将 PV 的创建工作交由 StorageClass 关联的 Provisioner 进行创建，会根据存储的不同自动配置相关的参数。创建完成 PV 后系统会自动将 PVC 与其绑定。
+
+2、存储绑定
+
+在静态模式下，在用户定义好 PVC 后，Kubernetes 将根据 PVC 提出的“申请空间的大小”、“访问模式”从集群中寻找已经存在且满足条件的 PV 进行绑定，如果集群中没有匹配的 PV 则 PVC 将处于 Pending 等待状态，知道系统创建了符合条件的 PV 再与其绑定。PV 与 PVC 绑定后就不能和别的 PVC 进行绑定。
+
+在动态模式下，当创建 PVC 并且指定 StorageClass 后，与 StorageClass 关联的存储插件会自动创建对应的 PV 与该 PVC 进行绑定。
+
+3、存储回收
+
+完成存储卷的使用目标之后删除 PVC 对象，以便进行资源回收。不过，至于如何操作则取决于 PV 的回收策略 ，目前有三种策略：
+
+- 保存策略（Retain）： 删除 PVC 之后，Kubernetes 系统不会自动删除 PV ，而仅是将它标识为 Released 状态，不过处于 Released 状态的 PV **不能被其他 PVC 申请所绑定，因为之前 PVC 绑定的应用数据仍然存在，需要由管理员手动清理数据，然后决定如何处理 PV 的使用。
+- 回收策略： 当 PVC 删除后，此 PV 变成 Available 可用状态。不过此策略需要后端存储插件的支持。
+- 删除策略： 当删除 PVC 后 PV 和存储中的数据会被立即删除，不过此策略也需要后端存储插件的支持。
+
+六、PVC 使用示例
+---
+Deployment 中使用 PVC
+
+一般 Deployment 中使用 PVC，大部分都是静态供给方式创建，即先创建 PV，再创建 PVC 与 PV 绑定，在设置应用于 PVC 关联。
+
+下面是一个 NFS 存储创建 PV 的例子，如下：
+```
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: nginx-pv
+  labels:
+    app: nginx-pv
+spec:
+  accessModes:       
+  - ReadWriteOnce
+  persistentVolumeReclaimPolicy: Delete
+  capacity:          
+    storage: 1Gi
+  mountOptions:
+  - hard  
+  - nfsvers=4.1  
+  nfs:
+    server: 192.168.2.11
+    path: /nfs/data/nginx
+```
+创建 PVC 与 PV 进行关联绑定：
+```
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: nginx-pvc
+spec:
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+  selector:
+    matchLabels:
+      app: nginx-pv
+```
+创建应用于 PVC 进行关联：
+```
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - name: server
+          containerPort: 80
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: nginx-pvc
+```
+StatefulSet 中使用 PVC
+---
+在有状态的应用中，我们经常使用动态供给方式创建 PV 和 PVC，不过提前需要集群拥有:
+
+- StorageClass：存储类
+- Provisioner：与存储类关联的管理后端存储的插件
+
+只有拥有上面两种资源同时存在时才能使用动态存储，本人这里使用的是 NFS 存储，关于如何创建 NFS Provisioner 可以查看 NFS Provisioner 一文，假如 Kubernetes 集群中使用 NFS 存储，且存在 Provisioner 的名称为 nfs-client 那就可以下面创建 StorageClass 示例：
+```
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-storage
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+provisioner: nfs-client
+parameters:
+  archiveOnDelete: "true"
+mountOptions: 
+  - hard
+  - nfsvers=4
+```
+然后 StatefulSet 可以按下方式，在 volumeClaimTemplates 参数中指定使用的 StorageClass，然后与 StorageClass 关联的 NFS Provisioner 会执行创建 PVC 和 PV，然后两者进行绑定，下面是 StatefulSet 方式使用 volumeClaimTemplates挂载存储的示例：
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  serviceName: "nginx"
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      terminationGracePeriodSeconds: 1
+      containers:
+      - name: nginx
+        image: nginx:latest
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: data
+          mountPath: /data
+  volumeClaimTemplates:
+  - metadata:
+      name: data
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      storageClassName: "nfs-storage"
+      resources:
+        requests:
+          storage: 1Gi
+```

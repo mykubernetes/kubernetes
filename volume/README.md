@@ -7,6 +7,16 @@ https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
 https://github.com/kubernetes-incubator/external-storage
 ---
 
+一、存储机制介绍  
+在 Kubernetes 中，存储资源和计算资源(CPU、Memory)同样重要，Kubernetes 为了能让管理员方便管理集群中的存储资源，同时也为了让使用者使用存储更加方便，所以屏蔽了底层存储的实现细节，将存储抽象出两个 API 资源 PersistentVolume 和 PersistentVolumeClaim 对象来对存储进行管理。
+
+- PersistentVolume（持久化卷）： PersistentVolume 简称 PV， 是对底层共享存储的一种抽象，将共享存储定义为一种资源，它属于集群级别资源，不属于任何 Namespace，用户使用 PV 需要通过 PVC 申请。PV 是由管理员进行创建和配置，它和具体的底层的共享存储技术的实现方式有关，比如说 Ceph、GlusterFS、NFS 等，都是通过插件机制完成与共享存储的对接，且根据不同的存储 PV 可配置参数也是不相同。
+
+- PersistentVolumeClaim（持久化卷声明）： PersistentVolumeClaim 简称 PVC，是用户存储的一种声明，类似于对存储资源的申请，它属于一个 Namespace 中的资源，可用于向 PV 申请存储资源。PVC 和 Pod 比较类似，Pod 消耗的是 Node 节点资源，而 PVC 消耗的是 PV 存储资源，Pod 可以请求 CPU 和 Memory，而 PVC 可以请求特定的存储空间和访问模式。
+
+![](https://mydlq-club.oss-cn-beijing.aliyuncs.com/images/kubernetes-storage-1002.jpg?x-oss-process=style/shuiyin)
+
+
 1、访问模式
 accessModes支持的访问模式有：
 - ReadWriteOnce 缩写RWO read-write 单路读写

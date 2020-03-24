@@ -199,3 +199,121 @@ spec:
       # this field is optional
       type: Directory
 ```  
+
+三、PersistentVolumeClaim 详解
+---
+1、PVC 示例
+```
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: pvc1
+spec:
+  accessModes:
+    - ReadWriteOnce
+  volumeMode: Filesystem
+  resources:
+    requests:
+      storage: 8Gi
+  storageClassName: slow
+  selector:
+    matchLabels:
+      release: "stable"
+    matchExpressions:
+      - key: environment
+        operator: In
+        values: dev
+```
+2、PVC 的常用配置参数
+（1）、筛选器（selector）
+
+PVC 可以通过在 Selecter 中设置 Laberl 标签，筛选出带有指定 Label 的 PV 进行绑定。Selecter 中可以指定 matchLabels 或 matchExpressions，如果两个字段都设定了就需要同时满足才能匹配。
+```
+selector:
+  matchLabels:
+    release: "stable"
+  matchExpressions:
+    - key: environment
+      operator: In
+      values: dev
+```
+（2）、资源请求（resources）
+
+PVC 设置目前只有 requests.storage 一个参数，用于指定申请存储空间的大小。
+```
+resources:
+  requests:
+    storage: 8Gi
+```
+（3）、存储类（storageClass）
+
+PVC 要想绑定带有特定 StorageClass 的 PV 时，也必须设定 storageClassName 参数，且名称也必须要和 PV 中的 storageClassName 保持一致。如果要绑定的 PV 没有设置 storageClassName 则 PVC 中也不需要设置。
+
+当 PVC 中如果未指定 storageClassName 参数或者指定为空值，则还需要考虑 Kubernetes 中是否设置了默认的 StorageClass：
+
+- 未启用 DefaultStorageClass：等于 storageClassName 值为空。
+-  启用 DefaultStorageClass：等于 storageClassName 值为默认的 StorageClass。
+
+- 如果设置 storageClassName=""，则表示该 PVC 不指定 StorageClass。
+```
+storageClassName: slow
+```
+（4）、访问模式（accessModes）
+
+PVC 中可设置的访问模式与 PV 种一样，用于限制应用对资源的访问权限。
+
+（5）、存储卷模式（volumeMode）
+
+PVC 中可设置的存储卷模式与 PV 种一样，分为 Filesystem 和 Block 两种。
+
+四、StorageClass 详解
+---
+1、StorageClass 示例
+
+这里使用 NFS 存储，创建 StorageClass 示例：
+```
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: nfs-storage
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true" #设置为默认的 StorageClass
+provisioner: nfs-client
+mountOptions: 
+  - hard
+  - nfsvers=4
+parameters:
+  archiveOnDelete: "true"
+```
+2、StorageClass 的常用配置参数
+（1）、提供者（provisioner）
+
+在创建 StorageClass 之前需要 Kubernetes 集群中存在 Provisioner（存储分配提供者）应用，如 NFS 存储需要有 NFS-Provisioner （NFS 存储分配提供者）应用，如果集群中没有该应用，那么创建的 StorageClass 只能作为标记,而不能提供创建 PV 的作用。
+
+NFS 的存储 NFS Provisioner 可以参考：创建 NFS-Provisioner 博文
+```
+provisioner: nfs-client
+```
+（2）、参数（parameters）
+
+后端存储提供的参数，不同的 Provisioner 可与配置的参数也是不相同。例如 NFS Provisioner 可与提供如下参数：
+```
+parameters:
+  archiveOnDelete: "true" #删除 PV 后是否保留数据
+```
+（3）、挂载参数（mountOptions）
+
+在 StorageClass 中，可以根据不同的存储来指定不同的挂载参数，此参数会与 StorageClass 绑定的 Provisioner 创建 PV 时，将此挂载参数与创建的 PV 关联。
+```
+mountOptions: 
+  - hard
+  - nfsvers=4
+```
+（4）、设置默认的 StorageClass
+
+可与在 Kubernetes 集群中设置一个默认的 StorageClass，这样当创建 PVC 时如果未指定 StorageClass 则会使用默认的 StorageClass。
+```
+metadata:
+  annotations:
+    storageclass.kubernetes.io/is-default-class: "true"
+```

@@ -14,6 +14,8 @@ https://github.com/kubernetes-incubator/external-storage
 
 - PersistentVolumeClaim（持久化卷声明）： PersistentVolumeClaim 简称 PVC，是用户存储的一种声明，类似于对存储资源的申请，它属于一个 Namespace 中的资源，可用于向 PV 申请存储资源。PVC 和 Pod 比较类似，Pod 消耗的是 Node 节点资源，而 PVC 消耗的是 PV 存储资源，Pod 可以请求 CPU 和 Memory，而 PVC 可以请求特定的存储空间和访问模式。
 
+![](https://mydlq-club.oss-cn-beijing.aliyuncs.com/images/kubernetes-storage-1002.jpg?x-oss-process=style/shuiyin)
+
 上面两种资源 PV 和 PVC 的存在很好的解决了存储管理的问题，不过这些存储每次都需要管理员手动创建和管理，如果一个集群中有很多应用，并且每个应用都要挂载很多存储，那么就需要创建很多 PV 和 PVC 与应用关联。为了解决这个问题 Kubernetes 在 1.4 版本中引入了 StorageClass 对象。
 
 当我们创建 PVC 时指定对应的 StorageClass 就能和 StorageClass 关联，StorageClass 会交由与他关联 Provisioner 存储插件来创建与管理存储，它能帮你创建对应的 PV 和在远程存储上创建对应的文件夹，并且还能根据设定的参数，删除与保留数据。所以管理员只要在 StorageClass 中配置好对应的参数就能方便的管理集群中的存储资源。

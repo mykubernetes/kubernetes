@@ -1,5 +1,13 @@
+kubeadm安装官方文档  
+https://kubernetes.io/docs/reference/setup-tools/kubeadm/kubeadm/
+
+kops安装官方文档  
+https://kubernetes.io/docs/setup/production-environment/tools/kops/  
+https://github.com/kubernetes/kops
+
 kubespray安装官方文档  
-https://kubernetes.io/docs/setup/production-environment/tools/kubespray/
+https://kubernetes.io/docs/setup/production-environment/tools/kubespray/  
+https://github.com/kubernetes-sigs/kubespray
 
 查看日志
 ```

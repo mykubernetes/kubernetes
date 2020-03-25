@@ -46,6 +46,15 @@ kube-node
 calico-rr
 ```
 
+修改全局变量
+```
+vim inventory/mycluster/k8s-cluster/k8s-cluster.yml
+kube_service_addresses: 10.233.0.0/18
+kube_pods_subnet: 10.233.64.0/18
+kube_network_plugin: calico
+```
+
+
 开始自定义部署
 ```
 ansible-playbook -i inventory/mycluster/inventory cluster.yml -b -v \

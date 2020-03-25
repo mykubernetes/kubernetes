@@ -1,3 +1,6 @@
+kubespray安装官方文档  
+https://kubernetes.io/docs/setup/production-environment/tools/kubespray/
+
 查看日志
 ```
 journalctl -l -u kube-apiserver

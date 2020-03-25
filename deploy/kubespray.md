@@ -1,3 +1,4 @@
+https://blog.csdn.net/educast/article/details/89957284
 下载源码
 ```
 git clone https://github.com/kubernetes-sigs/kubespray.git

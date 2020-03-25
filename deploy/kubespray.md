@@ -64,3 +64,6 @@ ansible-playbook -i inventory/mycluster/inventory remove-node.yml -b -v \
 --private-key=~/.ssh/private_key \
 --extra-vars "node=nodename,nodename2"
 ```
+
+升级  
+https://github.com/kubernetes-sigs/kubespray/blob/master/docs/upgrades.md

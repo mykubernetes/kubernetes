@@ -52,8 +52,22 @@ vim inventory/mycluster/k8s-cluster/k8s-cluster.yml
 kube_service_addresses: 10.233.0.0/18
 kube_pods_subnet: 10.233.64.0/18
 kube_network_plugin: calico
+
+#配置dns
+dns_mode: coredns
 ```
 
+
+```
+vim group_vars/all/all.yml
+# 负载均衡域名，提前配置好DNS解析
+apiserver_loadbalancer_domain_name: "kubernetes.7mxing.com"
+     
+# 负载均衡
+loadbalancer_apiserver:
+  address: 10.0.128.160
+  port: 6443
+```
 
 开始自定义部署
 ```

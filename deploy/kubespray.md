@@ -1,4 +1,67 @@
 https://blog.csdn.net/educast/article/details/89957284
+
+准备工作
+---
+
+1、所有机器都必须关闭selinux
+```
+setenforce 0
+sed -i --follow-symlinks 's/SELINUX=enforcing/SELINUX=disabled/g' /etc/sysconfig/selinux
+```
+
+2、配置防火墙
+在master机器上
+```
+firewall-cmd --permanent --add-port=6443/tcp
+firewall-cmd --permanent --add-port=2379-2380/tcp
+firewall-cmd --permanent --add-port=10250/tcp
+firewall-cmd --permanent --add-port=10251/tcp
+firewall-cmd --permanent --add-port=10252/tcp
+firewall-cmd --permanent --add-port=10255/tcp
+firewall-cmd --reload
+modprobe br_netfilter
+echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+sysctl -w net.ipv4.ip_forward=1
+```
+
+如果关闭了防火墙，则只需执行最下面三行。
+在node机器上
+```
+firewall-cmd --permanent --add-port=10250/tcp
+firewall-cmd --permanent --add-port=10255/tcp
+firewall-cmd --permanent --add-port=30000-32767/tcp
+firewall-cmd --permanent --add-port=6783/tcp
+firewall-cmd  --reload
+echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
+sysctl -w net.ipv4.ip_forward=1
+```
+
+或者关闭防火墙
+```
+systemctl stop firewalld
+```
+
+3、在ansible-client机器上安装ansible
+```
+yum install epel-release
+yum install ansible
+```
+
+4、安装jinja2
+```
+easy_install pip
+pip2 install jinja2 --upgrade
+
+升级jinja2
+pip install --upgrade pip
+pip2 install jinja2 --upgrade
+```
+
+5、安装Python 3.6
+```
+yum install python36 –y
+```
+
 下载源码
 ```
 git clone https://github.com/kubernetes-sigs/kubespray.git

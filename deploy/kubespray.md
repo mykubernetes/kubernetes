@@ -168,8 +168,7 @@ loadbalancer_apiserver:
 
 开始自定义部署
 ```
-ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v \
-  --private-key=~/.ssh/private_key
+ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml
 ```
 
 添加node节点
@@ -215,14 +214,12 @@ node3
 ```
 
 ```
-ansible-playbook -i inventory/mycluster/hosts.ini scale.yml -b -v \
-  --private-key=~/.ssh/private_key
+ansible-playbook -i inventory/mycluster/hosts.ini scale.yml
 ```
 
 删除节点
 ```
-ansible-playbook -i inventory/mycluster/hosts.ini remove-node.yml -b -v \
---private-key=~/.ssh/private_key \
+ansible-playbook -i inventory/mycluster/hosts.ini remove-node.yml \
 --extra-vars "node=nodename,nodename2"
 ```
 

@@ -172,7 +172,48 @@ ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v \
   --private-key=~/.ssh/private_key
 ```
 
-添加节点
+添加node节点
+
+```
+cat inventory/mycluster/host.ini
+
+[k8s-cluster:children]
+kube-master      
+kube-node        
+
+[all]
+node1    ansible_host=172.20.0.88 ip=172.20.0.88
+node2    ansible_host=172.20.0.89 ip=172.20.0.89
+node3    ansible_host=172.20.0.90 ip=172.20.0.90
+node4    ansible_host=172.20.0.91 ip=172.20.0.91
+node5    ansible_host=172.20.0.92 ip=172.20.0.92
+node6    ansible_host=172.20.0.92 ip=172.20.0.93
+
+[kube-master]
+node1    
+node2    
+
+[kube-node]
+node1    
+node2    
+node3    
+node4    
+node5
+node6
+
+[etcd]
+node1    
+node2    
+node3    
+
+[calico-rr]
+
+[vault]
+node1    
+node2    
+node3 
+```
+
 ```
 ansible-playbook -i inventory/mycluster/hosts.ini scale.yml -b -v \
   --private-key=~/.ssh/private_key

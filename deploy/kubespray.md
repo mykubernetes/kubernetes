@@ -62,52 +62,85 @@ pip2 install jinja2 --upgrade
 yum install python36 –y
 ```
 
-下载源码
+6、ssh互信
+```
+ssh-keygen
+
+ssh-copy-id root@172.20.0.88
+ssh-copy-id root@172.20.0.89
+ssh-copy-id root@172.20.0.90
+ssh-copy-id root@172.20.0.91
+ssh-copy-id root@172.20.0.92
+```
+
+
+在ansible-client机器上安装kubespray
+---
+
+1、下载源码
 ```
 git clone https://github.com/kubernetes-sigs/kubespray.git
 ```
 
-修改配置文件
+2、安装kubespray需要的包：
+```
+cd kubespray
+pip install -r requirements.txt
+```
+
+3 拷贝inventory/sample ，命名为inventory/mycluster ，mycluster可以改为其他的名字
 ```
 cp -r inventory/sample inventory/mycluster
+```
 
-vim inventory/mycluster/inventory
-# ## Configure 'ip' variable to bind kubernetes services on a
-# ## different ip than the default iface
-# ## We should set etcd_member_name for etcd cluster. The node that is not a etcd member do not need to set the value, or can set the empty string value.
+4 使用inventory_builder，初始化inventory文件
+```
+# declare -a IPS=(172.20.0.88 172.20.0.89 172.20.0.90 172.20.0.91 172.20.0.92)
+# CONFIG_FILE=inventory/mycluster/hosts.ini python36 contrib/inventory_builder/inventory.py ${IPS[@]}
+```
+
+5、此时生成的配置文件
+```
+cat inventory/mycluster/host.ini
+
+[k8s-cluster:children]
+kube-master      
+kube-node        
+
 [all]
-node1 ansible_host=95.54.0.12  # ip=10.3.0.1 etcd_member_name=etcd1
-node2 ansible_host=95.54.0.13  # ip=10.3.0.2 etcd_member_name=etcd2
-node3 ansible_host=95.54.0.14  # ip=10.3.0.3 etcd_member_name=etcd3
-node4 ansible_host=95.54.0.15  # ip=10.3.0.4 etcd_member_name=etcd4
-node5 ansible_host=95.54.0.16  # ip=10.3.0.5 etcd_member_name=etcd5
-node6 ansible_host=95.54.0.17  # ip=10.3.0.6 etcd_member_name=etcd6
-
-# ## configure a bastion host if your nodes are not directly reachable
-# bastion ansible_host=x.x.x.x ansible_user=some_user
+node1    ansible_host=172.20.0.88 ip=172.20.0.88
+node2    ansible_host=172.20.0.89 ip=172.20.0.89
+node3    ansible_host=172.20.0.90 ip=172.20.0.90
+node4    ansible_host=172.20.0.91 ip=172.20.0.91
+node5    ansible_host=172.20.0.92 ip=172.20.0.92
 
 [kube-master]
-node1
-node2
-
-[etcd]
-node1
-node2
-node3
+node1    
+node2    
 
 [kube-node]
-node2
-node3
-node4
-node5
-node6
+node1    
+node2    
+node3    
+node4    
+node5    
+
+[etcd]
+node1    
+node2    
+node3    
 
 [calico-rr]
 
-[k8s-cluster:children]
-kube-master
-kube-node
-calico-rr
+[vault]
+node1    
+node2    
+node3 
+```
+
+6、使用ansible playbook部署kubespray
+```
+ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml
 ```
 
 修改全局变量
@@ -135,21 +168,26 @@ loadbalancer_apiserver:
 
 开始自定义部署
 ```
-ansible-playbook -i inventory/mycluster/inventory cluster.yml -b -v \
+ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml -b -v \
   --private-key=~/.ssh/private_key
 ```
 
 添加节点
 ```
-ansible-playbook -i inventory/mycluster/inventory scale.yml -b -v \
+ansible-playbook -i inventory/mycluster/hosts.ini scale.yml -b -v \
   --private-key=~/.ssh/private_key
 ```
 
 删除节点
 ```
-ansible-playbook -i inventory/mycluster/inventory remove-node.yml -b -v \
+ansible-playbook -i inventory/mycluster/hosts.ini remove-node.yml -b -v \
 --private-key=~/.ssh/private_key \
 --extra-vars "node=nodename,nodename2"
+```
+
+卸载
+```
+ansible-playbook -i inventory/mycluster/hosts.ini reset.yml
 ```
 
 升级  

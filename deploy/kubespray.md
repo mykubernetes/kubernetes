@@ -167,6 +167,13 @@ loadbalancer_apiserver:
 ansible-playbook -i inventory/mycluster/hosts.ini --become --become-user=root cluster.yml
 ```
 
+8、测试
+```
+cp /etc/kubernetes/admin.conf /root/config
+chmod +r /root/config
+mkdir .kube/
+mv config .kube/
+```
 
 开始自定义部署
 ```

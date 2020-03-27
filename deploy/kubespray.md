@@ -138,12 +138,8 @@ node2
 node3 
 ```
 
-6、使用ansible playbook部署kubespray
-```
-ansible-playbook -i inventory/mycluster/hosts.ini cluster.yml
-```
 
-修改全局变量
+6、修改全局变量
 ```
 vim inventory/mycluster/k8s-cluster/k8s-cluster.yml
 kube_service_addresses: 10.233.0.0/18
@@ -165,6 +161,12 @@ loadbalancer_apiserver:
   address: 10.0.128.160
   port: 6443
 ```
+
+7、使用ansible playbook部署kubespray
+```
+ansible-playbook -i inventory/mycluster/hosts.ini --become --become-user=root cluster.yml
+```
+
 
 开始自定义部署
 ```

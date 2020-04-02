@@ -2,6 +2,9 @@
 https://github.com/opsnull/follow-me-install-kubernetes-cluster
 ---
 
+https://www.qikqiak.com/k8s-book/docs/57.AlertManager%E7%9A%84%E4%BD%BF%E7%94%A8.html
+---
+
 微服务容器化持续交付  
 https://github.com/minminmsn/k8s1.13
 ---

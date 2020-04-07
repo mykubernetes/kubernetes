@@ -38,6 +38,20 @@ Kubernetes 主要由以下几个核心组件组成：
 | 统一安装路径 | /data/apps/ |
 
 
+| 主机名(HostName)	| IP地址 | 角色(Role)	| 集群IP(Vip) |
+| :------: | :--------: | :------: | :--------: |
+| K8S-PROD-MASTER-A1 | 10.211.18.4 | Master	| 10.211.18.10 |
+| K8S-PROD-MASTER-A2 | 10.211.18.5 | Master	|
+| K8S-PROD-MASTER-A3 | 10.211.18.6 | Master | 
+| K8S-PROD-NODE-A1 | 10.211.18.11	| Node | 不涉及 |
+| K8S-PROD-NODE-A2 | 10.211.18.12	| Node | 不涉及 |
+| K8S-PROD-NODE-A3 | 10.211.18.13	| Node | 不涉及 |
+| K8S-PROD-NODE-A4 | 10.211.18.14	| Node | 不涉及 |
+| K8S-PROD-LB-A1 | 10.211.18.50	| Ingress	| 10.211.18.100 |
+| K8S-PROD-LB-B1 | 10.211.18.51	| Ingress |
+| K8S-PROD-REGISTR-A1 | 10.211.18.61 | Registr |
+| K8S-PROD-REGISTR-B1	| 10.211.18.62 | Registr |
+| Ceph集群 | / | ceph |  |
 
 
 

@@ -53,8 +53,15 @@ Kubernetes 主要由以下几个核心组件组成：
 | K8S-PROD-REGISTR-B1	| 10.211.18.62 | Registr |
 | Ceph集群 | / | ceph |  |
 
-
-
+前期准备工作
+---
+修改主机名/关闭selinux
+```
+#修改主机名
+#  hostnamectl  --static set-hostname  K8S-PROD-NODE-A1
+#关闭Selinux
+#  sed -i 's/SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config
+```
 
 
 

@@ -27,3 +27,23 @@ Kubernetes 主要由以下几个核心组件组成：
 | kubernetes-node-linux-amd64.tar.gz | Kubernetes Node节点的安装包。 | https://dl.k8s.io/v1.13.6/kubernetes-node-linux-amd64.tar.gz |
 | etcd-v3.3.10-linux-amd64.tar.gz | etcd是一个开源的分布式键值存储，为Container Linux集群提供共享配置和服务发现。 | https://github.com/etcd-io/etcd/releases/download/v3.3.10/etcd-v3.3.10-linux-amd64.tar.gz |
 | flannel-v0.11.0-linux-amd64.tar.gz | Container Network CNI plugin | https://github.com/coreos/flannel/releases/download/v0.11.0/flannel-v0.11.0-linux-amd64.tar.gz |
+
+安装规划
+===
+| 名称 | 网段 |
+| :------: | :--------: |
+| Pod分配IP段 | 10.244.0.0/16 |
+| ClusterIP 地址 | 10.99.0.0/16 |
+| CoreDns 地址 | 10.99.110.110 |
+| 统一安装路径 | /data/apps/ |
+
+
+
+
+
+
+
+
+
+
+

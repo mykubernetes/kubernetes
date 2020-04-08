@@ -1060,6 +1060,135 @@ total size is 8,482  speedup is 1.44
 
 2、分发配置文件到其他master节点
 
+配置kube-apiserver 
+===
+kube-apiserver 是 Kubernetes 最重要的核心组件之一，主要提供以下的功能
+- 提供集群管理的 REST API 接口，包括认证授权、数据校验以及集群状态变更等
+- 提供其他模块之间的数据交互和通信的枢纽（其他模块通过 API Server 查询或修改数据，只有 API Server 才直接操作 etcd）
+```
+[root@K8S-PROD-MASTER-A1 kubernetes]# cd /data/apps/kubernetes/pki/
+[root@K8S-PROD-MASTER-A1 pki]# openssl genrsa -out /data/apps/kubernetes/pki/sa.key 2048
+Generating RSA private key, 2048 bit long modulus
+...............+++
+......+++
+e is 65537 (0x10001)
+[root@K8S-PROD-MASTER-A1 pki]# openssl rsa -in /data/apps/kubernetes/pki/sa.key -pubout -out /data/apps/kubernetes/pki/sa.pub
+writing RSA key
+[root@K8S-PROD-MASTER-A1 pki]# ls -l sa.*
+-rw-r--r-- 1 root root 1679 Mar 14 11:49 sa.key
+-rw-r--r-- 1 root root  451 Mar 14 11:49 sa.pub
+```
+分发文件到其他apiserver节点
+```
+[root@K8S-PROD-MASTER-A1 pki]# scp -r /data/apps/kubernetes/pki/sa.* 10.211.18.5:/data/apps/kubernetes/pki/
+[root@K8S-PROD-MASTER-A1 pki]# scp -r /data/apps/kubernetes/pki/sa.* 10.211.18.6:/data/apps/kubernetes/pki/
 
+[root@K8S-PROD-MASTER-A1 kubernetes]# scp -r /data/apps/kubernetes/etc 10.211.18.5:/data/apps/kubernetes/
+[root@K8S-PROD-MASTER-A1 kubernetes]# scp -r /data/apps/kubernetes/etc 10.211.18.6:/data/apps/kubernetes/
+```
+
+配置apiserver系统服务
+
+1、分别在10.211.18.4、10.211.18.5、10.211.18.6三台主机执行如下命令。
+```
+cat > /usr/lib/systemd/system/kube-apiserver.service << EOF
+[Unit]
+Description=Kubernetes API Service
+Documentation=https://github.com/kubernetes/kubernetes
+After=network.target
+
+[Service]
+EnvironmentFile=-/data/apps/kubernetes/etc/kube-apiserver.conf
+ExecStart=/data/apps/kubernetes/server/bin/kube-apiserver \\
+\$KUBE_LOGTOSTDERR \\
+\$KUBE_LOG_LEVEL \\
+\$KUBE_ETCD_ARGS \\
+\$KUBE_API_ADDRESS \\
+\$KUBE_SERVICE_ADDRESSES \\
+\$KUBE_ADMISSION_CONTROL \\
+\$KUBE_APISERVER_ARGS
+Restart=on-failure
+Type=notify
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+
+2、创建apiserver配置文件
+```
+···
+[root@K8S-PROD-MASTER-A1 etc]# cat >/data/apps/kubernetes/etc/kube-apiserver.conf <<EOF
+KUBE_API_ADDRESS="--advertise-address=10.211.18.4"
+
+KUBE_ETCD_ARGS="--etcd-servers=https://10.211.18.4:2379,https://10.211.18.5:2379,https://10.211.18.6:2379 \
+--etcd-cafile=/data/apps/etcd/ssl/etcd-ca.pem \
+--etcd-certfile=/data/apps/etcd/ssl/etcd.pem \
+--etcd-keyfile=/data/apps/etcd/ssl/etcd-key.pem"
+
+KUBE_LOGTOSTDERR="--logtostderr=false"
+KUBE_LOG_LEVEL=" --log-dir=/data/apps/kubernetes/log/  --v=2 \
+--audit-log-maxage=7 \
+--audit-log-maxbackup=10  \
+--audit-log-maxsize=100 \
+--audit-log-path=/data/apps/kubernetes/log/kubernetes.audit --event-ttl=12h"
+
+
+KUBE_SERVICE_ADDRESSES="--service-cluster-ip-range=10.99.0.0/16"
+KUBE_ADMISSION_CONTROL="--enable-admission-plugins=NamespaceLifecycle,LimitRanger,ServiceAccount,DefaultStorageClass,DefaultTolerationSeconds,MutatingAdmissionWebhook,ValidatingAdmissionWebhook,ResourceQuota,PersistentVolumeClaimResize,PodPreset"
+
+KUBE_APISERVER_ARGS="--storage-backend=etcd3 \
+--apiserver-count=3 \
+--endpoint-reconciler-type=lease \
+--runtime-config=api/all,settings.k8s.io/v1alpha1=true,admissionregistration.k8s.io/v1beta1 \
+--enable-admission-plugins=Initializers \
+--allow-privileged=true \
+--authorization-mode=Node,RBAC \
+--enable-bootstrap-token-auth=true \
+--token-auth-file=/data/apps/kubernetes/etc/token.csv \
+--service-node-port-range=30000-40000 \
+--tls-cert-file=/data/apps/kubernetes/pki/kube-apiserver.pem \
+--tls-private-key-file=/data/apps/kubernetes/pki/kube-apiserver-key.pem \
+--client-ca-file=/data/apps/kubernetes/pki/ca.pem \
+--service-account-key-file=/data/apps/kubernetes/pki/sa.pub \
+--enable-swagger-ui=false \
+--secure-port=6443 \
+--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname \
+--anonymous-auth=false \
+--kubelet-client-certificate=/data/apps/kubernetes/pki/admin.pem \
+--kubelet-client-key=/data/apps/kubernetes/pki/admin-key.pem "
+EOF
+```
+
+3、分别启动三台apiserver
+```
+[root@K8S-PROD-MASTER-A1 etc]# mkdir –p /data/apps/kubernetes/log
+[root@K8S-PROD-MASTER-A1 etc]# systemctl daemon-reload
+[root@K8S-PROD-MASTER-A1 etc]# systemctl enable kube-apiserver
+Created symlink from /etc/systemd/system/multi-user.target.wants/kube-apiserver.service to /usr/lib/systemd/system/kube-apiserver.service.
+
+[root@K8S-PROD-MASTER-A1 etc]# systemctl start kube-apiserver
+[root@K8S-PROD-MASTER-A1 etc]# systemctl status kube-apiserver
+```
+
+
+访问测试,出现一下内容说明搭建成功：
+```
+curl -k https://10.211.18.4:6443
+
+{
+"kind": "Status",
+"apiVersion": "v1",
+"metadata": {
+
+},
+"status": "Failure",
+"message": "Unauthorized",
+"reason": "Unauthorized",
+"code": 401
+}
+```
 
 

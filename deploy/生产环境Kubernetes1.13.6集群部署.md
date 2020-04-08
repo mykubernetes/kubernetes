@@ -190,12 +190,16 @@ yum --disablerepo="*" --enablerepo="elrepo-kernel" list available
 
 七、防火墙放行端口
 Master Node Inbound
+---
 | Protocol | Port Range | Source | Purpose |
 | :------: | :--------: | :------: | :------: |
 | TCP	| 6443 8443	| Worker Node,API Requests	| Kubernetes API Server |
 | UDP | 8285 | Master & Worker Nodes | Flannel overlay network – udp backend |
 | UDP | 8472 | Master & Worker Nodes | Flannel overlay network – vxlan backend |
 Worker Node Inbound
+---
+| Protocol | Port Range | Source | Purpose |
+| :------: | :--------: | :------: | :------: |
 | TCP	| 10250 | Master Nodes | Worker node Kubelet API for exec and logs. |
 | TCP	| 10255 | Heapster | Worker node read-only Kubelet API. |
 | TCP	| 30000-40000 | External Application Consumers | Default port range for external service ports. Typically, these ports would need to be exposed to external load-balancers, or other external consumers of the application itself. |
@@ -203,9 +207,15 @@ Worker Node Inbound
 |UDP | 8472 | Master & Worker Nodes | flannel overlay network - vxlan backend (only required if using flannel)
 | TCP | 179 | Worket Nodes | Calico BGP network (only required if the BGP backend is used) |
 Etcd Node Inbound
+---
+| Protocol | Port Range | Source | Purpose |
+| :------: | :--------: | :------: | :------: |
 | TCP	| 2379-2380 | Master Nodes | etcd server client API |
 | TCP	| 2379-2380 | Worker Nodes | etcd server client API (only required if using flannel or Calico). |
-Ingress 
+Ingress
+---
+| Protocol | Port Range | Source | Purpose |
+| :------: | :--------: | :------: | :------: |
 | TCP | 80 | Ingress Nodes | http |
 | TCP | 443 | Ingress Nodes | https |
 | TCP | 8080 | Ingress Nodes | other |

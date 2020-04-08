@@ -1191,4 +1191,430 @@ curl -k https://10.211.18.4:6443
 }
 ```
 
+配置apiserver高可用部署
+===
+ 
+
+
+安装相关软件包
+```
+10.211.18.4   apiserver-0
+10.211.18.5   apiserver-1
+10.211.18.6   apiserver-2
+
+分别在apiserver集群节点安装haproxy、keepalived
+yum install haproxy keepalived -y
+```
+
+
+配置haproxy
+1、在Master-A1执行如下命令
+```
+[root@K8S-PROD-MASTER-A1 ~]# cd /etc/haproxy/
+[root@K8S-PROD-MASTER-A1 haproxy]# cp haproxy.cfg{,.bak} 
+[root@K8S-PROD-MASTER-A1 haproxy]# > haproxy.cfg
+···
+
+依次在其他apiserver节点创建haproxy.cfg配置文件
+···
+[root@K8S-PROD-MASTER-A1 haproxy]# vi haproxy.cfg 
+
+global
+    log 127.0.0.1 local2
+    chroot /var/lib/haproxy
+    pidfile /var/run/haproxy.pid
+    maxconn 4000
+    user haproxy
+    group haproxy
+    daemon
+    stats socket /var/lib/haproxy/stats
+
+defaults
+    mode tcp
+    log global
+    retries 3
+    option tcplog
+    option httpclose
+    option dontlognull
+    option abortonclose
+    option redispatch
+    maxconn 32000
+    timeout connect 5000ms
+    timeout client 2h
+    timeout server 2h
+
+listen stats
+    mode http
+    bind :10086
+    stats enable
+    stats uri /admin?stats
+    stats auth admin:admin
+    stats admin if TRUE
+
+frontend k8s_apiserver 
+    bind *:8443
+    mode tcp
+    default_backend https_sri
+
+backend https_sri
+    balance roundrobin
+server apiserver1_10_211_18_4 10.211.18.4:6443 check inter 2000 fall 2 rise 2 weight 100
+server apiserver2_10_211_18_5 10.211.18.5:6443 check inter 2000 fall 2 rise 2 weight 100
+server apiserver3_10_211_18_6 10.211.18.6:6443 check inter 2000 fall 2 rise 2 weight 100
+```
+
+2、在Master-A2执行如下命令
+```
+[root@K8S-PROD-MASTER-A2 ~]# cd /etc/haproxy/
+[root@K8S-PROD-MASTER-A2 haproxy]# cp haproxy.cfg{,.bak} 
+[root@K8S-PROD-MASTER-A2 haproxy]# > haproxy.cfg
+
+ [root@K8S-PROD-MASTER-A2 haproxy]# vi haproxy.cfg 
+global
+    log 127.0.0.1 local2
+    chroot /var/lib/haproxy
+    pidfile /var/run/haproxy.pid
+    maxconn 4000
+    user haproxy
+    group haproxy
+    daemon
+    stats socket /var/lib/haproxy/stats
+
+defaults
+    mode tcp
+    log global
+    retries 3
+    option tcplog
+    option httpclose
+    option dontlognull
+    option abortonclose
+    option redispatch
+    maxconn 32000
+    timeout connect 5000ms
+    timeout client 2h
+    timeout server 2h
+
+listen stats
+    mode http
+    bind :10086
+    stats enable
+    stats uri /admin?stats
+    stats auth admin:admin
+    stats admin if TRUE
+
+frontend k8s_apiserver 
+    bind *:8443
+    mode tcp
+    default_backend https_sri
+
+backend https_sri
+    balance roundrobin
+server apiserver1_10_211_18_4 10.211.18.4:6443 check inter 2000 fall 2 rise 2 weight 100
+server apiserver2_10_211_18_5 10.211.18.5:6443 check inter 2000 fall 2 rise 2 weight 100
+server apiserver3_10_211_18_6 10.211.18.6:6443 check inter 2000 fall 2 rise 2 weight 100
+```
+
+3、在Master-A3执行如下命令
+```
+[root@K8S-PROD-MASTER-A3 ~]# cd /etc/haproxy/
+[root@K8S-PROD-MASTER-A3 haproxy]# cp haproxy.cfg{,.bak} 
+[root@K8S-PROD-MASTER-A3 haproxy]# > haproxy.cfg
+
+[root@K8S-PROD-MASTER-A3 haproxy]# vi haproxy.cfg 
+
+global
+    log 127.0.0.1 local2
+    chroot /var/lib/haproxy
+    pidfile /var/run/haproxy.pid
+    maxconn 4000
+    user haproxy
+    group haproxy
+    daemon
+    stats socket /var/lib/haproxy/stats
+
+defaults
+    mode tcp
+    log global
+    retries 3
+    option tcplog
+    option httpclose
+    option dontlognull
+    option abortonclose
+    option redispatch
+    maxconn 32000
+    timeout connect 5000ms
+    timeout client 2h
+    timeout server 2h
+
+listen stats
+    mode http
+    bind :10086
+    stats enable
+    stats uri /admin?stats
+    stats auth admin:admin
+    stats admin if TRUE
+
+frontend k8s_apiserver 
+    bind *:8443
+    mode tcp
+    default_backend https_sri
+
+backend https_sri
+    balance roundrobin
+server apiserver1_10_211_18_4 10.211.18.4:6443 check inter 2000 fall 2 rise 2 weight 100
+server apiserver2_10_211_18_5 10.211.18.5:6443 check inter 2000 fall 2 rise 2 weight 100
+server apiserver3_10_211_18_6 10.211.18.6:6443 check inter 2000 fall 2 rise 2 weight 100
+```
+
+配置keepalived
+```
+[root@K8S-PROD-MASTER-A1 haproxy]# cd /etc/keepalived/
+[root@K8S-PROD-MASTER-A1 keepalived]# cp keepalived.conf{,.bak}  
+[root@K8S-PROD-MASTER-A1 keepalived]#  > keepalived.conf
+```
+1、Master-A1节点
+```
+[root@K8S-PROD-MASTER-A1 keepalived]# vi keepalived.conf
+
+! Configuration File for keepalived  
+global_defs {  
+    notification_email {   
+        test@test.com   
+    }   
+    notification_email_from admin@test.com  
+    smtp_server 127.0.0.1  
+    smtp_connect_timeout 30  
+    router_id LVS_MASTER_APISERVER
+}  
+
+vrrp_script check_haproxy {
+    script "/etc/keepalived/check_haproxy.sh"
+    interval 3
+}  
+
+vrrp_instance VI_1 {  
+    state MASTER
+    interface ens33
+    virtual_router_id 60  
+    priority 100
+    advert_int 1  
+    authentication {  
+        auth_type PASS  
+        auth_pass 1111  
+}  
+    unicast_peer {
+    10.211.18.4
+    10.211.18.5
+    10.211.18.6
+    }
+    virtual_ipaddress {  
+        10.211.18.10/24 label ens33:0
+}
+
+    track_script {   
+        check_haproxy
+    }
+}
+```
+注意： 
+其他两个节点state MASTER 字段需改为state BACKUP,  priority 100 需要分别设置90 80
+
+```
+[root@K8S-PROD-MASTER-A2 haproxy]# cd /etc/keepalived/
+[root@K8S-PROD-MASTER-A2 keepalived]# cp keepalived.conf{,.bak}  
+[root@K8S-PROD-MASTER-A2 keepalived]#  > keepalived.conf
+
+[root@K8S-PROD-MASTER-A2 keepalived]# vi keepalived.conf
+
+! Configuration File for keepalived  
+global_defs {  
+    notification_email {   
+        test@test.com   
+    }   
+    notification_email_from admin@test.com  
+    smtp_server 127.0.0.1  
+    smtp_connect_timeout 30  
+    router_id LVS_MASTER_APISERVER
+}  
+
+vrrp_script check_haproxy {
+    script "/etc/keepalived/check_haproxy.sh"
+    interval 3
+}  
+
+vrrp_instance VI_1 {  
+    state BACKUP
+    interface ens33
+    virtual_router_id 60  
+    priority 90
+    advert_int 1  
+    authentication {  
+        auth_type PASS  
+        auth_pass 1111  
+}  
+    unicast_peer {
+    10.211.18.4
+    10.211.18.5
+    10.211.18.6
+    }
+    virtual_ipaddress {  
+        10.211.18.10/24 label ens33:0
+    }
+
+    track_script {   
+        check_haproxy
+    }
+}
+```
+
+创建keepalived配置文件
+```
+[root@K8S-PROD-MASTER-A3 haproxy]# cd /etc/keepalived/
+[root@K8S-PROD-MASTER-A3 keepalived]# cp keepalived.conf{,.bak}  
+[root@K8S-PROD-MASTER-A3 keepalived]#  > keepalived.conf
+
+
+[root@K8S-PROD-MASTER-A3 keepalived]# vi keepalived.conf
+
+! Configuration File for keepalived  
+global_defs {  
+    notification_email {   
+        test@test.com   
+    }   
+    notification_email_from admin@test.com  
+    smtp_server 127.0.0.1  
+    smtp_connect_timeout 30  
+    router_id LVS_MASTER_APISERVER
+}  
+
+vrrp_script check_haproxy {
+    script "/etc/keepalived/check_haproxy.sh"
+    interval 3
+}  
+
+vrrp_instance VI_1 {  
+    state BACKUP
+    interface ens33
+    virtual_router_id 60  
+    priority 80
+    advert_int 1  
+    authentication {  
+        auth_type PASS  
+        auth_pass 1111  
+}  
+    unicast_peer {
+    10.211.18.4
+    10.211.18.5
+    10.211.18.6
+    }
+    virtual_ipaddress {  
+        10.211.18.10/24 label ens33:0
+    }
+
+    track_script {   
+        check_haproxy
+    }
+}
+```
+
+
+所有节点(Master1~Master3)需要配置检查脚本（check_haproxy.sh）, 当haproxy挂掉后自动停止keepalived
+```
+[root@K8S-PROD-MASTER-A1 keepalived]# vi /etc/keepalived/check_haproxy.sh
+
+#!/bin/bash
+
+flag=$(systemctl status haproxy &> /dev/null;echo $?)
+
+if [[ $flag != 0 ]];then
+echo "haproxy is down,close the keepalived"
+systemctl stop keepalived
+fi
+```
+
+2、修改系统服务
+```
+[root@K8S-PROD-MASTER-A1 keepalived]#  vi /usr/lib/systemd/system/keepalived.service
+
+[Unit]
+Description=LVS and VRRP High Availability Monitor
+After=syslog.target network-online.target
+Requires=haproxy.service    #增加该字段
+[Service]
+Type=forking
+PIDFile=/var/run/keepalived.pid
+KillMode=process
+EnvironmentFile=-/etc/sysconfig/keepalived
+ExecStart=/usr/sbin/keepalived $KEEPALIVED_OPTIONS
+ExecReload=/bin/kill -HUP $MAINPID
+
+[Install]
+WantedBy=multi-user.target
+```
+
+
+firewalld放行VRRP协议
+```
+firewall-cmd --direct --permanent --add-rule ipv4 filter INPUT 0 --in-interface ens33 --destination 224.0.0.18 --protocol vrrp -j ACCEPT
+firewall-cmd --reload
+```
+注意：--in-interface ens33请修改为实际网卡名称
+
+
+登录apiserver节点启动以下服务
+```
+[root@K8S-PROD-MASTER-A1 haproxy]# systemctl enable haproxy 
+Created symlink from /etc/systemd/system/multi-user.target.wants/haproxy.service to /usr/lib/systemd/system/haproxy.service.
+
+
+[root@K8S-PROD-MASTER-A1 haproxy]# systemctl  start haproxy
+[root@K8S-PROD-MASTER-A1 haproxy]# systemctl  status haproxy
+● haproxy.service - HAProxy Load Balancer
+   Loaded: loaded (/usr/lib/systemd/system/haproxy.service; enabled; vendor preset: disabled)
+   Active: active (running) since Mon 2019-04-29 10:19:21 CST; 6h ago
+ Main PID: 5304 (haproxy-systemd)
+   CGroup: /system.slice/haproxy.service
+           ├─5304 /usr/sbin/haproxy-systemd-wrapper -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid
+           ├─5308 /usr/sbin/haproxy -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid -Ds
+           └─5344 /usr/sbin/haproxy -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid -Ds
+
+Apr 29 10:19:21 K8S-PROD-MASTER-A1 systemd[1]: Started HAProxy Load Balancer.
+Apr 29 10:19:21 K8S-PROD-MASTER-A1 haproxy-systemd-wrapper[5304]: haproxy-systemd-wrapper: executing /usr/sbin/haproxy -f /etc/haproxy/haproxy.cfg -p /run/haproxy.pid –Ds
+
+
+
+[root@K8S-PROD-MASTER-A1 keepalived]# systemctl enable keepalived
+Created symlink from /etc/systemd/system/multi-user.target.wants/keepalived.service to /usr/lib/systemd/system/keepalived.service.
+
+[root@K8S-PROD-MASTER-A1 keepalived]# systemctl  start keepalived 
+[root@K8S-PROD-MASTER-A1 keepalived]# systemctl  status keepalived
+● keepalived.service - LVS and VRRP High Availability Monitor
+   Loaded: loaded (/usr/lib/systemd/system/keepalived.service; enabled; vendor preset: disabled)
+   Active: active (running) since Mon 2019-04-29 10:19:28 CST; 4h 2min ago
+ Main PID: 5355 (keepalived)
+   CGroup: /system.slice/keepalived.service
+           ├─5355 /usr/sbin/keepalived -D
+           ├─5356 /usr/sbin/keepalived -D
+           └─5357 /usr/sbin/keepalived -D
+
+Apr 29 10:21:32 K8S-PROD-MASTER-A1 Keepalived_vrrp[5357]: Sending gratuitous ARP on ens33 for 10.211.18.10
+Apr 29 10:21:32 K8S-PROD-MASTER-A1 Keepalived_vrrp[5357]: Sending gratuitous ARP on ens33 for 10.211.18.10
+Apr 29 10:21:32 K8S-PROD-MASTER-A1 Keepalived_vrrp[5357]: Sending gratuitous ARP on ens33 for 10.211.18.10
+Apr 29 10:21:32 K8S-PROD-MASTER-A1 Keepalived_vrrp[5357]: Sending gratuitous ARP on ens33 for 10.211.18.10
+Apr 29 10:21:37 K8S-PROD-MASTER-A1 Keepalived_vrrp[5357]: Sending gratuitous ARP on ens33 for 10.211.18.10
+Apr 29 10:21:37 K8S-PROD-MASTER-A1 Keepalived_vrrp[5357]: VRRP_Instance(VI_1) Sending/queueing gratuitous ARPs on ens33 for 10.211.18.10
+```
+
+执行ip a命令， 查看浮动IP
+ 
+
+
+http://10.211.18.10:10086/admin?stats 登录haproxy，查看服务是否正常
+ 
+
+
+
+
+
+
 

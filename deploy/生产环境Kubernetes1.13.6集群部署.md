@@ -881,8 +881,184 @@ mkdir: created directory ‘/data/apps/kubernetes/pki’
 [root@K8S-PROD-MASTER-A1 k8s-ssl]# rsync  -avzP /data/apps/kubernetes 10.211.18.6/data/apps/
 ```
 
+部署Master节点
+---
+1、解压server包并拷贝文件到其他master节点
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cd /opt/software/
+[root@K8S-PROD-MASTER-A1 software]# ls -l
+total 517804
+drwxr-xr-x 3 1000 1000        96 Mar 12 16:11 etcd-v3.3.12-linux-amd64
+-rw-r--r-- 1 root root  11350736 Mar 11 08:42 etcd-v3.3.12-linux-amd64.tar.gz
+-rw-r--r-- 1 root root   9565743 Mar 11 08:44 flannel-v0.11.0-linux-amd64.tar.gz
+-rw-r--r-- 1 root root  91418745 Mar 11 08:51 kubernetes-node-linux-amd64.tar.gz
+-rw-r--r-- 1 root root 417885230 Mar 11 09:10 kubernetes-server-linux-amd64.tar.gz
 
+[root@K8S-PROD-MASTER-A1 software]# tar zxf kubernetes-server-linux-amd64.tar.gz
+[root@K8S-PROD-MASTER-A1 software]# rsync -avzP kubernetes/server   10.211.18.4:/data/apps/kubernetes/
+[root@K8S-PROD-MASTER-A1 software]# rsync -avzP kubernetes/server   10.211.18.4:/data/apps/kubernetes/
+[root@K8S-PROD-MASTER-A1 software]# rsync -avzP kubernetes/server   10.211.18.4:/data/apps/kubernetes/
+```
 
+2、配置环境变量，安装docker命令补全
+```
+[root@K8S-PROD-MASTER-A1 software]# yum install  bash-completion  -y
+[root@K8S-PROD-MASTER-A1 software]# cat > /etc/profile.d/kubernetes.sh << EOF
+K8S_HOME=/data/apps/kubernetes
+export PATH=\$K8S_HOME/server/bin:\$PATH
+source <(kubectl completion bash)
+EOF
+
+[root@K8S-PROD-MASTER-A1 software]# source /etc/profile.d/kubernetes.sh
+
+[root@K8S-PROD-MASTER-A1 ~]# kubectl version
+Client Version: version.Info{Major:"1", Minor:"13", GitVersion:"v1.13.6", GitCommit:"c27b913fddd1a6c480c229191a087698aa92f0b1", GitTreeState:"clean", BuildDate:"2019-02-28T13:37:52Z", GoVersion:"go1.11.5", Compiler:"gc", Platform:"linux/amd64"}
+The connection to the server localhost:8080 was refused - did you specify the right host or port?
+```
+
+配置 TLS Bootstrapping
+===
+1、生成token
+```
+[root@K8S-PROD-MASTER-A1 software]# export BOOTSTRAP_TOKEN=$(head -c 16 /dev/urandom | od -An -t x | tr -d ' ')
+[root@K8S-PROD-MASTER-A1 software]# cat > /data/apps/kubernetes/token.csv << EOF
+${BOOTSTRAP_TOKEN},kubelet-bootstrap,10001,"system:kubelet-bootstrap"
+EOF
+```
+
+一、创建 kubelet bootstrapping kubeconfig
+
+设置kube-apiserver访问地址， 后面需要对kube-apiserver配置高可用集群， 这里设置apiserver浮动IP。 KUBE_APISERVER=浮动IP
+```
+[root@K8S-PROD-MASTER-A1 software]# cd /data/apps/kubernetes/
+# export KUBE_APISERVER="https://10.211.18.10:8443"
+
+# kubectl config set-cluster kubernetes \
+--certificate-authority=/data/apps/kubernetes/pki/ca.pem \
+--embed-certs=true \
+--server=${KUBE_APISERVER} \
+--kubeconfig=kubelet-bootstrap.kubeconfig
+Cluster "kubernetes" set.
+
+# kubectl config set-credentials kubelet-bootstrap \
+--token=${BOOTSTRAP_TOKEN} \
+--kubeconfig=kubelet-bootstrap.kubeconfig
+User "kubelet-bootstrap" set.
+
+# kubectl config set-context default \
+--cluster=kubernetes \
+--user=kubelet-bootstrap \
+--kubeconfig=kubelet-bootstrap.kubeconfig
+Context "default" created.
+
+# kubectl config use-context default --kubeconfig=kubelet-bootstrap.kubeconfig
+Switched to context "default".
+```
+
+二、创建 kube-controller-manager kubeconfig
+```
+[root@K8S-PROD-MASTER-A1 kubernetes]# kubectl config set-cluster kubernetes \
+--certificate-authority=/data/apps/kubernetes/pki/ca.pem \
+--embed-certs=true \
+--server=${KUBE_APISERVER} \
+--kubeconfig=kube-controller-manager.kuconfig
+
+[root@K8S-PROD-MASTER-A1 kubernetes]# kubectl config set-credentials kube-controller-manager \
+--client-certificate=/data/apps/kubernetes/pki/kube-controller-manager.pem \
+--client-key=/data/apps/kubernetes/pki/kube-controller-manager-key.pem \
+--embed-certs=true \
+--kubeconfig=kube-controller-manager.kubeconfig
+
+[root@K8S-PROD-MASTER-A1 kubernetes]# kubectl config set-context default \
+--cluster=kubernetes \
+--user=kube-controller-manager \
+--kubeconfig=kube-controller-manager.kubeconfig
+
+[root@K8S-PROD-MASTER-A1 kubernetes]# kubectl config use-context default --kubeconfig=kube-controller-manager.kubeconfig
+```
+
+三、创建 kube-scheduler kubeconfig
+```
+kubectl config set-cluster kubernetes \
+--certificate-authority=/data/apps/kubernetes/pki/ca.pem \
+--embed-certs=true \
+--server=${KUBE_APISERVER} \
+--kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config set-credentials kube-scheduler \
+--client-certificate=/data/apps/kubernetes/pki/kube-scheduler.pem \
+--client-key=/data/apps/kubernetes/pki/kube-scheduler-key.pem \
+--embed-certs=true \
+--kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config set-context default \
+--cluster=kubernetes \
+--user=kube-scheduler \
+--kubeconfig=kube-scheduler.kubeconfig
+
+kubectl config use-context default --kubeconfig=kube-scheduler.kubeconfig
+```
+
+四、创建 kube-proxy kubeconfig
+```
+kubectl config set-cluster kubernetes \
+--certificate-authority=/data/apps/kubernetes/pki/ca.pem \
+--embed-certs=true \
+--server=${KUBE_APISERVER} \
+--kubeconfig=kube-proxy.kubeconfig
+
+kubectl config set-credentials kube-proxy \
+--client-certificate=/data/apps/kubernetes/pki/kube-proxy.pem \
+--client-key=/data/apps/kubernetes/pki/kube-proxy-key.pem \
+--embed-certs=true \
+--kubeconfig=kube-proxy.kubeconfig
+
+kubectl config set-context default \
+--cluster=kubernetes \
+--user=kube-proxy \
+--kubeconfig=kube-proxy.kubeconfig
+
+kubectl config use-context default --kubeconfig=kube-proxy.kubeconfig
+```
+
+五、创建 admin kubeconfig
+```
+kubectl config set-cluster kubernetes \
+--certificate-authority=/data/apps/kubernetes/pki/ca.pem \
+--embed-certs=true \
+--server=${KUBE_APISERVER} \
+--kubeconfig=admin.conf
+
+kubectl config set-credentials admin \
+--client-certificate=/data/apps/kubernetes/pki/admin.pem \
+--client-key=/data/apps/kubernetes/pki/admin-key.pem \
+--embed-certs=true \
+--kubeconfig=admin.conf
+
+kubectl config set-context default \
+--cluster=kubernetes \
+--user=admin \
+--kubeconfig=admin.conf
+
+kubectl config use-context default --kubeconfig=admin.conf
+```
+
+六、分发kubelet/kube-proxy配置文件
+
+1、分发配置文件到node节点
+```
+[root@K8S-PROD-MASTER-A1 kubernetes]# rsync  -avz --exclude=kube-scheduler.kubeconfig --exclude=kube-controller-manager.kubeconfig --exclude=admin.conf --exclude=token.csv etc 10.211.18.11:/data/apps/kubernetes
+
+sending incremental file list
+etc/
+etc/kube-proxy.kubeconfig
+etc/kubelet-bootstrap.kubeconfig
+
+sent 5,842 bytes  received 58 bytes  1,311.11 bytes/sec
+total size is 8,482  speedup is 1.44
+```
+
+2、分发配置文件到其他master节点
 
 
 

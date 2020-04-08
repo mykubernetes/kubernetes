@@ -55,13 +55,131 @@ Kubernetes 主要由以下几个核心组件组成：
 
 前期准备工作
 ---
-修改主机名/关闭selinux
+一、修改主机名/关闭selinux
+操作步骤：  
+步骤 1	以root用户登录所有节点。  
+步骤 2	执行以下命令修改主机名、关闭selinux。  
 ```
 #修改主机名
 #  hostnamectl  --static set-hostname  K8S-PROD-NODE-A1
 #关闭Selinux
 #  sed -i 's/SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config
 ```
+
+二、升级系统内核/同步系统时间 
+注意：Overlay需要内核版本在3.12+，所以在安装完centos7.6之后要进行内核升级
+
+步骤 1	以root用户登录所有节点。
+步骤 2	安装时间同步软件
+```
+# yum install chrony –y
+```
+步骤 3	修改/etc/chrony.conf配置文件， 增加如下内容。 
+```
+server time.aliyun.com iburst
+```
+步骤 4	安装必备软件
+```
+yum install wget vim gcc git lrzsz net-tools tcpdump telnet  rsync -y
+```
+启动chronyd
+```
+# systemctl  start chronyd
+```
+
+三、调整内核参数
+```
+cat >  /etc/sysctl.d/k8s.conf  << EOF
+net.ipv4.tcp_keepalive_time = 600
+net.ipv4.tcp_keepalive_intvl = 30
+net.ipv4.tcp_keepalive_probes = 10
+net.ipv6.conf.all.disable_ipv6 = 1
+net.ipv6.conf.default.disable_ipv6 = 1
+net.ipv6.conf.lo.disable_ipv6 = 1
+net.ipv4.neigh.default.gc_stale_time = 120
+net.ipv4.conf.all.rp_filter = 0
+net.ipv4.conf.default.rp_filter = 0
+net.ipv4.conf.default.arp_announce = 2
+net.ipv4.conf.lo.arp_announce = 2
+net.ipv4.conf.all.arp_announce = 2
+net.ipv4.ip_forward = 1
+net.ipv4.tcp_max_tw_buckets = 5000
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_max_syn_backlog = 1024
+net.ipv4.tcp_synack_retries = 2
+net.bridge.bridge-nf-call-ip6tables = 1
+net.bridge.bridge-nf-call-iptables = 1
+net.bridge.bridge-nf-call-arptables = 1
+net.netfilter.nf_conntrack_max = 2310720
+fs.inotify.max_user_watches=89100
+fs.may_detach_mounts = 1
+fs.file-max = 52706963
+fs.nr_open = 52706963
+EOF
+```
+执行以下命令使修改生效
+```
+sysctl --system
+modprobe br_netfilter
+```
+
+四、加载ipvs模块
+```
+cat << EOF > /etc/sysconfig/modules/ipvs.modules 
+#!/bin/bash
+ipvs_modules_dir="/usr/lib/modules/\`uname -r\`/kernel/net/netfilter/ipvs"
+for i in \`ls \$ipvs_modules_dir | sed -r 's#(.*).ko.xz#\1#'\`; do
+/sbin/modinfo -F filename \$i &> /dev/null
+if [ \$? -eq 0 ]; then
+/sbin/modprobe \$i
+fi
+done
+EOF
+
+chmod +x /etc/sysconfig/modules/ipvs.modules 
+bash /etc/sysconfig/modules/ipvs.modules
+```
+
+
+五、导入elrepo Key  
+步骤 1	导入KEY  
+```
+# rpm -import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+```
+步骤 2	安装elrepo的yum源
+```
+#  rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+
+Retrieving http://www.elrepo.org/elrepo-release-7.0-2.el7.elrepo.noarch.rpm
+Retrieving http://elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+Preparing...                             ################################# [100%]
+Updating / installing...
+   1:elrepo-release-7.0-3.el7.elrepo ################################# [100%]
+```
+
+使用以下命令列出可用的内核相关包
+
+步骤 3	执行如下命令查看可用内核
+```
+yum --disablerepo="*" --enablerepo="elrepo-kernel" list available
+```
+步骤 4	安装4.4.176内核
+```
+# yum --enablerepo=elrepo-kernel install kernel-lt kernel-lt-devel -y
+```
+步骤 5	更改内核默认启动顺序
+```
+# grub2-set-default 0
+# reboot
+```
+步骤 6	验证内核是否升级成功
+```
+# uname -rp
+4.4.176-1.el7.elrepo.x86_64 x86_64
+```
+
+
+
 
 
 

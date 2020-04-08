@@ -66,7 +66,7 @@ Kubernetes 主要由以下几个核心组件组成：
 #  sed -i 's/SELINUX=.*/SELINUX=disabled/g' /etc/selinux/config
 ```
 
-二、升级系统内核/同步系统时间 
+二、升级系统内核/同步系统时间  
 注意：Overlay需要内核版本在3.12+，所以在安装完centos7.6之后要进行内核升级
 
 步骤 1	以root用户登录所有节点。
@@ -178,11 +178,38 @@ yum --disablerepo="*" --enablerepo="elrepo-kernel" list available
 4.4.176-1.el7.elrepo.x86_64 x86_64
 ```
 
+六、上传软件包
+参考表1将需上传的软件包或者脚本上传到Master和Node节点的指定目录下
+| 待上传包/脚本 |说明 | 上传路径 |
+| :------: | :--------: | :------: |
+| kubernetes-server-linux-amd64.tar.gz | Kubernetes Master节点所需安装包。 | /opt/software |
+| kubernetes-node-linux-amd64.tar.gz | Kubernetes Node节点所需安装包。 | /opt/software |
+| etcd-v3.3.10-linux-amd64.tar.gz | Etcd键值存储数据库	| /opt/software |
+| flannel-v0.11.0-linux-amd64.tar.gz | CNI网络插件 | /opt/software |
 
 
-
-
-
+七、防火墙放行端口
+Master Node Inbound
+| Protocol | Port Range | Source | Purpose |
+| :------: | :--------: | :------: | :------: |
+| TCP	| 6443 8443	| Worker Node,API Requests	| Kubernetes API Server |
+| UDP | 8285 | Master & Worker Nodes | Flannel overlay network – udp backend |
+| UDP | 8472 | Master & Worker Nodes | Flannel overlay network – vxlan backend |
+Worker Node Inbound
+| TCP	| 10250 | Master Nodes | Worker node Kubelet API for exec and logs. |
+| TCP	| 10255 | Heapster | Worker node read-only Kubelet API. |
+| TCP	| 30000-40000 | External Application Consumers | Default port range for external service ports. Typically, these ports would need to be exposed to external load-balancers, or other external consumers of the application itself. |
+| UDP | 8285 | Master & Worker Nodes | flannel overlay network - udp backend. This is the default network configuration (only required if using flannel) |
+|UDP | 8472 | Master & Worker Nodes | flannel overlay network - vxlan backend (only required if using flannel)
+| TCP | 179 | Worket Nodes | Calico BGP network (only required if the BGP backend is used) |
+Etcd Node Inbound
+| TCP	| 2379-2380 | Master Nodes	etcd server client API |
+| TCP	| 2379-2380 | Worker Nodes	etcd server client API (only required if using flannel or Calico). |
+Ingress 
+| TCP | 80 | Ingress Nodes | http |
+| TCP | 443 | Ingress Nodes | https |
+| TCP | 8080 | Ingress Nodes | other |
+			
 
 
 

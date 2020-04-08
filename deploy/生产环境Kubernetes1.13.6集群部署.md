@@ -188,7 +188,7 @@ yum --disablerepo="*" --enablerepo="elrepo-kernel" list available
 | flannel-v0.11.0-linux-amd64.tar.gz | CNI网络插件 | /opt/software |
 
 
-七、防火墙放行端口
+七、防火墙放行端口  
 Master Node Inbound
 ---
 | Protocol | Port Range | Source | Purpose |
@@ -196,6 +196,7 @@ Master Node Inbound
 | TCP	| 6443 8443	| Worker Node,API Requests	| Kubernetes API Server |
 | UDP | 8285 | Master & Worker Nodes | Flannel overlay network – udp backend |
 | UDP | 8472 | Master & Worker Nodes | Flannel overlay network – vxlan backend |
+
 Worker Node Inbound
 ---
 | Protocol | Port Range | Source | Purpose |
@@ -206,12 +207,14 @@ Worker Node Inbound
 | UDP | 8285 | Master & Worker Nodes | flannel overlay network - udp backend. This is the default network configuration (only required if using flannel) |
 |UDP | 8472 | Master & Worker Nodes | flannel overlay network - vxlan backend (only required if using flannel)
 | TCP | 179 | Worket Nodes | Calico BGP network (only required if the BGP backend is used) |
+
 Etcd Node Inbound
 ---
 | Protocol | Port Range | Source | Purpose |
 | :------: | :--------: | :------: | :------: |
 | TCP	| 2379-2380 | Master Nodes | etcd server client API |
 | TCP	| 2379-2380 | Worker Nodes | etcd server client API (only required if using flannel or Calico). |
+
 Ingress
 ---
 | Protocol | Port Range | Source | Purpose |

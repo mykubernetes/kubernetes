@@ -1615,7 +1615,150 @@ http://10.211.18.10:10086/admin?stats 登录haproxy，查看服务是否正常
 ![image](https://github.com/mykubernetes/kubernetes/blob/master/deploy/image/kuber3.png) 
 
 
+配置启动kube-controller-manager
+---
+kube-controller-manager 负责维护集群的状态，比如故障检测、自动扩展、滚动更新等
 
+在启动时设置 --leader-elect=true 后，controller manager 会使用多节点选主的方式选择主节点。只有主节点才会调用 StartControllers() 启动所有控制器，而其他从节点则仅执行选主算法。
+ 
+1、执行如下创建系统服务文件
+```
+[root@K8S-PROD-MASTER-A1 software]#  cat > /usr/lib/systemd/system/kube-controller-manager.service << EOF
+Description=Kubernetes Controller Manager
+Documentation=https://github.com/kubernetes/kubernetes
+
+[Service]
+EnvironmentFile=-/data/apps/kubernetes/etc/kube-controller-manager.conf
+ExecStart=/data/apps/kubernetes/server/bin/kube-controller-manager \
+$KUBE_LOGTOSTDERR \
+$KUBE_LOG_LEVEL \
+$KUBECONFIG \
+$KUBE_CONTROLLER_MANAGER_ARGS
+
+Restart=always
+RestartSec=10s
+
+#Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+2、创建kube-controller-manager.conf配置文件
+```
+[root@K8S-PROD-MASTER-A2 etc]# cat > /data/apps/kubernetes/etc/kube-controller-manager.conf <<EOF
+KUBE_LOGTOSTDERR="--logtostderr=false"
+KUBE_LOG_LEVEL="--v=2 --log-dir=/data/apps/kubernetes/log/"
+
+
+KUBECONFIG="--kubeconfig=/data/apps/kubernetes/etc/kube-controller-manager.kubeconfig"
+
+KUBE_CONTROLLER_MANAGER_ARGS="--bind-address=127.0.0.1 \
+--cluster-cidr=10.99.0.0/16 \
+--cluster-name=kubernetes \
+--cluster-signing-cert-file=/data/apps/kubernetes/pki/ca.pem \
+--cluster-signing-key-file=/data/apps/kubernetes/pki/ca-key.pem \
+--service-account-private-key-file=/data/apps/kubernetes/pki/sa.key \
+--root-ca-file=/data/apps/kubernetes/pki/ca.pem \
+--leader-elect=true \
+--use-service-account-credentials=true \
+--node-monitor-grace-period=10s \
+--pod-eviction-timeout=10s \
+--allocate-node-cidrs=true \
+--controllers=*,bootstrapsigner,tokencleaner \
+--horizontal-pod-autoscaler-use-rest-clients=true \
+--experimental-cluster-signing-duration=87600h0m0s \
+--feature-gates=RotateKubeletServerCertificate=true""
+EOF
+```
+3、启动kube-controller-manager
+```
+systemctl daemon-reload
+systemctl enable kube-controller-manager
+systemctl start kube-controller-manager
+
+systemctl status kube-controller-manager
+```
+
+
+
+配置kubectl
+---
+```
+[root@K8S-PROD-MASTER-A1 pki]# rm -rf $HOME/.kube
+[root@K8S-PROD-MASTER-A1 pki]# mkdir -p $HOME/.kube
+[root@K8S-PROD-MASTER-A1 pki]# cp  /data/apps/kubernetes/etc/admin.conf  $HOME/.kube/config
+[root@K8S-PROD-MASTER-A1 pki]# sudo chown $(id -u):$(id -g) $HOME/.kube/config
+[root@K8S-PROD-MASTER-A1 pki]# kubectl get node
+```
+
+查看各个组件的状态
+```
+kubectl get componentstatuses
+
+
+[root@K8S-PROD-MASTER-A1 pki]# kubectl get componentstatuses
+NAME               STATUS    MESSAGE   ERROR
+controller-manager Healthy   ok
+scheduler          Healthy   ok
+etcd-1             Healthy {"health": "true"}
+etcd-0             Healthy {"health": "true"}
+etcd-2             Healthy {"health": "true"}
+```
+
+配置kubelet使用bootstrap
+```
+[root@K8S-PROD-MASTER-A1 pki]#  kubectl create clusterrolebinding kubelet-bootstrap \
+--clusterrole=system:node-bootstrapper \
+--user=kubelet-bootstrap
+```
+
+配置启动kube-scheduler
+---
+kube-scheduler 负责分配调度 Pod 到集群内的节点上，它监听 kube-apiserver，查询还未分配 Node 的 Pod，然后根据调度策略为这些 Pod 分配节点。按照预定的调度策略将 Pod 调度到相应的机器上（更新 Pod 的 NodeName 字段）。 
+ 
+1、执行如下创建系统服务文件
+```
+[root@K8S-PROD-MASTER-A2 etc]# cat > /usr/lib/systemd/system/kube-scheduler.service << EOF
+[Unit]
+Description=Kubernetes Scheduler Plugin
+Documentation=https://github.com/kubernetes/kubernetes
+
+[Service]
+EnvironmentFile=-/data/apps/kubernetes/etc/kube-scheduler.conf
+ExecStart=/data/apps/kubernetes/server/bin/kube-scheduler \
+$KUBE_LOGTOSTDERR \
+$KUBE_LOG_LEVEL \
+$KUBECONFIG \
+$KUBE_SCHEDULER_ARGS
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+
+2、创建kube-scheduler.conf配置文件
+```
+[root@K8S-PROD-MASTER-A2 etc]#  cat > /data/apps/kubernetes/etc/kube-scheduler.conf << EOF
+KUBE_LOGTOSTDERR="--logtostderr=false"
+KUBE_LOG_LEVEL="--v=2 --log-dir=/data/apps/kubernetes/log/"
+
+KUBECONFIG="--kubeconfig=/data/apps/kubernetes/etc/kube-scheduler.kubeconfig"
+KUBE_SCHEDULER_ARGS="--leader-elect=true --address=127.0.0.1" 
+EOF
+```
+
+3、启动kube-scheduler， 并设置服务开机自启动
+```
+systemctl daemon-reload
+systemctl enable kube-scheduler
+systemctl start kube-scheduler
+systemctl  status kube-scheduler
+```
 
 
 

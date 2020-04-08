@@ -188,7 +188,8 @@ yum --disablerepo="*" --enablerepo="elrepo-kernel" list available
 | flannel-v0.11.0-linux-amd64.tar.gz | CNI网络插件 | /opt/software |
 
 
-七、防火墙放行端口  
+七、防火墙放行端口
+
 Master Node Inbound
 ---
 | Protocol | Port Range | Source | Purpose |
@@ -222,7 +223,92 @@ Ingress
 | TCP | 80 | Ingress Nodes | http |
 | TCP | 443 | Ingress Nodes | https |
 | TCP | 8080 | Ingress Nodes | other |
-			
+
+
+安装Docker
+===
+
+1、安装存储驱动
+```
+yum install -y yum-utils \
+device-mapper-persistent-data \
+lvm2
+```
+2、添加YUM仓库
+```
+yum-config-manager --add-repo  https://mirrors.aliyun.com/docker-ce/linux/centos/docker-ce.repo
+```
+3、列出所有版本的Docker CE
+```
+#  yum list docker-ce --showduplicates | sort -r
+docker-ce.x86_64            18.06.3.ce-3.el7
+docker-ce.x86_64            18.06.2.ce-3.el7
+```
+4、安装特定版本
+```
+# yum install docker-ce-<VERSION_STRING> docker-ce-cli-<VERSION_STRING> containerd.io
+
+# yum install docker-ce-18.06.2.ce-3.el7  containerd.io -y
+```
+5、修改docker服务配置文件
+```
+vim /usr/lib/systemd/system/docker.service   #增加如下参数
+
+[Service]
+# kill only the docker process, not all processes in the cgroup
+KillMode=process
+```
+6、配置docker参数
+```
+# mkdir /etc/docker
+# vi /etc/docker/daemon.json
+
+{
+    "log-level": "warn",
+    "selinux-enabled": false,
+    "insecure-registries": [
+        "10.211.18.61:10500",
+        "10.211.18.62:10500"
+    ],
+    "registry-mirrors": [
+        "https://pqbap4ya.mirror.aliyuncs.com"
+    ],
+    "default-shm-size": "128M",
+    "data-root": "/data/docker",
+    "max-concurrent-downloads": 10,
+    "max-concurrent-uploads": 5,
+    "oom-score-adjust": -1000,
+    "debug": false,
+    "live-restore": true,
+    "exec-opts": [
+        "native.cgroupdriver=cgroupfs"
+],
+    "log-driver": "json-file",
+    "log-opts": {
+        "max-size": "100m",
+        "max-file": "10"
+},
+    "oom-score-adjust": -1000,
+    "registry-mirrors": ["$mirror"],
+    "storage-driver": "overlay2",
+    "storage-opts":["overlay2.override_kernel_check=true"]
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

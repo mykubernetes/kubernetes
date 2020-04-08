@@ -1765,10 +1765,8 @@ systemctl  status kube-scheduler
 ===
 配置kubelet
 ---
-kubelet 负责维持容器的生命周期，同时也负责 Volume（CVI）和网络（CNI）的管理；
-
-每个节点上都运行一个 kubelet 服务进程，默认监听 10250 端口，接收并执行 master 发来的指令，管理 Pod 及 Pod 中的容器。每个 kubelet 进程会在 API Server 上注册节点自身信息，定期向 master 节点汇报节点的资源使用情况，并通过 cAdvisor/metric-server 监控节点和容器的资源。
- 
+kubelet 负责维持容器的生命周期，同时也负责 Volume（CVI）和网络（CNI）的管理；每个节点上都运行一个 kubelet 服务进程，默认监听 10250 端口，接收并执行 master 发来的指令，管理 Pod 及 Pod 中的容器。每个 kubelet 进程会在 API Server 上注册节点自身信息，定期向 master 节点汇报节点的资源使用情况，并通过 cAdvisor/metric-server 监控节点和容器的资源。
+![image](https://github.com/mykubernetes/kubernetes/blob/master/deploy/image/kube4.png)
 配置并启动kubelet， flanneld (master与node节点都需要安装)
 
 在Master节点配置kubelet
@@ -1960,13 +1958,126 @@ Mar 22 11:55:33 K8S-PROD-NODE-A1 kubelet[11124]: I0322 11:55:33.942154   11124 p
 Mar 22 11:55:33 K8S-PROD-NODE-A1 kubelet[11124]: E0322 11:55:33.965594   11124 bootstrap.go:184] Unable to read existing bootstrap client config:
 ```
 
-
-
-
-
-
-
 在node上操作
 重复以上步骤， 修改kubelet-config.yml  address:地址为node节点ip, --hostname-override= 为node ip地址
 
+配置kube-proxy
+---
+kube-proxy 负责为 Service 提供 cluster 内部的服务发现和负载均衡；
 
+每台机器上都运行一个 kube-proxy 服务，它监听 API server 中 service 和 endpoint 的变化情况，并通过 ipvs/iptables 等来为服务配置负载均衡（仅支持 TCP 和 UDP）。
+![image](https://github.com/mykubernetes/kubernetes/blob/master/deploy/image/kube5.png)
+
+所有节点都要配置kube-proxy
+
+注意：使用 ipvs 模式时，需要预先在每台 Node 上加载内核模块 nf_conntrack_ipv4, ip_vs, ip_vs_rr, ip_vs_wrr, ip_vs_sh 等。
+
+master节点操作
+
+安装conntrack-tools
+```
+[root@K8S-PROD-MASTER-A1]#  yum install -y conntrack-tools ipvsadm ipset conntrack libseccomp
+```
+创建服务启动文件
+```
+[root@K8S-PROD-MASTER-A1]# cat > /usr/lib/systemd/system/kube-proxy.service << EOF
+[Unit]
+Description=Kubernetes Kube-Proxy Server
+Documentation=https://github.com/kubernetes/kubernetes
+After=network.target
+
+[Service]
+EnvironmentFile=-/data/apps/kubernetes/etc/kube-proxy.conf
+ExecStart=/data/apps/kubernetes/server/bin/kube-proxy \\
+\$KUBE_LOGTOSTDERR \\
+\$KUBE_LOG_LEVEL \\
+\$KUBECONFIG \\
+\$KUBE_PROXY_ARGS
+Restart=on-failure
+LimitNOFILE=65536
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+启用ipvs主要就是把kube-proxy的--proxy-mode配置选项修改为ipvs,并且要启用--masquerade-all，使用iptables辅助ipvs运行。
+```
+[root@K8S-PROD-MASTER-A1]# cat > /data/apps/kubernetes/etc/kube-proxy.conf << EOF
+KUBE_LOGTOSTDERR="--logtostderr=false"
+KUBE_LOG_LEVEL="--v=2 --log-dir=/data/apps/kubernetes/log/"
+
+KUBECONFIG="--kubeconfig=/data/apps/kubernetes/etc/kube-proxy.kubeconfig"
+KUBE_PROXY_ARGS="--proxy-mode=ipvs --masquerade-all=true --cluster-cidr=10.99.0.0/16"
+EOF
+```
+启动kube-proxy并设置为开机自启动
+```
+[root@K8S-PROD-MASTER-A1 kubernetes]# systemctl daemon-reload
+[root@K8S-PROD-MASTER-A1 kubernetes]# systemctl enable kube-proxy
+[root@K8S-PROD-MASTER-A1 kubernetes]# systemctl restart kube-proxy
+[root@K8S-PROD-MASTER-A1 kubernetes]# systemctl status kube-proxy
+● kube-proxy.service - Kubernetes Kube-Proxy Server
+   Loaded: loaded (/usr/lib/systemd/system/kube-proxy.service; enabled; vendor preset: disabled)
+   Active: active (running) since Mon 2019-04-29 10:19:21 CST; 23h ago
+     Docs: https://github.com/kubernetes/kubernetes
+ Main PID: 5310 (kube-proxy)
+    Tasks: 0
+   Memory: 29.1M
+   CGroup: /system.slice/kube-proxy.service
+           ‣ 5310 /data/apps/kubernetes/server/bin/kube-proxy --logtostderr=false --v=0 --kubeconfig=/data/apps/kubernetes/etc/kube-proxy.conf --proxy-mode=ipvs --masquerade-all=true
+```
+
+在所有的node上操作
+
+安装conntrack-tools
+```
+[root@K8S-PROD-NODE-A1 kubernetes]#   yum install -y conntrack-tools ipvsadm ipset conntrack libseccomp
+```
+创建服务启动文件
+```
+[root@K8S-PROD-NODE-A1 kubernetes]# cat > /usr/lib/systemd/system/kube-proxy.service << EOF
+[Unit]
+Description=Kubernetes Kube-Proxy Server
+Documentation=https://github.com/kubernetes/kubernetes
+After=network.target
+
+[Service]
+EnvironmentFile=-/data/apps/kubernetes/etc/kube-proxy.conf
+ExecStart=/data/apps/kubernetes/node/bin/kube-proxy \\
+      \$KUBE_LOGTOSTDERR \\
+      \$KUBE_LOG_LEVEL \\
+      \$KUBECONFIG \\
+      \$KUBE_PROXY_ARGS
+Restart=on-failure
+LimitNOFILE=65536
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+```
+[root@K8S-PROD-NODE-A1 kubernetes]# cat > /data/apps/kubernetes/etc/kube-proxy.conf << EOF
+KUBE_LOGTOSTDERR="--logtostderr=false"
+KUBE_LOG_LEVEL="--v=2 --log-dir=/data/apps/kubernetes/log/"
+
+KUBECONFIG="--kubeconfig=/data/apps/kubernetes/etc/kube-proxy.kubeconfig"
+KUBE_PROXY_ARGS="--proxy-mode=ipvs --masquerade-all=true --cluster-cidr=10.99.0.0/16"
+EOF
+```
+启动kube-proxy并设置为开机自启动
+```
+[root@K8S-PROD-NODE-A1 kubernetes]# systemctl daemon-reload
+[root@K8S-PROD-NODE-A1 kubernetes]# systemctl enable kube-proxy
+[root@K8S-PROD-NODE-A1 kubernetes]# systemctl restart kube-proxy
+[root@K8S-PROD-NODE-A1 kubernetes]# systemctl status kube-proxy
+● kube-proxy.service - Kubernetes Kube-Proxy Server
+   Loaded: loaded (/usr/lib/systemd/system/kube-proxy.service; enabled; vendor preset: disabled)
+   Active: active (running) since Tue 2019-03-19 17:50:53 CST; 3 days ago
+     Docs: https://github.com/kubernetes/kubernetes
+ Main PID: 16909 (kube-proxy)
+    Tasks: 0
+   Memory: 8.5M
+   CGroup: /system.slice/kube-proxy.service
+           ‣ 16909 /data/apps/kubernetes/node/bin/kube-proxy --logtostderr=false --v=0 --kubeconfig=/data/apps/kubernetes/etc/kube-proxy.conf --proxy-mode=ipvs --masquerade-all=true --cluster-cid...
+```

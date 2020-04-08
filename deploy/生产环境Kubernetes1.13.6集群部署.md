@@ -471,7 +471,7 @@ LimitNOFILE=65536
 WantedBy=multi-user.target
 ```
 
-7、修改配置文件，红色字段内容请根据业务规划自行修改。
+7、修改配置文件。
 ```
 [root@K8S-PROD-MASTER-A1 k8s-ssl]# cat << EOF > /data/apps/etcd/etc/etcd.conf
 [Member]
@@ -571,9 +571,315 @@ EOF
 b69515ada606e488: name=K8S-PROD-ETCD-A3 peerURLs=https://10.211.18.6:2380 clientURLs=https://10.211.18.6:2379,https://127.0.0.1:2379 isLeader=false
 ```
 
+安装Kubernetes组件
+===
+
+生成集群CA证书文件
+---
+
+一、配置CA证书。
+
+1、使用root用户，登录K8S-PROD-MASTER-A1节点。
+
+在家目录创建用于生成证书临时目录。
+```
+mkdir  $HOME/k8s-ssl  &&  cd  $HOME/k8s-ssl
+```
+2、配置ca证书信息， ST/L/expiry 字段可自行修改。
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cp ../etcd-ssl/ca-config.json .
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cat > ca-csr.json << EOF
+{
+  "CN": "kubernetes",
+  "key": {
+    "algo": "rsa",
+    "size": 2048
+  },
+  "names": [
+    {
+      "C": "CN",
+      "ST": "HangZhou",
+      "L": "ZheJiang",
+      "O": "k8s",
+      "OU": "System"
+    }
+  ],
+  "ca": {
+     "expiry": "87600h"
+  }
+}
+EOF
+```
+3、执行gencert命令生成证书文件。
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cfssl gencert -initca ca-csr.json | cfssljson -bare ca
+
+2019/03/12 17:38:18 [INFO] generating a new CA key and certificate from CSR
+2019/03/12 17:38:19 [INFO] generate received request
+2019/03/12 17:38:19 [INFO] received CSR
+2019/03/12 17:38:19 [INFO] generating key: rsa-2048
+2019/03/12 17:38:19 [INFO] encoded CSR
+2019/03/12 17:38:19 [INFO] signed certificate with serial number 371293668666858827973511319667907765319628751223
+
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# ls -l ca*.pem
+-rw------- 1 root root 1679 Mar 12 17:38 ca-key.pem
+-rw-r--r-- 1 root root 1363 Mar 12 17:38 ca.pem
+```
+
+二、配置kube-apiserver证书
+
+注意： 如需自定义集群域名， 请修改cluster | cluster.local 字段为自定义域名
+
+1、配置kube-apiserver证书信息
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cat > kube-apiserver-csr.json << EOF
+{
+    "CN": "kube-apiserver",
+    "hosts": [
+      "127.0.0.1",
+      "10.211.18.4",
+      "10.211.18.5",
+      "10.211.18.6",
+      "10.211.18.10",
+      "10.99.0.1",
+      "kubernetes",
+      "kubernetes.default",
+      "kubernetes.default.svc",
+      "kubernetes.default.svc.ziji",
+      "kubernetes.default.svc.ziji.work"
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "ST": "HangZhou",
+            "L": "ZheJiang",
+            "O": "k8s",
+            "OU": "System"
+        }
+    ]
+}
+EOF
+```
+2、执行cfssl生成kube-apiserver证书
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=/root/k8s-ssl/ca-config.json -profile=kubernetes kube-apiserver-csr.json | cfssljson -bare kube-apiserver
+
+2019/03/12 22:01:33 [INFO] generate received request
+2019/03/12 22:01:33 [INFO] received CSR
+2019/03/12 22:01:33 [INFO] generating key: rsa-2048
+2019/03/12 22:01:34 [INFO] encoded CSR
+2019/03/12 22:01:34 [INFO] signed certificate with serial number 386694856404685594652175309996230208077296568138
+2019/03/12 22:01:34 [WARNING] This certificate lacks a "hosts" field. This makes it unsuitable for
+websites. For more information see the Baseline Requirements for the Issuance and Management
+of Publicly-Trusted Certificates, v.1.1.6, from the CA/Browser Forum (https://cabforum.org);
+specifically, section 10.2.3 ("Information Requirements").
 
 
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# ls -l kube-apiserver*.pem
+-rw------- 1 root root 1675 Mar 12 22:01 kube-apiserver-key.pem
+-rw-r--r-- 1 root root 1679 Mar 12 22:01 kube-apiserver.pem
+```
 
+三、配置kube-controller-manager证书
+
+该集群包含 3 个节点，启动后将通过竞争选举机制产生一个 leader 节点，其它节点为阻塞状态。当 leader 节点不可用后，剩余节点将再次进行选举产生新的 leader 节点，从而保证服务的可用性。
+
+1、创建证书和私钥
+
+注意：hosts列表包含所有 kube-controller-manager 节点 IP
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cat > kube-controller-manager-csr.json << EOF
+{
+    "CN": "system:kube-controller-manager",
+    "hosts": [
+      "127.0.0.1",
+      "10.211.18.4",
+      "10.211.18.5",
+      "10.211.18.6",
+      "10.211.18.10"
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "ST": "HangZhou",
+            "L": "ZheJiang",
+            "O": "system:kube-controller-manager",
+            "OU": "System"
+        }
+    ]
+} 
+EOF
+```
+
+2、执行cfssl 生成kube-controller-manager证书
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kube-controller-manager-csr.json | cfssljson -bare kube-controller-manager
+
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# ls -l kube-controller-manager*.pem
+-rw------- 1 root root 1679 Mar 13 16:51 kube-controller-manager-key.pem
+-rw-r--r-- 1 root root 1521 Mar 13 16:51 kube-controller-manager.pem
+```
+
+四、配置kube-scheduler证书
+
+1、创建证书和私钥
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cat > kube-scheduler-csr.json << EOF
+{
+    "CN": "system:kube-scheduler",
+    "hosts": [
+      "127.0.0.1",
+      "10.211.18.4",
+      "10.211.18.5",
+      "10.211.18.6",
+      "10.211.18.10"
+    ],
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "ST": "HangZhou",
+            "L": "ZheJiang",
+            "O": "system:kube-scheduler",
+            "OU": "System"
+        }
+    ]
+}
+EOF
+```
+
+2、执行cfssl生成kube-scheduler证书
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kube-scheduler-csr.json | cfssljson -bare kube-scheduler
+
+2019/03/13 18:34:17 [INFO] generate received request
+2019/03/13 18:34:17 [INFO] received CSR
+2019/03/13 18:34:17 [INFO] generating key: rsa-2048
+2019/03/13 18:34:18 [INFO] encoded CSR
+2019/03/13 18:34:18 [INFO] signed certificate with serial number 403553352625169635537829194764174077828018057798
+2019/03/13 18:34:18 [WARNING] This certificate lacks a "hosts" field. This makes it unsuitable for
+websites. For more information see the Baseline Requirements for the Issuance and Management
+of Publicly-Trusted Certificates, v.1.1.6, from the CA/Browser Forum (https://cabforum.org);
+specifically, section 10.2.3 ("Information Requirements").
+
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# ls -l kube-scheduler*.pem
+-rw------- 1 root root 1679 Mar 13 18:34 kube-scheduler-key.pem
+-rw-r--r-- 1 root root 1497 Mar 13 18:34 kube-scheduler.pem
+```
+
+五、配置 kube-proxy 证书
+
+kube-proxy 运行在所有 worker 节点上，，它监听 apiserver 中 service 和 Endpoint 的变化情况，创建路由规则来进行服务负载均衡。本文档kube-proxy使用ipvs模式。
+
+1、创建 kube-proxy 证书
+
+该证书只会被 kube-proxy 当做 client 证书使用，所以 hosts 字段为空。
+```
+cat > kube-proxy-csr.json << EOF
+{
+    "CN": "system:kube-proxy",
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "ST": "HangZhou",
+            "L": "ZheJiang",
+            "O": "system:kube-proxy",
+            "OU": "System"
+        }
+    ]
+}
+EOF
+```
+2、生成 kube-proxy 证书
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes kube-proxy-csr.json | cfssljson -bare kube-proxy
+
+2019/03/13 17:27:13 [INFO] generate received request
+2019/03/13 17:27:13 [INFO] received CSR
+……………
+
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# ls -l kube-proxy*.pem
+-rw------- 1 root root 1675 Mar 13 17:27 kube-proxy-key.pem
+-rw-r--r-- 1 root root 1428 Mar 13 17:27 kube-proxy.pem
+```
+
+六、配置 admin 证书
+
+为集群组件kubelet、kubectl配置admin TLS认证证书，具有访问kubernetes所有api的权限。
+
+1、创建 admin证书文件
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cat > admin-csr.json << EOF
+{
+    "CN": "admin",
+    "key": {
+        "algo": "rsa",
+        "size": 2048
+    },
+    "names": [
+        {
+            "C": "CN",
+            "ST": "HangZhou",
+            "L": "ZheJiang",
+            "O": "system:masters",
+            "OU": "System"
+        }
+    ]
+}
+EOF
+```
+2、生成 admin 证书
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cfssl gencert -ca=ca.pem -ca-key=ca-key.pem -config=ca-config.json -profile=kubernetes admin-csr.json | cfssljson -bare admin
+
+2019/03/13 18:25:57 [INFO] generate received request
+2019/03/13 18:25:57 [INFO] received CSR
+2019/03/13 18:25:57 [INFO] generating key: rsa-2048
+2019/03/13 18:25:57 [INFO] encoded CSR
+2019/03/13 18:25:57 [INFO] signed certificate with serial number 125226606191023955519736334759407934858394250916
+2019/03/13 18:25:57 [WARNING] This certificate lacks a "hosts" field. This makes it unsuitable for
+websites. For more information see the Baseline Requirements for the Issuance and Management
+of Publicly-Trusted Certificates, v.1.1.6, from the CA/Browser Forum (https://cabforum.org);
+specifically, section 10.2.3 ("Information Requirements").
+
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# ls -l admin*.pem
+-rw------- 1 root root 1679 Mar 13 18:25 admin-key.pem
+-rw-r--r-- 1 root root 1407 Mar 13 18:25 admin.pem
+```
+
+七、分发证书文件
+
+提示：  node节点只需要ca、kube-proxy、kubelet证书，不需要拷贝kube-controller-manager、 kube-schedule、kube-apiserver证书
+
+1、创建证书存放目录
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# mkdir -pv /data/apps/kubernetes/{pki,log,etc,certs}
+mkdir: created directory ‘/data/apps/kubernetes’
+mkdir: created directory ‘/data/apps/kubernetes/pki’
+```
+2、拷贝证书文件到apiserver、master节点
+```
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# cp ca*.pem admin*.pem kube-proxy*.pem kube-scheduler*.pem kube-controller-manager*.pem kube-apiserver*.pem /data/apps/kubernetes/pki/
+
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# rsync  -avzP /data/apps/kubernetes 10.211.18.4/data/apps/
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# rsync  -avzP /data/apps/kubernetes 10.211.18.5/data/apps/
+[root@K8S-PROD-MASTER-A1 k8s-ssl]# rsync  -avzP /data/apps/kubernetes 10.211.18.6/data/apps/
+```
 
 
 

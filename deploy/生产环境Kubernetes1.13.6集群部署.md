@@ -1761,5 +1761,212 @@ systemctl  status kube-scheduler
 ```
 
 
+部署Node节点
+===
+配置kubelet
+---
+kubelet 负责维持容器的生命周期，同时也负责 Volume（CVI）和网络（CNI）的管理；
+
+每个节点上都运行一个 kubelet 服务进程，默认监听 10250 端口，接收并执行 master 发来的指令，管理 Pod 及 Pod 中的容器。每个 kubelet 进程会在 API Server 上注册节点自身信息，定期向 master 节点汇报节点的资源使用情况，并通过 cAdvisor/metric-server 监控节点和容器的资源。
+ 
+配置并启动kubelet， flanneld (master与node节点都需要安装)
+
+在Master节点配置kubelet
+```
+[root@K8S-PROD-MASTER-A1 pki]# cat > /usr/lib/systemd/system/kubelet.service << EOF
+[Unit]
+Description=Kubernetes Kubelet Server
+Documentation=https://github.com/kubernetes/kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+EnvironmentFile=-/data/apps/kubernetes/etc/kubelet.conf
+ExecStart=/data/apps/kubernetes/node/bin/kubelet \\
+\$KUBE_LOGTOSTDERR \\
+\$KUBE_LOG_LEVEL \\
+\$KUBELET_CONFIG \\
+\$KUBELET_HOSTNAME \\
+\$KUBELET_POD_INFRA_CONTAINER \\
+\$KUBELET_ARGS
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+创建kubelet配置文件
+```
+[root@K8S-PROD-MASTER-A1 pki]# cat > /data/apps/kubernetes/etc/kubelet.conf << EOF
+KUBE_LOGTOSTDERR="--logtostderr=false"
+KUBE_LOG_LEVEL="--v=2 --log-dir=/data/apps/kubernetes/log/"
+
+KUBELET_HOSTNAME="--hostname-override=10.211.18.4"
+KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=registry.cn-hangzhou.aliyuncs.com/google_containers/pause-amd64:3.1"
+KUBELET_CONFIG="--config=/data/apps/kubernetes/etc/kubelet-config.yml"
+KUBELET_ARGS="--bootstrap-kubeconfig=/data/apps/kubernetes/etc/kubelet-bootstrap.kubeconfig \
+--kubeconfig=/data/apps/kubernetes/etc/kubelet.kubeconfig \
+--cert-dir=/data/apps/kubernetes/pki \
+--feature-gates=RotateKubeletClientCertificate=true \
+--system-reserved=memory=300Mi \
+--kube-reserved=memory=400Mi \
+--eviction-hard=imagefs.available<15%,memory.available<300Mi,nodefs.available<10%,nodefs.inodesFree<5%"
+EOF
+```
+```
+[root@K8S-PROD-MASTER-A1 pki]# cat > /data/apps/kubernetes/etc/kubelet-config.yml << EOF
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+address: 10.211.18.4
+port: 10250
+cgroupDriver: cgroupfs
+clusterDNS:
+  - 10.99.110.110
+clusterDomain: ziji.work.
+hairpinMode: promiscuous-bridge
+maxPods: 200
+failSwapOn: false
+imageGCHighThresholdPercent: 90
+imageGCLowThresholdPercent: 80
+imageMinimumGCAge: 5m0s
+serializeImagePulls: false
+authentication:
+  x509:
+    clientCAFile: /data/apps/kubernetes/pki/ca.pem
+  anonymous:
+    enbaled: false
+  webhook:
+    enbaled: false
+EOF
+```
+启动kubelet
+```
+[root@K8S-PROD-MASTER-A1 pki]# systemctl daemon-reload
+[root@K8S-PROD-MASTER-A1 pki]# systemctl enable kubelet
+[root@K8S-PROD-MASTER-A1 pki]# systemctl restart kubelet
+[root@K8S-PROD-MASTER-A1 pki]# systemctl  status kubelet 
+● kubelet.service - Kubernetes Kubelet Server
+   Loaded: loaded (/usr/lib/systemd/system/kubelet.service; enabled; vendor preset: disabled)
+   Active: active (running) since Mon 2019-04-29 18:35:33 CST; 13s ago
+     Docs: https://github.com/kubernetes/kubernetes
+ Main PID: 29401 (kubelet)
+    Tasks: 8
+   Memory: 13.0M
+   CGroup: /system.slice/kubelet.service
+           └─29401 /data/apps/kubernetes/server/bin/kubelet --logtostderr=true --v=0 --config=/data/apps/kubernetes/etc/kubelet-config.yml --hostname-override=10.211.18.4 --pod-infra-container-i...
+
+Apr 29 18:35:33 K8S-PROD-MASTER-A1 systemd[1]: kubelet.service holdoff time over, scheduling restart.
+Apr 29 18:35:33 K8S-PROD-MASTER-A1 systemd[1]: Stopped Kubernetes Kubelet Server.
+Apr 29 18:35:33 K8S-PROD-MASTER-A1 systemd[1]: Started Kubernetes Kubelet Server.
+Apr 29 18:35:33 K8S-PROD-MASTER-A1 kubelet[29401]: I0429 18:35:33.694991   29401 server.go:407] Version: v1.13.4
+Apr 29 18:35:33 K8S-PROD-MASTER-A1 kubelet[29401]: I0429 18:35:33.695245   29401 plugins.go:103] No cloud provider specified.
+Apr 29 18:35:33 K8S-PROD-MASTER-A1 kubelet[29401]: E0429 18:35:33.699058   29401 bootstrap.go:184] Unable to read existing bootstrap client config: invalid configuration: [unable to read client-...
+```
+
+在Node节点配置kubelet
+```
+[root@K8S-PROD-NODE-A1 etc]#  cd software/
+[root@K8S-PROD-NODE-A1 etc]#  tar zxf kubernetes-node-linux-amd64.tar.gz
+[root@K8S-PROD-NODE-A1 etc]#  mv kubernetes/node  /data/apps/kubernetes/
+```
+```
+[root@K8S-PROD-NODE-A1 etc]#  cat > /etc/systemd/system/kubelet.service << EOF
+[Unit]
+Description=Kubernetes Kubelet Server
+Documentation=https://github.com/kubernetes/kubernetes
+After=docker.service
+Requires=docker.service
+
+[Service]
+EnvironmentFile=-/data/apps/kubernetes/etc/kubelet.conf
+ExecStart=/data/apps/kubernetes/node/bin/kubelet \\
+\$KUBE_LOGTOSTDERR \\
+\$KUBE_LOG_LEVEL \\
+\$KUBELET_CONFIG \\
+\$KUBELET_HOSTNAME \\
+\$KUBELET_POD_INFRA_CONTAINER \\
+\$KUBELET_ARGS
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target 
+EOF
+```
+
+```
+[root@K8S-PROD-NODE-A1 etc]# cat > /data/apps/kubernetes/etc/kubelet << EOF
+KUBE_LOGTOSTDERR="--logtostderr=false"
+KUBE_LOG_LEVEL="--v=2 --log-dir=/data/apps/kubernetes/log/"
+
+KUBELET_HOSTNAME="--hostname-override=10.211.18.11"
+KUBELET_POD_INFRA_CONTAINER="--pod-infra-container-image=registry.cn-hangzhou.aliyuncs.com/google_containers/pause-amd64:3.1"
+KUBELET_CONFIG="--config=/data/apps/kubernetes/etc/kubelet-config.yml"
+KUBELET_ARGS="--bootstrap-kubeconfig=/data/apps/kubernetes/etc/kubelet-bootstrap.kubeconfig \
+--kubeconfig=/data/apps/kubernetes/etc/kubelet.kubeconfig \
+--cert-dir=/data/apps/kubernetes/pki \
+--system-reserved=memory=300Mi \
+--kube-reserved=memory=400Mi \
+--eviction-hard=imagefs.available<15%,memory.available<300Mi,nodefs.available<10%,nodefs.inodesFree<5%"
+EOF
+```
+
+```
+[root@K8S-PROD-NODE-A1 etc]# cat > /data/apps/kubernetes/etc/kubelet-config.yml << EOF
+kind: KubeletConfiguration
+apiVersion: kubelet.config.k8s.io/v1beta1
+address: 10.211.18.11
+port: 10250
+cgroupDriver: cgroupfs
+clusterDNS:
+  - 10.99.110.110
+clusterDomain: ziji.work.
+hairpinMode: promiscuous-bridge
+maxPods: 200
+failSwapOn: false
+imageGCHighThresholdPercent: 90
+imageGCLowThresholdPercent: 80
+imageMinimumGCAge: 5m0s
+serializeImagePulls: false
+authentication:
+  x509:
+    clientCAFile: /data/apps/kubernetes/pki/ca.pem
+  anonymous:
+    enbaled: false
+  webhook:
+    enbaled: false
+EOF
+```
+node1启动kubelet
+```
+[root@K8S-PROD-NODE-A1 etc]# systemctl daemon-reload
+[root@K8S-PROD-NODE-A1 etc]# systemctl enable kubelet
+[root@K8S-PROD-NODE-A1 etc]# systemctl restart kubelet
+[root@K8S-PROD-NODE-A1 etc]# systemctl status kubelet
+● kubelet.service - Kubernetes Kubelet Server
+   Loaded: loaded (/usr/lib/systemd/system/kubelet.service; enabled; vendor preset: disabled)
+   Active: active (running) since Fri 2019-03-22 11:55:33 CST; 14s ago
+     Docs: https://github.com/kubernetes/kubernetes
+ Main PID: 11124 (kubelet)
+    Tasks: 8
+   Memory: 13.1M
+   CGroup: /system.slice/kubelet.service
+           └─11124 /data/apps/kubernetes/node/bin/kubelet --logtostderr=true --v=0 --config=/data/apps/kubernetes/etc/kubelet-config.yml --hostname-override=10.211.18.11 --pod-infra-container-im...
+
+Mar 22 11:55:33 K8S-PROD-NODE-A1 systemd[1]: kubelet.service holdoff time over, scheduling restart.
+Mar 22 11:55:33 K8S-PROD-NODE-A1 systemd[1]: Stopped Kubernetes Kubelet Server.
+Mar 22 11:55:33 K8S-PROD-NODE-A1 systemd[1]: Started Kubernetes Kubelet Server.
+Mar 22 11:55:33 K8S-PROD-NODE-A1 kubelet[11124]: I0322 11:55:33.941658   11124 server.go:407] Version: v1.13.4
+Mar 22 11:55:33 K8S-PROD-NODE-A1 kubelet[11124]: I0322 11:55:33.942154   11124 plugins.go:103] No cloud provider specified.
+Mar 22 11:55:33 K8S-PROD-NODE-A1 kubelet[11124]: E0322 11:55:33.965594   11124 bootstrap.go:184] Unable to read existing bootstrap client config:
+```
+
+
+
+
+
+
+
+在node上操作
+重复以上步骤， 修改kubelet-config.yml  address:地址为node节点ip, --hostname-override= 为node ip地址
 
 

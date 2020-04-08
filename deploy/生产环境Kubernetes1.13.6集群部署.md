@@ -295,7 +295,25 @@ KillMode=process
 }
 ```
 
+参数说明
+| 参数名称 | 描述 |
+| :------: | :--------: |
+| log-level | 日志级别[error|warn|info|debug]。 |
+| insecure-registries | 配置私有镜像仓库，多个地址以“,”隔开。 |
+| registry-mirrors | 默认拉取镜像仓库地址 |
+| max-concurrent-downloads | 最大下载镜像数量 |
+| max-concurrent-uploads | 最大上传镜像数量 |
+| live-restore	Docker | 停止时保持容器继续运行，取值[true|false] |
+| native.cgroupdriver | Docker存储驱动 |
+| data-root | 设置docker存储路径， 默认为/var/lib/docker |
 
+详细参数请参考官方文档： https://docs.docker.com/engine/reference/commandline/dockerd/#/linux-configuration-file
+
+7、启动docker
+```
+# systemctl  enable docker
+# systemctl  start  docker
+```
 
 
 

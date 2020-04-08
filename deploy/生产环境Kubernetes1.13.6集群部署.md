@@ -1194,7 +1194,7 @@ curl -k https://10.211.18.4:6443
 配置apiserver高可用部署
 ===
  
-
+![image](https://github.com/mykubernetes/kubernetes/blob/master/deploy/image/kuber1.png)
 
 安装相关软件包
 ```
@@ -1606,11 +1606,11 @@ Apr 29 10:21:37 K8S-PROD-MASTER-A1 Keepalived_vrrp[5357]: VRRP_Instance(VI_1) Se
 ```
 
 执行ip a命令， 查看浮动IP
- 
+![image](https://github.com/mykubernetes/kubernetes/blob/master/deploy/image/kuber2.png) 
 
 
 http://10.211.18.10:10086/admin?stats 登录haproxy，查看服务是否正常
- 
+![image](https://github.com/mykubernetes/kubernetes/blob/master/deploy/image/kuber3.png) 
 
 
 

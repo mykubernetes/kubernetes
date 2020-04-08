@@ -203,8 +203,8 @@ Worker Node Inbound
 |UDP | 8472 | Master & Worker Nodes | flannel overlay network - vxlan backend (only required if using flannel)
 | TCP | 179 | Worket Nodes | Calico BGP network (only required if the BGP backend is used) |
 Etcd Node Inbound
-| TCP	| 2379-2380 | Master Nodes	etcd server client API |
-| TCP	| 2379-2380 | Worker Nodes	etcd server client API (only required if using flannel or Calico). |
+| TCP	| 2379-2380 | Master Nodes | etcd server client API |
+| TCP	| 2379-2380 | Worker Nodes | etcd server client API (only required if using flannel or Calico). |
 Ingress 
 | TCP | 80 | Ingress Nodes | http |
 | TCP | 443 | Ingress Nodes | https |

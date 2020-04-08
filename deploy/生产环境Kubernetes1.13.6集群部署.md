@@ -2081,3 +2081,47 @@ EOF
    CGroup: /system.slice/kube-proxy.service
            ‣ 16909 /data/apps/kubernetes/node/bin/kube-proxy --logtostderr=false --v=0 --kubeconfig=/data/apps/kubernetes/etc/kube-proxy.conf --proxy-mode=ipvs --masquerade-all=true --cluster-cid...
 ```
+
+通过证书验证添加各个节点
+---
+1、在master节点操作
+```
+[root@K8S-PROD-MASTER-A1 kubernetes]# kubectl  get csr
+NAME                                                   AGE   REQUESTOR           CONDITION
+node-csr-NT3oojJY6_VRvkkNKQMEBZyK6BZoOnEbKCqcEvjnqco   16h   kubelet-bootstrap   Pending
+node-csr-O8Zzno_W7X7QLt7EqdaVvvXfg0RS3AaSbdoOzUO821M   16h   kubelet-bootstrap   Pending
+node-csr-gXAsSMLxfcmdwaOeu8swemiqFQOcrZaPw85yfcguNlA   16h   kubelet-bootstrap   Pending
+node-csr-sjskQXhS3v8ZS7Wi0rjSdGocdTsMw_zHWL8quCATR5c   16h   kubelet-bootstrap   Pending
+```
+
+2、通过验证并添加进集群
+```
+[root@K8S-PROD-MASTER-A1 kubernetes]# kubectl get csr | awk '/node/{print $1}' | xargs kubectl certificate approve
+```
+
+###单独执行命令例子：
+```
+kubectl certificate approve node-csr-O8Zzno_W7X7QLt7EqdaVvvXfg0RS3AaSbdoOzUO821M
+```
+#查看节点
+
+#此时节点状态为 NotReady，因为还没有配置网络
+```
+[root@K8S-PROD-MASTER-A1 kubernetes]# kubectl  get nodes
+NAME           STATUS     ROLES    AGE   VERSION
+10.211.18.11   Ready      <none>   41s   v1.13.6
+10.211.18.4    Ready      <none>   41s   v1.13.6
+10.211.18.5    Ready      <none>   41s   v1.13.6
+10.211.18.50   NotReady   <none>   41s   v1.13.6
+10.211.18.6    Ready       <none>   41s   v1.13.6
+```
+在node节点查看生成的文件
+```
+[root@K8S-PROD-NODE-A1 kubernetes]# ls -l /data/apps/kubernetes/etc/kubelet.conf 
+-rw------- 1 root root 2315 Apr 30 10:02 /data/apps/kubernetes/etc/kubelet.conf
+
+[root@K8S-PROD-NODE-A1 kubernetes]# ls -l /data/apps/kubernetes/pki/kubelet*
+-rw------- 1 root root 1277 Apr 30 10:02 /data/apps/kubernetes/pki/kubelet-client-2019-04-30-10-02-49.pem
+lrwxrwxrwx 1 root root   64 Apr 30 10:02 /data/apps/kubernetes/pki/kubelet-client-current.pem -> /data/apps/kubernetes/pki/kubelet-client-2019-04-30-10-02-49.pem
+-rw-r--r-- 1 root root 2177 Mar 19 11:46 /data/apps/kubernetes/pki/kubelet.crt
+```

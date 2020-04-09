@@ -2125,3 +2125,210 @@ NAME           STATUS     ROLES    AGE   VERSION
 lrwxrwxrwx 1 root root   64 Apr 30 10:02 /data/apps/kubernetes/pki/kubelet-client-current.pem -> /data/apps/kubernetes/pki/kubelet-client-2019-04-30-10-02-49.pem
 -rw-r--r-- 1 root root 2177 Mar 19 11:46 /data/apps/kubernetes/pki/kubelet.crt
 ```
+
+
+设置集群角色
+---
+在任意master节点操作， 为集群节点打label
+```
+[root@K8S-PROD-MASTER-A1]#
+kubectl label nodes 10.211.18.4 node-role.kubernetes.io/master=MASTER-A1
+kubectl label nodes 10.211.18.5 node-role.kubernetes.io/master=MASTER-A2
+kubectl label nodes 10.211.18.6 node-role.kubernetes.io/master=MASTER-A3
+
+设置 192.168.1.11 - 14 lable为 node 
+kubectl label nodes 10.211.18.11 node-role.kubernetes.io/node=NODE-A1
+kubectl label nodes 10.211.18.12 node-role.kubernetes.io/node=NODE-A2
+kubectl label nodes 10.211.18.13 node-role.kubernetes.io/node=NODE-A3
+kubectl label nodes 10.211.18.14 node-role.kubernetes.io/node=NODE-A4
+
+为Ingress边缘节点设置label
+kubectl label nodes 10.211.18.50 node-role.kubernetes.io/LB=LB-A1
+kubectl label nodes 10.211.18.51 node-role.kubernetes.io/LB=LB-B1
+
+设置 master 一般情况下不接受负载 
+kubectl taint nodes 10.211.18.4 node-role.kubernetes.io/master=MASTER-A1:NoSchedule --overwrite
+node/10.211.18.4 modified
+kubectl taint nodes 10.211.18.5 node-role.kubernetes.io/master=MASTER-A2:NoSchedule --overwrite
+node/10.211.18.4 modified
+kubectl taint nodes 10.211.18.6 node-role.kubernetes.io/master=MASTER-A3:NoSchedule --overwrite
+```
+
+删除lable –overwrite
+```
+kubectl label nodes 10.211.18.50  node-role.kubernetes.io/LB- --overwrite
+node/10.211.18.50 labeled
+[root@K8S-PROD-MASTER-A1 kubernetes]# kubectl  get nodes --show-labels
+NAME           STATUS     ROLES    AGE   VERSION   LABELS
+10.211.18.11   Ready      node     41d   v1.13.4   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/hostname=10.211.18.11,node-role.kubernetes.io/node=NODE-A1
+10.211.18.4    Ready      master   41d   v1.13.4   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/hostname=10.211.18.4,node-role.kubernetes.io/master=MASTER-A1
+10.211.18.5    Ready      master   41d   v1.13.4   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/hostname=10.211.18.5,node-role.kubernetes.io/master=MASTER-A2
+10.211.18.50   NotReady   <none>   41d   v1.13.4   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/hostname=10.211.18.50
+10.211.18.6    Ready      master   41d   v1.13.4   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/hostname=10.211.18.6,node-role.kubernetes.io/master=MASTER-A3
+```
+
+查看节点Roles, ROLES已经标识出了master和node
+```
+[root@K8S-PROD-MASTER-A1 kubernetes]# kubectl  get node 
+NAME           STATUS     ROLES    AGE   VERSION
+10.211.18.11   Ready      node     41d   v1.13.6
+10.211.18.4    Ready      master   41d   v1.13.6
+10.211.18.5    Ready      master   41d   v1.13.6
+10.211.18.50   NotReady   LB       41d   v1.13.6
+10.211.18.6    Ready      master   41d   v1.13.6
+```
+
+配置网络插件
+---
+Master和node节点
+```
+[root@K8S-PROD-NODE-A1 docker]# cd /opt/software/
+[root@K8S-PROD-NODE-A1 software]# tar zxvf flannel-v0.11.0-linux-amd64.tar.gz
+mv flanneld mk-docker-opts.sh  /data/apps/kubernetes/node/bin/
+chmod +x /data/apps/kubernetes/node/bin/*
+```
+
+创建flanneld.conf配置文件
+
+创建网络段
+#在etcd集群执行如下命令， 为docker创建互联网段
+```
+etcdctl \
+--ca-file=/data/apps/etcd/ssl/etcd-ca.pem --cert-file=/data/apps/etcd/ssl/etcd.pem --key-file=/data/apps/etcd/ssl/etcd-key.pem \
+--endpoints="https://10.211.18.4:2379,https://10.211.18.5:2379,https://10.211.18.6:2379" \
+set /coreos.com/network/config '{ "Network": "10.99.0.0/16", "Backend": {"Type": "vxlan"}}'
+```
+
+1、在node节点创建etcd证书存放路径， 并拷贝etcd证书到Node节点
+```
+[root@K8S-PROD-NODE-A1 software]# mkdir -p /data/apps/etcd
+[root@K8S-PROD-MASTER-A1 kubernetes]# scp -r /data/apps/etcd/ssl 10.211.18.11:/data/apps/etcd/
+root@10.211.18.11's password: 
+etcd-ca-key.pem                                                                                                                                                    100% 1675   735.4KB/s   00:00    
+etcd-ca.pem                                                                                                                                                        100% 1371   555.3KB/s   00:00    
+etcd-key.pem                                                                                                                                                       100% 1675   581.8KB/s   00:00    
+etcd.pem
+```
+
+2、创建etcd证书目录
+```
+[root@K8S-PROD-NODE-A1 kubernetes]# ls -l /data/apps/etcd/ssl/
+total 16
+-rw------- 1 root root 1675 Apr 30 11:01 etcd-ca-key.pem
+-rw-r--r-- 1 root root 1371 Apr 30 11:01 etcd-ca.pem
+-rw------- 1 root root 1675 Apr 30 11:01 etcd-key.pem
+-rw-r--r-- 1 root root 1460 Apr 30 11:01 etcd.pem
+```
+
+3、创建flannel配置文件
+```
+cat > /data/apps/kubernetes/etc/flanneld.conf<< EOF
+FLANNEL_OPTIONS="--etcd-endpoints=https://10.211.18.4:2379,https://10.211.18.5:2379,https://10.211.18.6:2379 -etcd-cafile=/data/apps/etcd/ssl/etcd-ca.pem -etcd-certfile=/data/apps/etcd/ssl/etcd.pem -etcd-keyfile=/data/apps/etcd/ssl/etcd-key.pem"
+
+EOF
+```
+
+4、创建系统服务
+```
+[root@K8S-PROD-NODE-A1 kubernetes]# cat > /usr/lib/systemd/system/flanneld.service << EOF
+[Unit]
+Description=Flanneld overlay address etcd agent
+After=network-online.target network.target
+Before=docker.service
+
+[Service]
+Type=notify
+EnvironmentFile=/data/apps/kubernetes/etc/flanneld.conf
+ExecStart=/data/apps/kubernetes/node/bin/flanneld --ip-masq $FLANNEL_OPTIONS
+ExecStartPost=/data/apps/kubernetes/node/bin/mk-docker-opts.sh -k DOCKER_NETWORK_OPTIONS -d /run/flannel/subnet.env
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+EOF
+```
+注意： master节点的flanneld服务配置文件/node/bin/ 需要改为/server/bin/
+
+
+5、修改docker.service启动文件
+
+添加子网配置文件 
+```
+[root@K8S-PROD-NODE-A1 kubernetes]# vi /usr/lib/systemd/system/docker.service
+# --graph表示修改docker默认/var/lib/docker存储路径为/data/docker , 需提前创建目录
+EnvironmentFile=/run/flannel/subnet.env
+ExecStart=/usr/bin/dockerd -H unix:// $DOCKER_NETWORK_OPTIONS $DOCKER_DNS_OPTIONS
+```
+修改docker服务启动文件，注入dns参数
+
+dns根据实际部署的dns服务来填写
+```
+[root@K8S-PROD-NODE-A1 kubernetes]# mkdir -p /usr/lib/systemd/system/docker.service.d/
+[root@K8S-PROD-NODE-A1 kubernetes]# vi /usr/lib/systemd/system/docker.service.d/docker-dns.conf
+[Service]
+Environment="DOCKER_DNS_OPTIONS=\
+--dns 10.99.110.110 --dns 114.114.114.114 \
+--dns-search default.svc.ziji.work --dns-search svc.ziji.work \
+--dns-opt ndots:2 --dns-opt timeout:2 --dns-opt attempts:2"
+```
+
+启动flanneld
+```
+systemctl  daemon-reload
+systemctl  start flanneld
+systemctl  restart docker
+systemctl  status  flanneld
+● flanneld.service - Flanneld overlay address etcd agent
+   Loaded: loaded (/usr/lib/systemd/system/flanneld.service; enabled; vendor preset: disabled)
+   Active: active (running) since Tue 2019-04-30 15:42:03 CST; 1min 29s ago
+  Process: 17685 ExecStartPost=/data/apps/kubernetes/node/bin/mk-docker-opts.sh -k DOCKER_NETWORK_OPTIONS -d /run/flannel/subnet.env (code=exited, status=0/SUCCESS)
+ Main PID: 17668 (flanneld)
+    Tasks: 8
+   Memory: 10.7M
+   CGroup: /system.slice/flanneld.service
+           └─17668 /data/apps/kubernetes/node/bin/flanneld --ip-masq --etcd-endpoints=https://10.211.18.4:2379,https://10.211.18.5:2379,https://10.211.18.6:2379 -etcd-cafile=/data/apps/etcd/ssl/...
+
+Apr 30 15:42:03 K8S-PROD-NODE-A1 flanneld[17668]: I0430 15:42:03.060859   17668 main.go:351] Current network or subnet (10.99.0.0/16, 10.99.79.0/24) is not equal to previous one (0.0...tables rules
+Apr 30 15:42:03 K8S-PROD-NODE-A1 flanneld[17668]: I0430 15:42:03.098916   17668 iptables.go:167] Deleting iptables rule: -s 0.0.0.0/0 -d 0.0.0.0/0 -j RETURN
+Apr 30 15:42:03 K8S-PROD-NODE-A1 flanneld[17668]: I0430 15:42:03.100839   17668 iptables.go:167] Deleting iptables rule: -s 0.0.0.0/0 ! -d 224.0.0.0/4 -j MASQUERADE
+Apr 30 15:42:03 K8S-PROD-NODE-A1 flanneld[17668]: I0430 15:42:03.102994   17668 iptables.go:167] Deleting iptables rule: ! -s 0.0.0.0/0 -d 0.0.0.0/0 -j RETURN
+```
+
+配置coredns
+---
+#10.99.110.110 是kubelet中配置的dns
+
+#安装coredns
+```
+[root@K8S-PROD-MASTER-A1 ~]# cd /root && mkdir coredns && cd coredns
+[root@K8S-PROD-MASTER-A1 coredns]# wget https://raw.githubusercontent.com/coredns/deployment/master/kubernetes/coredns.yaml.sed
+[root@K8S-PROD-MASTER-A1 coredns]# wget https://raw.githubusercontent.com/coredns/deployment/master/kubernetes/deploy.sh
+[root@K8S-PROD-MASTER-A1 coredns]# chmod +x deploy.sh
+```
+修改coredns.yaml文件， 增加红色字段内容
+
+
+
+```
+[root@K8S-PROD-MASTER-A1 coredns]# ./deploy.sh -i 10.99.110.110 > coredns.yml
+
+[root@K8S-PROD-MASTER-A1 coredns]# kubectl  apply -f coredns.yml 
+serviceaccount/coredns created
+clusterrole.rbac.authorization.k8s.io/system:coredns created
+clusterrolebinding.rbac.authorization.k8s.io/system:coredns created
+configmap/coredns created
+deployment.apps/coredns created
+service/coredns created
+```
+
+
+#查看coredns是否运行正常
+```
+[root@K8S-PROD-MASTER-A1 coredns]# kubectl get svc,pods -n kube-system
+NAME              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                  AGE
+service/coredns   ClusterIP   10.99.110.110   <none>        53/UDP,53/TCP,9153/TCP   11m
+
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/coredns-756d6db49-7rbfd   1/1     Running   0          11m
+pod/coredns-756d6db49-jg797   1/1     Running   0          11m
+```

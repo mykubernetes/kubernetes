@@ -253,6 +253,7 @@ kubectl get pods -l key1=value1,key2=value2
 如果 Endpoints 正常，可以进一步检查
 -	Pod 的 containerPort 与 Service 的 containerPort 是否对应
 -	直接访问 podIP:containerPort 是否正常
+
 再进一步，即使上述配置都正确无误，还有其他的原因会导致 Service 无法访问，比如
 -	Pod 内的容器有可能未正常运行或者没有监听在指定的 containerPort 上
 -	CNI 网络或主机路由异常也会导致类似的问题

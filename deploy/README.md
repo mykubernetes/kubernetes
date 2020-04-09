@@ -9,6 +9,40 @@ kubespray安装官方文档
 https://kubernetes.io/docs/setup/production-environment/tools/kubespray/  
 https://github.com/kubernetes-sigs/kubespray
 
+主机维护
+---
+1、当需要对主机进行维护升级时，首先将节点主机设置成不可调度模式
+```
+kubectl cordon NODE [options]
+
+
+[root@K8S-PROD-MASTER-A1 ~]# kubectl  cordon  10.211.18.50 
+node/10.211.18.50 cordoned
+
+
+[root@K8S-PROD-MASTER-A1 ~]# kubectl  get node 
+NAME           STATUS  ROLES    AGE   VERSION
+10.211.18.11   Ready  node     49d   v1.13.5
+10.211.18.4    Ready, master   49d   v1.13.5
+10.211.18.5    Ready, master   49d   v1.13.5
+10.211.18.50   Ready,SchedulingDisabled   LB       49d   v1.13.5
+10.211.18.6    Ready   master   49d   v1.13.5
+```
+2、然后需要将主机上正在运行的容器驱赶到其它可用节点
+```
+kubectl drain ［nodeid］
+
+[root@K8S-PROD-MASTER-A1 ~]# kubectl drain 10.211.18.50
+node/10.211.18.50 already cordoned
+```
+给予900秒宽限期优雅的调度
+```
+kubectl drain 10.211.18.50 --grace-period=120
+```
+当容器迁移完毕后，运维人员可以对该主机进行操作，配置升级性能参数调优等等。当对主机的维护操作完毕后， 再将主机设置成可调度模式：
+```
+kubectl uncordon [nodeid]  
+```
 
 查看证书时间
 ---

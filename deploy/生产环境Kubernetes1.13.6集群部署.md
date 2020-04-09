@@ -2307,7 +2307,7 @@ Apr 30 15:42:03 K8S-PROD-NODE-A1 flanneld[17668]: I0430 15:42:03.102994   17668 
 ```
 修改coredns.yaml文件， 增加红色字段内容
 
-
+![image](https://github.com/mykubernetes/kubernetes/blob/master/deploy/image/kube6.png)
 
 ```
 [root@K8S-PROD-MASTER-A1 coredns]# ./deploy.sh -i 10.99.110.110 > coredns.yml

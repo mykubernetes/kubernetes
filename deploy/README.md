@@ -95,11 +95,13 @@ Events:
 二、Pod 一直处于 Waiting 或 ContainerCreating 状态
 
 通过 kubectl describe pod <pod-name> 命令查看到当前 Pod 的事件
+
 可能的原因有以下几种
--	镜像拉取失败，比如
-  -	配置了错误的镜像
-  -	Kubelet 无法访问镜像（国内环境访问 gcr.io 需要特殊处理）
-  -	私有镜像的密钥配置错误
+
+- 镜像拉取失败，比如
+  - 配置了错误的镜像
+  - Kubelet 无法访问镜像（国内环境访问 gcr.io 需要特殊处理）
+  - 私有镜像的密钥配置错误
   - 镜像太大，拉取超时（可以适当调整 kubelet 的 --image-pull-progress-deadline 和 --runtime-request-timeout 选项）
 - CNI 网络错误，一般需要检查 CNI 网络插件的配置，比如
   -	无法配置 Pod 网络

@@ -2332,3 +2332,164 @@ NAME                          READY   STATUS    RESTARTS   AGE
 pod/coredns-756d6db49-7rbfd   1/1     Running   0          11m
 pod/coredns-756d6db49-jg797   1/1     Running   0          11m
 ```
+
+测试DNS解析
+---
+创建一个nginx 应用，测试应用和dns是否正常
+```
+[root@K8S-PROD-MASTER-A1 coredns]# cd /root && mkdir nginx && cd nginx
+cat << EOF > nginx.yaml
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginx-test
+spec:
+  selector:
+    app: nginx-test
+  type: NodePort
+  ports:
+  - port: 80
+    nodePort: 31000
+    name: nginx-port
+    targetPort: 80
+    protocol: TCP
+
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx-test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx-test
+  template:
+    metadata:
+      name: nginx-test
+      labels:
+        app: nginx-test
+    spec:
+      containers:
+      - name: nginx-test
+        image: nginx
+        ports:
+        - containerPort: 80
+EOF
+
+[root@K8S-PROD-MASTER-A1 nginx]# kubectl apply -f nginx.yaml
+```
+
+创建一个pod用来测试dns
+```
+[root@K8S-PROD-MASTER-A1 nginx]# kubectl run curl --image=radial/busyboxplus:curl -i --tty
+kubectl run --generator=deployment/apps.v1 is DEPRECATED and will be removed in a future version. Use kubectl run --generator=run-pod/v1 or kubectl create instead.
+If you don't see a command prompt, try pressing enter.
+[ root@curl-66959f6557-tl5rn:/ ]$ nslookup  kubernetes
+Server:    10.99.110.110
+Address 1: 10.99.110.110 coredns.kube-system.svc.ziji.work
+
+Name:      kubernetes
+Address 1: 10.99.0.1 kubernetes.default.svc.ziji.work
+```
+
+
+部署Dashboard
+---
+```
+1、下载 dashboard 镜像
+# 个人的镜像
+registry.cn-hangzhou.aliyuncs.com/dnsjia/k8s:kubernetes-dashboard-amd64_v1.10.0
+2、下载 yaml 文件
+[root@K8S-PROD-MASTER-A1 dashboard]# curl -O   https://soft.8090st.com/kubernetes/dashboard/kubernetes-dashboard.yaml
+```
+
+修改证书
+在使用–auto-generate-certificates自动生成证书后，访问dashboard报错：NET::ERR_CERT_INVALID查看dashboard的日志提示证书未找到，为解决这个问题，将生成好的dashboard.crt和dashboard.key挂载到容器的/certs下，然后重新发布deployment即可
+
+
+CA证书的生成可以参考如下配置
+```
+$cd ~
+$mkdir certs
+
+$ openssl genrsa -des3 -passout pass:x -out dashboard.pass.key 2048
+...
+$ openssl rsa -passin pass:x -in dashboard.pass.key -out dashboard.key
+# Writing RSA key
+$ rm dashboard.pass.key
+$ openssl req -new -key dashboard.key -out dashboard.csr
+...
+Country Name (2 letter code) [AU]: US
+...
+A challenge password []:
+...
+
+Generate SSL certificate
+The self-signed SSL certificate is generated from the dashboard.key private key and dashboard.csr files.
+
+$ openssl x509 -req -sha256 -days 365 -in dashboard.csr -signkey dashboard.key -out dashboard.crt
+```
+注意： 默认生成证书到期时间为一年， 修改过期时间为10年  -days 3650
+
+
+
+将创建的证书拷贝到其他node节点  
+这里我采取的是hostPath方式挂载,这个需要保证dashboard调度到的node上都要有这个文件；  
+其他挂载的方式可以参考[官网](https://kubernetes.io/docs/concepts/storage/volumes/)  
+修改 kubernetes-dashboard.yaml为如下内容  
+```
+volumes:
+- name: kubernetes-dashboard-certs
+# secret:
+# secretName: kubernetes-dashboard-certs
+hostPath:
+path: /data/apps/kubernetes/certs
+type: Directory
+
+- name: tmp-volume
+emptyDir: {}
+```
+#在master节点执行如下命令，部署ui
+```
+[root@K8S-PROD-MASTER-A1 dashboard]# kubectl  apply -f kubernetes-dashboard.yaml  
+secret/kubernetes-dashboard-certs created
+serviceaccount/kubernetes-dashboard created
+role.rbac.authorization.k8s.io/kubernetes-dashboard-minimal created
+rolebinding.rbac.authorization.k8s.io/kubernetes-dashboard-minimal created
+deployment.apps/kubernetes-dashboard created
+service/kubernetes-dashboard created
+```
+
+配置Dashboard令牌
+```
+[root@K8S-PROD-MASTER-A1 dashboard]# vi token.sh
+
+#!/bin/bash
+
+if kubectl get sa dashboard-admin -n kube-system &> /dev/null;then
+echo -e "\033[33mWARNING: ServiceAccount dashboard-admin exist!\033[0m"
+else
+kubectl create sa dashboard-admin -n kube-system
+kubectl create clusterrolebinding dashboard-admin --clusterrole=cluster-admin --serviceaccount=kube-system:dashboard-admin
+fi
+
+[root@K8S-PROD-MASTER-A1 dashboard]# sh token.sh  #生成登录令牌
+
+[root@K8S-PROD-MASTER-A1 dashboard]#  kubectl describe secret -n kube-system $(kubectl get secrets -n kube-system | grep dashboard-admin | cut -f1 -d ' ') | grep -E '^token'
+
+
+token:      eyJhbGciOiJSUzI1NiIsImtpZCI6IiJ9.eyJpc3MiOiJrdWJlcm5ldGVzL3NlcnZpY2VhY2NvdW50Iiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9uYW1lc3BhY2UiOiJrdWJlLXN5c3RlbSIsImt1YmVybmV0ZXMuaW8vc2VydmljZWFjY291bnQvc2VjcmV0Lm5hbWUiOiJkYXNoYm9hcmQtYWRtaW4tdG9rZW4tYzlrNXMiLCJrdWJlcm5ldGVzLmlvL3NlcnZpY2VhY2NvdW50L3NlcnZpY2UtYWNjb3VudC5uYW1lIjoiZGFzaGJvYXJkLWFkbWluIiwia3ViZXJuZXRlcy5pby9zZXJ2aWNlYWNjb3VudC9zZXJ2aWNlLWFjY291bnQudWlkIjoiNDJkMjc1NTctZWZkMC0xMWU4LWFmNTgtMDAwYzI5OWJiNzhkIiwic3ViIjoic3lzdGVtOnNlcnZpY2VhY2NvdW50Omt1YmUtc3lzdGVtOmRhc2hib2FyZC1hZG1pbiJ9.HoEtcgtjMbM_DZ8J3w5xq_gZrr1M-C5Axtt_PbGw39TbMqetsk1oCVNUdY5Hv_9z-liC-DBo2O-NO6IvPdrYBjgADwPBgc3fSjrZMfI8gDqwsKDIVF6VXCzaMAy-QeqUh-zgoqZa93MdBaBlhGQXtLyx0kso8XMGQccPndnzjqRw_8gWXNX2Lt5vLkEDTYcBMkqoGuwLJymQVtFVUwBHEHi9VIDgN4j5YV72ZDK320YgyS_nwjqwicyWpkDWq03yWhyJKyPGQ_Z8cylotCKr8jFqxU7oEoX7lfu3SJA19C_ds5Ak0OJi7tMobI59APL-u8xdigvd0MZivsQS0AWDsA
+```
+
+登录dashboard
+
+1、通过node节点ip+端口号访问
+```
+[root@K8S-PROD-MASTER-A1 dashboard]#  kubectl get svc,pod -n kube-system  -o wide
+```
+
+
+我们可以看到dashboard pod被调度到了10.211.18.11节点， 暴露端口为32279  
+https://10.211.18.11:32279

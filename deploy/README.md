@@ -10,7 +10,8 @@ https://kubernetes.io/docs/setup/production-environment/tools/kubespray/
 https://github.com/kubernetes-sigs/kubespray
 
 
-查看证书时间  
+查看证书时间
+---
 ```
 openssl x509 -in apiserver.crt -text -noout
 ```  

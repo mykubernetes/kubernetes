@@ -212,26 +212,26 @@ kubectl get pod mypod -o yaml
 网络排错
 ---
 介绍各种常见的网络问题以及排错方法，包括 Pod 访问异常、Service 访问异常以及网络安全策略异常等。
--	Pod 访问容器外部网络
--	从容器外部访问 Pod 网络
--	Pod 之间相互访问
+- Pod 访问容器外部网络
+- 从容器外部访问 Pod 网络
+- Pod 之间相互访问
 
 当然，以上每种情况还都分别包括本地访问和跨主机访问两种场景，并且一般情况下都是通过 Service 间接访问 Pod。
 
 网络异常可能的原因比较多，常见的有
 -	CNI 网络插件配置错误，导致多主机网络不通，比如
-  -	IP 网段与现有网络冲突
-  -	插件使用了底层网络不支持的协议
-  -	忘记开启 IP 转发等
+  - IP 网段与现有网络冲突
+  - 插件使用了底层网络不支持的协议
+  - 忘记开启 IP 转发等
     - sysctl net.ipv4.ip_forward
     - sysctl net.bridge.bridge-nf-call-iptables
--	Pod 网络路由丢失，比如
-  -	kubenet 要求网络中有 podCIDR 到主机 IP 地址的路由，这些路由如果没有正确配置会导致 Pod 网络通信等问题
-  -	在公有云平台上，kube-controller-manager 会自动为所有 Node 配置路由，但如果配置不当（如认证授权失败、超出配额等），也有可能导致无法配置路由
--	主机内或者云平台的安全组、防火墙或者安全策略等阻止了 Pod 网络，比如
-  -	非 Kubernetes 管理的 iptables 规则禁止了 Pod 网络
-  -	公有云平台的安全组禁止了 Pod 网络（注意 Pod 网络有可能与 Node 网络不在同一个网段）
-  -	交换机或者路由器的 ACL 禁止了 Pod 网络
+- Pod 网络路由丢失，比如
+  - kubenet 要求网络中有 podCIDR 到主机 IP 地址的路由，这些路由如果没有正确配置会导致 Pod 网络通信等问题
+  - 在公有云平台上，kube-controller-manager 会自动为所有 Node 配置路由，但如果配置不当（如认证授权失败、超出配额等），也有可能导致无法配置路由
+- 主机内或者云平台的安全组、防火墙或者安全策略等阻止了 Pod 网络，比如
+  - 非 Kubernetes 管理的 iptables 规则禁止了 Pod 网络
+  - 公有云平台的安全组禁止了 Pod 网络（注意 Pod 网络有可能与 Node 网络不在同一个网段）
+  - 交换机或者路由器的 ACL 禁止了 Pod 网络
 
 Service 无法访问
 ---

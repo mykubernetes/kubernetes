@@ -219,7 +219,7 @@ kubectl get pod mypod -o yaml
 当然，以上每种情况还都分别包括本地访问和跨主机访问两种场景，并且一般情况下都是通过 Service 间接访问 Pod。
 
 网络异常可能的原因比较多，常见的有
--	CNI 网络插件配置错误，导致多主机网络不通，比如
+- CNI 网络插件配置错误，导致多主机网络不通，比如
   - IP 网段与现有网络冲突
   - 插件使用了底层网络不支持的协议
   - 忘记开启 IP 转发等
@@ -241,11 +241,12 @@ kubectl get endpoints <service-name>
 ```
 如果该列表为空，则有可能是该 Service 的 LabelSelector 配置错误，可以用下面的方法确认一下
 
-查询 Service 的 LabelSelector
+#查询 Service 的 LabelSelector
 ```
 kubectl get svc <service-name> -o jsonpath='{.spec.selector}'
 ```
-查询匹配 LabelSelector 的 Pod
+
+#查询匹配 LabelSelector 的 Pod
 ```
 kubectl get pods -l key1=value1,key2=value2
 ```

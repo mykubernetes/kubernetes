@@ -157,36 +157,35 @@ metadata:
   name: limit-test
 spec:
   limits:
-    - type: Pod        #对Pod中所有容器资源总和进行限制
-      max:
+    - type: Pod                 #对Pod中所有容器资源总和进行限制
+      max:                      #定义最大的资源用量
         cpu: 4000m
         memory: 2048Mi 
-      min:
+      min:                      #定义最小的资源用量
         cpu: 10m
         memory: 128Mi 
       maxLimitRequestRatio:
         cpu: 5
         memory: 5
-    - type: Container  #对Pod中所有容器资源进行限制
+    - type: Container           #对Pod中所有容器资源进行限制
       max:
         cpu: 2000m
         memory: 1024Mi
       min:
         cpu: 10m
         memory: 128Mi 
-      maxLimitRequestRatio:
+      maxLimitRequestRatio:     #Request和Limit的比值最大不能超过多少，也就是最小用量的指定倍数
         cpu: 5
         memory: 5
-      default:
+      default:                  #用于定义默认的资源限制
         cpu: 1000m
         memory: 512Mi
-      defaultRequest:
+      defaultRequest:           #定义默认的资源需求
         cpu: 500m
         memory: 256Mi
 ```
-- default 即 limit 的值
-- defaultRequest 即 request 的值
-注意：LimitRange 类型为 Pod 中，不能设置 Default。
+- LimitRange 类型为 Pod 中，不能设置 Default因为Container可以包含多个容器，一个pod可以给默认值，多个pod无法给多个默认值，所有不能设置默认值
+- Container有默认值
 
 执行 Kubectl 创建 LimitRange：
 ```

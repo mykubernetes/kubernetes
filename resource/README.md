@@ -184,6 +184,8 @@ spec:
         cpu: 500m
         memory: 256Mi
 ```
+- default 即 limit 的值
+- defaultRequest 即 request 的值
 注意：LimitRange 类型为 Pod 中，不能设置 Default。
 
 执行 Kubectl 创建 LimitRange：
@@ -401,6 +403,8 @@ Terminating、 NotTerminating 和 NotBestEffort 限制配额跟踪以下资源�
 - requests.memory
 
 4、ResourceQuota 使用示例
+
+计算资源配额
 ```
 apiVersion: v1
 kind: ResourceQuota
@@ -421,6 +425,23 @@ spec:
     <storage-class-name>.storageclass.storage.k8s.io/persistentvolumeclaims: "10"    #指定存储类上可使用的PVC总数
     requests.ephemeral-storage: "20"             #所有Pod可用的本地临时存储需求的总量
     limits.ephemeral-storage: "20"               #所有Pod可用的本地临时存储限制的总量
+```
+
+配置对象数量配额限制
+```
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: object-counts
+  namespace: spark-cluster
+spec:
+  hard:
+    configmaps: "10"
+    persistentvolumeclaims: "4"
+    replicationcontrollers: "20"
+    secrets: "10"
+    services: "10"
+    services.loadbalancers: "2"
 ```
 
 （1）、设置某 Namespace 计算资源的配额

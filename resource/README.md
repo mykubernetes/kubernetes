@@ -401,6 +401,27 @@ Terminating、 NotTerminating 和 NotBestEffort 限制配额跟踪以下资源�
 - requests.memory
 
 4、ResourceQuota 使用示例
+```
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: quota-example
+spec:
+  hard:
+    pods: "5"                                    #POD 资源限制的总量限额
+    requests.cpu: "1"                            #CPU 资源需求的总量限额
+    requests.memory: 1Gi                         #内存资源需求的总量限额
+    limits.cpu: "2"                              #CPU 资源限制的总量限
+    limits.memory: 2Gi                           #内存资源限制的总量限额
+    count/deployments.apps: "2"
+    count/deployments.extensions: "2"
+    persistentvolumeclaims: "2"                  #可以创建的 PVC 总数
+    requests.storage: "5"                        #所有 PVC 存储需求的总量限额
+    <storage-class-name>.storageclass.storage.k8s.io/requests.storage: "10"          #指定存储类上可使用的所有PVC存储需求的总量限额
+    <storage-class-name>.storageclass.storage.k8s.io/persistentvolumeclaims: "10"    #指定存储类上可使用的PVC总数
+    requests.ephemeral-storage: "20"             #所有Pod可用的本地临时存储需求的总量
+    limits.ephemeral-storage: "20"               #所有Pod可用的本地临时存储限制的总量
+```
 
 （1）、设置某 Namespace 计算资源的配额
 

@@ -49,6 +49,9 @@ spec:
     livenessProbe:
       initialDelaySeconds: 10   #延迟检测时间
       periodSeconds: 5          #检测时间间隔
+      failureThreshold: 2       #探测失败的重试次数
+      successThreshold: 1       #探针检测失败后认为成功的最小连接成功次数
+      timeoutSeconds: 5         #探针执行检测请求后，等待响应的超时时间
       exec:
         command:
         - cat

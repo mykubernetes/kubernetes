@@ -184,7 +184,9 @@ spec:
         cpu: 500m
         memory: 256Mi
 ```
-- LimitRange 类型为 Pod 中，不能设置 Default因为Container可以包含多个容器，一个pod可以给默认值，多个pod无法给多个默认值，所有不能设置默认值
+- default 即 limit 的值
+- defaultRequest 即 request 的值
+- LimitRange 类型为 Pod 中，不能设置 Default。因为Container可以包含多个容器，一个pod可以给默认值，多个pod无法给多个默认值，所有不能设置默认值
 - Container有默认值
 
 执行 Kubectl 创建 LimitRange：

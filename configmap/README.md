@@ -273,7 +273,65 @@ spec:
 - metadata.labels['KEY']: POD对象标签指定键的值，例如 metadata.labels['mylabel']
 - metadata.annotations['KEY']:  POD对象注解信息中的指定键的值
 
-七、通过command和args的方式添加启动参数  
+七、通过downwardAPI获取主机变量挂载方式的传递参数  
+```
+kind: Pod
+apiVersion: v1
+metadata:
+  labels:
+    zone: east-china
+    cluster: downward-api-test-cluster1
+    rack: rack-101
+    app: dapi-vol-pod
+  name: dapi-vol-pod
+  annotations:
+    annotation1: "test-value-1"
+    annotation2: "test-value-2"
+spec:
+  containers:
+    - name: volume-test-container
+      image: busybox
+      command: ["sh", "-c", "sleep 864000"]
+      resources:
+        requests:
+          memory: "32Mi"
+          cpu: "125m"
+        limits:
+          memory: "64Mi"
+          cpu: "250m"
+      volumeMounts:
+      - name: podinfo
+        mountPath: /etc/podinfo
+        readOnly: false
+  volumes:
+  - name: podinfo
+    downwardAPI:
+      defaultMode: 420
+      items:
+      - fieldRef:
+          fieldPath: metadata.name
+        path: pod_name
+      - fieldRef:
+          fieldPath: metadata.namespace
+        path: pod_namespace
+      - fieldRef:
+          fieldPath: metadata.labels
+        path: pod_labels
+      - fieldRef:
+          fieldPath: metadata.annotations
+        path: pod_annotations
+      - resourceFieldRef:
+          containerName: volume-test-container
+          resource: limits.cpu
+        path: "cpu_limit"
+      - resourceFieldRef:
+          containerName: volume-test-container
+          resource: requests.memory
+          divisor: "1Mi"
+        path: "mem_request"
+```
+
+八、通过command和args的方式添加启动参数  
 ```
 # cat command-demo.yaml
 apiVersion: v1

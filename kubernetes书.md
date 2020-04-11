@@ -17,10 +17,6 @@ https://github.com/minminmsn/k8s1.13
 https://www.qikqiak.com/k8s-book/
 ---
 
-helm官方chart仓库  
-https://github.com/helm/charts
----
-
 Kubernetes中文指南/云原生应用架构实践手册  
 https://jimmysong.io/kubernetes-handbook/
 ---

@@ -1,3 +1,10 @@
+kubernetes官网
+===
+https://kubernetes.io/zh/docs/concepts/
+
+https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.15/#-strong-api-overview-strong-
+
+
 - [pod的常见状态及生命周期](https://github.com/mykubernetes/kubernetes/blob/master/pod%E7%9A%84%E5%B8%B8%E8%A7%81%E7%8A%B6%E6%80%81%E5%8F%8A%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.md)
 - [pod资源及控制器.md](https://github.com/mykubernetes/kubernetes/blob/master/pod%E8%B5%84%E6%BA%90%E5%8F%8A%E6%8E%A7%E5%88%B6%E5%99%A8.md)
 - [service.md](https://github.com/mykubernetes/kubernetes/blob/master/service.md)

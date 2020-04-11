@@ -24,3 +24,4 @@ https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.15/#-strong-api
 - [k8s命令自动补全](https://github.com/mykubernetes/kubernetes/blob/master/k8s%E5%91%BD%E4%BB%A4%E8%87%AA%E5%8A%A8%E8%A1%A5%E5%85%A8.md)
 - [cert-manager](https://github.com/mykubernetes/kubernetes/blob/master/cert-manager.md)
 - [helm](https://github.com/mykubernetes/kubernetes/tree/master/helm)
+- [etcd集群备份与恢复](https://github.com/mykubernetes/kubernetes/blob/master/etcd%E9%9B%86%E7%BE%A4%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D.md)

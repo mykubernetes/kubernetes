@@ -30,7 +30,63 @@ Service的类型
 ```  
 ![image](https://github.com/mykubernetes/linux-install/blob/master/image/service3.png)  
 
+```
+kind: Service
+apiVersion: v1
+metadata:
+  name: myapp-svc-nodeport
+spec:
+  clusterIP: None                   #配置clusterIP为无头服务,tyep只能为clusterIP生效
+  type: NodePort                    #配置svc类型默认为clusterIP
+  sessionAffinity: ClientIP         #session绑定默认值为None(不启用)   ClientIP,None   效果不佳，不建议使用
+  selector:
+    app: myapp                      #对应pod的标签
+  ports:
+  - protocol: TCP                   #协议，默认tcp
+    port: 80                        #server端口
+    targetPort: 80                  #pod端口
+    nodePort: 32223                 #集群接入，主机端口，范围30000-32767
+```
 
+服务解析
+---
+普通pod的地址解析
+- svc_name.svc_ns_name.svc.cluster.local
+```
+dig -t A myapp-svc.default.svc.cluster.local @10.96.0.10
+```
+
+解析statefulset的pod IP 地址
+- pod_name.svc_name.ns_name.svc.cluster.local
+```
+dig -t A myapp-0.myapp.default.svc.cluster.local @10.96.0.10
+进入容器的解析方式
+nslookup myapp-0.myapp.default.svc.cluster.local
+```
+
+解析过程svc_name.svc_ns.svc.cluster.local
+```
+# dig -t A external-www-svc.default.svc.cluster.local @10.96.0.10
+
+; <<>> DiG 9.9.4-RedHat-9.9.4-73.el7_6 <<>> -t A external-www-svc.default.svc.cluster.local @10.96.0.10
+;; global options: +cmd
+;; Got answer:
+;; ->>HEADER<<- opcode: QUERY, status: NOERROR, id: 48496
+;; flags: qr aa rd ra; QUERY: 1, ANSWER: 3, AUTHORITY: 0, ADDITIONAL: 0
+
+;; QUESTION SECTION:
+;external-www-svc.default.svc.cluster.local. IN A
+
+;; ANSWER SECTION:
+external-www-svc.default.svc.cluster.local. 5 IN CNAME www.kubernetes.io.
+www.kubernetes.io.	5	IN	CNAME	kubernetes.io.
+kubernetes.io.		5	IN	A	45.54.44.102
+
+;; Query time: 123 msec
+;; SERVER: 10.96.0.10#53(10.96.0.10)
+;; WHEN: Thu Mar 21 16:17:31 EDT 2019
+;; MSG SIZE  rcvd: 206
+```
 实验  
 ---
 1、创建myapp-deploy.yaml文件
@@ -158,9 +214,39 @@ metadata:
 spec:
   type: ExternalName
   externalName: www.baidu.com
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+    nodePort: 0
+  selector: {}
 ```  
 
-
+7、定义Endpoints资源
+```
+apiVersion: v1
+kind: Service
+metadata:
+  name: alertmanager
+  namespace: default
+spec:
+  clusterIP: None
+  ports:
+  - port: 9093
+    protocol: TCP
+---
+kind: Endpoints
+apiVersion: v1
+metadata:
+  name: alertmanager
+  namespace: default
+subsets:
+  - addresses:
+      - ip: 10.211.18.5
+    ports:
+      - port:9093
+        protocol: TCP
+```
 
 
 

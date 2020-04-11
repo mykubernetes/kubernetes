@@ -20,6 +20,7 @@ https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.15/#-strong-api
 - [calico](https://github.com/mykubernetes/kubernetes/blob/master/calico/README.md)
 - [flannel](https://github.com/mykubernetes/kubernetes/blob/master/flannel.md)
 - [metrics-server](https://github.com/mykubernetes/kubernetes/blob/master/metrics-server.md)
+- [Traefik](https://github.com/mykubernetes/kubernetes/blob/master/Traefik.md)
 - [hpa](https://github.com/mykubernetes/kubernetes/blob/master/hpa.md)
 - [LXCFS](https://github.com/mykubernetes/kubernetes/blob/master/LXCFS.md)
 - [metallb LoadBalancer](https://github.com/mykubernetes/kubernetes/blob/master/metallb%20LoadBalancer.md)

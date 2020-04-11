@@ -1,9 +1,342 @@
-部署Traefik
-=============
+ingress(边缘节点)
+===
+
 官方文档：https://docs.traefik.io/user-guide/kubernetes/  
 项目地址：https://github.com/containous/traefik  
 
 https://github.com/containous/traefik/tree/v1.7/examples/k8s  
+
+边缘节点（Edge Node），所谓的边缘节点即集群内部用来向集群外暴露服务能力的节点，集群外部的服务通过该节点来调用集群内部的服务，边缘节点是集群内外交流的一个Endpoint。
+
+边缘节点要考虑两个问题
+-	边缘节点的高可用，不能有单点故障，否则整个kubernetes集群将不可用
+-	对外的一致暴露端口，即只能有一个外网访问IP和端口
+
+对边缘节点打污点， 防止其他Pod被调度到ingress节点。
+```
+# kubectl  taint node node01 node-role.kubernetes.io/LB=LB-A1:NoSchedule
+node/node01 tainted
+
+# kubectl  taint node node02 node-role.kubernetes.io/LB=LB-B1:NoSchedule
+node/node02 tainted
+```
+
+设置边缘节点label, 后面pod调度将根据NodeSelector选择对应的Node节点
+```
+# kubectl  label  nodes node01 edgenode=true
+node/node01 labeled
+# kubectl  label  nodes node02 edgenode=true
+node/node02 labeled
+```
+
+以 DaemonSet 的方式在边缘节点 node 上启动一个 traefik，并使用 hostPort 的方式在Node节点监听80 、443端口
+
+```
+#  mkdir $HOME/traefik ; cd $HOME/traefik
+```
+
+
+1、创建RBAC文件
+```
+# vim traefik-rbac.yaml
+---
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: traefik-ingress-controller
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - services
+      - endpoints
+      - secrets
+    verbs:
+      - get
+      - list
+      - watch
+  - apiGroups:
+      - extensions
+    resources:
+      - ingresses
+    verbs:
+      - get
+      - list
+      - watch
+---
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: traefik-ingress-controller
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: ClusterRole
+  name: traefik-ingress-controller
+subjects:
+- kind: ServiceAccount
+  name: traefik-ingress-controller
+  namespace: kube-system
+
+# kubectl  apply -f traefik-rbac.yaml 
+clusterrole.rbac.authorization.k8s.io/traefik-ingress-controller created
+clusterrolebinding.rbac.authorization.k8s.io/traefik-ingress-controller created
+```
+
+2、创建traefik.toml配置文件
+```
+# vim traefik-configmap.yaml
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  namespace: kube-system
+  name: traefik-conf
+data:
+  traefik.toml: |
+    insecureSkipVerify = true
+    defaultEntryPoints = ["http","https"]
+    [entryPoints]
+      [entryPoints.ping]
+      address=":8888"
+      [entryPoints.ping.auth]
+        [entryPoints.ping.auth.basic]
+          users = [
+           "admin:$apr1$ehrsakXa$zr4qevnn4t.gOV7J8Ia/y1",
+           "test:$apr1$H6uskkkW$IgXLP6ewTrSuBkTrqE8wj/",
+         ]
+    [ping]
+    entryPoint = "ping"
+
+      [entryPoints.http]
+      address = ":80"
+        [entryPoints.http.redirect]
+        #entryPoint = "https"
+      [entryPoints.https]
+      address = ":443"
+        [entryPoints.https.tls]
+        minVersion = "VersionTLS12"
+        cipherSuites = [
+          "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+          "TLS_RSA_WITH_AES_256_GCM_SHA384"
+        ]
+
+      [[entryPoints.https.tls.certificates]]
+      CertFile = "/ssl/tls.crt"
+      KeyFile = "/ssl/tls.key"
+
+
+#以configmap方式创建traefik.toml
+# kubectl  apply -f traefik-configmap.yaml 
+configmap/traefik-conf created
+```
+
+3、创建 secret
+```
+# openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout tls.key -out tls.crt -subj "/CN=*.ziji.work"
+Generating a 2048 bit RSA private key
+...........+++
+.......................+++
+writing new private key to 'tls.key'
+-----
+
+
+[root@K8S-PROD-MASTER-A1 traefik]# ls -l tls.*
+-rw-r--r-- 1 root root 1099 May  5 10:50 tls.crt
+-rw-r--r-- 1 root root 1704 May  5 10:50 tls.key
+
+# kubectl -n kube-system create secret tls traefik-cert --key=tls.key --cert=tls.crt
+secret/traefik-cert created
+```
+
+4、部署Traefik
+```
+# vim traefik-deamonset.yaml
+
+---
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: traefik-ingress-controller
+  namespace: kube-system
+---
+kind: DaemonSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: traefik-ingress-controller
+  namespace: kube-system
+  labels:
+    k8s-app: traefik-ingress-lb
+spec:
+  template:
+    metadata:
+      labels:
+        k8s-app: traefik-ingress-lb
+        name: traefik-ingress-lb
+    spec:
+      serviceAccountName: traefik-ingress-controller
+      terminationGracePeriodSeconds: 60
+      hostNetwork: true
+      restartPolicy: Always
+      volumes:
+       - name: ssl
+         secret:
+          secretName: traefik-cert
+       - name: traefik-config
+         configMap:
+          name: traefik-conf
+      containers:
+      - image: traefik:v1.7
+        imagePullPolicy: IfNotPresent
+        name: traefik-ingress-lb
+        ports:
+        - name: http
+          containerPort: 80
+          hostPort: 80
+        - name: https
+          containerPort: 443
+          hostPort: 443
+        - name: admin
+          containerPort: 8080
+          hostPort: 8080
+        volumeMounts:
+        - mountPath: "/ssl"
+          name: "ssl"
+        - mountPath: "/etc/traefik"
+          name: "traefik-config"
+        securityContext:
+          capabilities:
+            drop:
+            - ALL
+            add:
+            - NET_BIND_SERVICE
+        args:
+        - --configfile=/etc/traefik/traefik.toml
+        - --api
+        - --kubernetes
+        - --logLevel=INFO
+      tolerations:
+      - key: "edgenode"
+        operator: "Equal"
+        value: "true"
+        effect: "NoSchedule"
+      nodeSelector:
+        edgenode: "true"
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: traefik-ingress-service
+  namespace: kube-system
+spec:
+  selector:
+    k8s-app: traefik-ingress-lb
+  ports:
+    - protocol: TCP
+      port: 80
+      name: web
+    - protocol: TCP
+      port: 443
+      name: https
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+      name: admin
+
+
+[root@K8S-PROD-MASTER-A1 traefik]# kubectl  apply -f traefik-deamonset.yaml 
+serviceaccount/traefik-ingress-controller created
+daemonset.extensions/traefik-ingress-controller created
+service/traefik-ingress-service created
+```
+
+查看部署情况
+```
+[root@K8S-PROD-MASTER-A1 traefik]# kubectl  get pod,svc -n kube-system 
+NAME                                        READY   STATUS    RESTARTS   AGE
+pod/coredns-756d6db49-s6x84                 1/1     Running   2          2d6h
+pod/coredns-756d6db49-sf9wj                 1/1     Running   2          2d6h
+pod/kubernetes-dashboard-5974995975-8tlgv   1/1     Running   2          2d6h
+pod/nginx-test2-65c869854f-h8lxb            1/1     Running   1          2d4h
+pod/traefik-ingress-controller-rkvk2        1/1     Running   0          25s
+
+NAME                              TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)                   AGE
+service/coredns                   ClusterIP   10.99.110.110   <none>        53/UDP,53/TCP,9153/TCP    4d21h
+service/kubernetes-dashboard      NodePort    10.99.255.171   <none>        443:32279/TCP             4d15h
+service/nginx-test2               NodePort    10.99.201.93    <none>        80:31001/TCP              2d4h
+service/traefik-ingress-service   ClusterIP   10.99.89.99     <none>        80/TCP,443/TCP,8181/TCP   27s
+service/traefik-web-ui            ClusterIP   10.99.229.113   <none>        80/TCP                    2d5h
+```
+
+其中 traefik 监听 node 的 80 和 443 端口，80/443 提供http/https服务，8080 是其自带的 UI 界面。 由于traefik1.7.11已经丢弃了以下参数，生产环境建议对8080端口做限制。
+```
+--web     (Deprecated) Enable Web backend with default settings (default "false")
+--web.address (Deprecated) Web administration port  (default ":8080")
+```
+
+5、部署UI
+
+生成https证书
+```
+# openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout traefik-edge.ziji.work.key -out traefik-edge.ziji.work.crt -subj "/CN=traefik-edge.ziji.work"
+
+# kubectl -n kube-system create secret tls traefik-cert --key=traefik-edge.ziji.work.key --cert=traefik-edge.ziji.work.crt
+```
+
+为traefik创建ingress代理
+```
+# vi  traefik-web-ui.yaml
+
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  annotations:
+    kubernetes.io/ingress.class: traefik
+    #301 http to https
+    ingress.kubernetes.io/ssl-redirect: "true"
+    # Forces the frontend to redirect to SSL  but by sending a 302 instead of a 301.
+#ingress.kubernetes.io/ssl-temporary-redirect: "true"
+#优先级
+    ingress.kubernetes.io/priority: "100"
+    #限制IP
+    ingress.kubernetes.io/whitelist-x-forwarded-for: "true"
+    ingress.kubernetes.io/whitelist-source-range: "192.168.1.0/24, 10.211.18.0/24"
+    #设置后端service权重值
+    ingress.kubernetes.io/service-weights: |
+      traefik-web-ui: 100%
+    #设置认证
+    ingress.kubernetes.io/auth-type: "basic"
+    ingress.kubernetes.io/auth-secret: "ingress-auth"
+  name: traefik-web-ui
+  namespace: kube-system
+spec:
+  rules:
+  - host: traefik-edge.ziji.work
+    http:
+      paths:
+      - path: /
+        backend:
+          serviceName: traefik-ingress-service
+          servicePort: 8080
+  tls:
+   - secretName: traefik-edge.ziji.work
+
+# kubectl  apply -f traefik-web-ui.yaml 
+ingress.extensions/traefik-web-ui created
+
+
+
+# kubectl  get  ingress -n kube-system
+NAME             HOSTS                    ADDRESS   PORTS     AGE
+traefik-web-ui   traefik-edge.ziji.work             80, 443   50s
+```
+将traefik-edge.ziji.work域名解析到边缘节点浮动IP(VIP)， 访问域名测试是否正常
+
+输入认证信息：  admin/admin
+
+
+
+部署Traefik
+---
 
 1、部署rbac.yaml  
 ``` # kubectl apply -f https://raw.githubusercontent.com/containous/traefik/v1.7/examples/k8s/traefik-rbac.yaml ```  

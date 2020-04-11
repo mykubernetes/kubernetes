@@ -6,4 +6,4 @@
 - [hpa](https://github.com/mykubernetes/kubernetes/blob/master/hpa.md)
 - [LXCFS](https://github.com/mykubernetes/kubernetes/blob/master/LXCFS.md)
 - [host文件的域名解析](https://github.com/mykubernetes/kubernetes/blob/master/host%E6%96%87%E4%BB%B6%E7%9A%84%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90.md)
-- [metallb LoadBalancer](https://github.com/mykubernetes/kubernetes/blob/master/metallb%20LoadBalancer/metallb%20LoadBalancer.md)
+- [metallb LoadBalancer](https://github.com/mykubernetes/kubernetes/blob/master/metallb%20LoadBalancer.md)

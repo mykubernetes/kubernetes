@@ -22,3 +22,4 @@ https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.15/#-strong-api
 - [LXCFS](https://github.com/mykubernetes/kubernetes/blob/master/LXCFS.md)
 - [metallb LoadBalancer](https://github.com/mykubernetes/kubernetes/blob/master/metallb%20LoadBalancer.md)
 - [k8s命令自动补全](https://github.com/mykubernetes/kubernetes/blob/master/k8s%E5%91%BD%E4%BB%A4%E8%87%AA%E5%8A%A8%E8%A1%A5%E5%85%A8.md)
+- [cert-manager](https://github.com/mykubernetes/kubernetes/blob/master/cert-manager.md)

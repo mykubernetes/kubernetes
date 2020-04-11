@@ -56,3 +56,7 @@ https://github.com/mykubernetes/gitbook-ceph
 千峰教育培训文档  
 https://www.funtl.com/zh/service-mesh-kubernetes/
 ---
+
+https://blog.csdn.net/qq_32641153
+http://www.mydlq.club/about/menu/
+---

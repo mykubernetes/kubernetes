@@ -189,52 +189,6 @@ spec:
           servicePort: 80
 ```  
 
-## 使用Rancher
-
 访问地址：https://rancher.hipstershop.cn:30443
 
 第一次访问Rancher需要设置admin密码
-
-![重置密码](https://github.com/findsec-cn/k201/raw/master/imgs/1/rancher_reset_pwd.jpg)
-
-设置Racher Server url
-
-![设置 Racher Server url](https://github.com/findsec-cn/k201/raw/master/imgs/1/rancher_server_url.jpg)
-
-可以导入以前创建好的集群
-
-![导入集群](https://github.com/findsec-cn/k201/raw/master/imgs/1/rancher_import_k8s_cluster.jpg)
-
-输入apiserver地址然后就可以导入以前创建好的集群了
-
-![导入集群](https://github.com/findsec-cn/k201/raw/master/imgs/1/rancher_import_k8s_cluster_2.jpg)
-
-支持域认证，这个功能在企业里面是很实用的，如果你的企业是用域账号登录的，你就可以启用这个功能。
-
-![域认证](https://github.com/findsec-cn/k201/raw/master/imgs/1/rancher_ldap.jpg)
-
-支持项目概念，原生的Kubernetes使用命名空间来隔离应用的，Rancher在命名空间的基础上有添加了项目这个概念，一个项目可以包含多命名空间，这很符合现实情况，我们的一个项目通常会包含多个微服务，这些微服务有一组开发工程师来维护，这样我们就可以为这组开发工程师赋予这个项目的权限，而其他工程师是无法看到这个项目里的应用的。
-
-![域认证](https://github.com/findsec-cn/k201/raw/master/imgs/1/rancher_project.jpg)
-
-我们可以查看到这个Rancher管理的所有集群的集群信息
-
-![查看本地集群信息](https://github.com/findsec-cn/k201/raw/master/imgs/1/rancher_local_cluster.jpg)
-
-进入到具体的项目，我们就可以查看到这个项目包含的所有微服务的部署情况
-
-![工作负载](https://github.com/findsec-cn/k201/raw/master/imgs/1/rancher_workload.jpg)
-
-可以看到项目中微服务的负载均衡配置
-
-![负载均衡](https://github.com/findsec-cn/k201/raw/master/imgs/1/rancher_ingress.jpg)
-
-也可以看到项目中的微服务的服务发现相关的信息
-
-![服务发现](https://github.com/findsec-cn/k201/raw/master/imgs/1/rancher_service.jpg)
-
-另外，Rancher支持应用商店，我们可以像在手机上安装应用一样将服务部署到多个Kubernetes集群中
-
-![服务](https://github.com/findsec-cn/k201/raw/master/imgs/1/rancher_catalog.jpg)
-
-另外Ranchaer还可以导入已有的集群、创建新集群、对集群进行监控报警、对项目配置CI/CD流水线等。

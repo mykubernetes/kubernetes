@@ -2,8 +2,6 @@ kubernetes官网
 ===
 https://kubernetes.io/zh/docs/concepts/
 
-https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.15/#-strong-api-overview-strong-
-
 - [kubernetes1.13.1+etcd3.3.10+flanneld0.10集群二进制部署](https://github.com/mykubernetes/kubernetes/blob/master/deploy/kubernetes1.13.1%2Betcd3.3.10%2Bflanneld0.10%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2.md)
 - [主机维护](https://github.com/mykubernetes/kubernetes/blob/master/deploy/%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86.md)
 - [pod的常见状态及生命周期](https://github.com/mykubernetes/kubernetes/blob/master/pod%E7%9A%84%E5%B8%B8%E8%A7%81%E7%8A%B6%E6%80%81%E5%8F%8A%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.md)

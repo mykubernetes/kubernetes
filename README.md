@@ -1,2 +1,2 @@
-- [resource限制.md](https://github.com/mykubernetes/kubernetes/blob/master/service.md)
+- [service.md](https://github.com/mykubernetes/kubernetes/blob/master/service.md)
 - [resource限制.md](https://github.com/mykubernetes/kubernetes/blob/master/resource%E9%99%90%E5%88%B6.md)

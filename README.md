@@ -6,6 +6,8 @@
 - [host文件的域名解析](https://github.com/mykubernetes/kubernetes/blob/master/host%E6%96%87%E4%BB%B6%E7%9A%84%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90.md)
 - [configmap](https://github.com/mykubernetes/kubernetes/blob/master/configmap.md)
 - [secret](https://github.com/mykubernetes/kubernetes/blob/master/secret.md)
+- [pod调度及亲和性](https://github.com/mykubernetes/kubernetes/blob/master/pod%E8%B0%83%E5%BA%A6%E5%8F%8A%E4%BA%B2%E5%92%8C%E6%80%A7.md)
+- [pod污点和容忍度](https://github.com/mykubernetes/kubernetes/blob/master/pod%E6%B1%A1%E7%82%B9%E5%92%8C%E5%AE%B9%E5%BF%8D%E5%BA%A6.md)
 - [flannel](https://github.com/mykubernetes/kubernetes/blob/master/flannel.md)
 - [hpa](https://github.com/mykubernetes/kubernetes/blob/master/hpa.md)
 - [LXCFS](https://github.com/mykubernetes/kubernetes/blob/master/LXCFS.md)

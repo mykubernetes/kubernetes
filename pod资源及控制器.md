@@ -1,3 +1,14 @@
+Pod对象
+---
+- apiVersion: api版本。
+- kind: 编排对象，pod、Deployment、StatefulSet、DaemonSet、Service、Ingress等。
+- metadata: 元数据，name、namespace、labels、annotations等。
+  - label: 一个API对象通过标签来选择另一个API对象
+  - annotations: 是给Kubernetes看的，告诉Kubernetes开启某些功能
+- spec: 用来描述这个API对象的期望状态。
+- status: Pod的实际运行状态。
+
+
 yaml格式的pod定义文件完整内容：  
 ---
 ```

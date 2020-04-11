@@ -13,10 +13,6 @@ https://www.kubernetes.org.cn/k8s
 https://github.com/minminmsn/k8s1.13
 ---
 
-kubernetes官方存储示例  
-https://github.com/kubernetes-incubator/external-storage
----
-
 从Docker到Kubernetes进阶  
 https://www.qikqiak.com/k8s-book/
 ---

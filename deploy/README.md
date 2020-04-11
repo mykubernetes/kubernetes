@@ -9,6 +9,9 @@ kubespray安装官方文档
 https://kubernetes.io/docs/setup/production-environment/tools/kubespray/  
 https://github.com/kubernetes-sigs/kubespray
 
+kubesphere官方网页
+https://kubesphere.com.cn/docs/zh-CN/installation/intro/
+
 主机维护
 ---
 1、当需要对主机进行维护升级时，首先将节点主机设置成不可调度模式

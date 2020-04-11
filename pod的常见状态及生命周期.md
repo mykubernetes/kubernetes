@@ -85,3 +85,25 @@ spec:
         exec:
           command: ["/usr/sbin/nginx","-s","quit"]
 ```
+
+共享宿主机的Network、IPC 和 PIDNamespace
+---
+```
+apiVersion: v1
+kind: Pod
+metadata:
+  name: example
+  namespace: default
+  labels:
+    app: example
+spec:
+  hostNetwork: true
+  hostIPC: true
+  hostPID: true
+  containers:
+  - name: busybox
+    image: busybox
+    args:
+    - sleep
+    - "600"
+```

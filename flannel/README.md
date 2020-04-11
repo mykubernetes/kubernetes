@@ -308,6 +308,17 @@ default via 192.168.31.1 dev ens33 proto static metric 100
  6. **数据包到达目的宿主机：**Node1的eth0网卡发出去，发现是VXLAN数据包，把它交给flannel.1设备。flannel.1设备则会进一步拆包，取出原始二层数据帧包，发送ARP请求，经由cni0网桥转发给container。
 
 
+7、vxlan+直接路由方式
+```
+  net-conf.json: |
+    {
+      "Network": "10.244.0.0/16",
+      "Backend": {
+        "Type": "vxlan",
+        "Directrouting": true
+      }
+    }
+```
 
 #### Host-GW
 

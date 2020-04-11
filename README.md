@@ -14,6 +14,8 @@ https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.15/#-strong-api
 - [pod健康检查](https://github.com/mykubernetes/kubernetes/blob/master/pod%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5.md)
 - [label](https://github.com/mykubernetes/kubernetes/blob/master/label.md)
 - [host文件的域名解析](https://github.com/mykubernetes/kubernetes/blob/master/host%E6%96%87%E4%BB%B6%E7%9A%84%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90.md)
+- [RBAC](https://github.com/mykubernetes/kubernetes/tree/master/RBAC)
+- [服务发现](https://github.com/mykubernetes/kubernetes/tree/master/%E6%9C%8D%E5%8A%A1%E5%8F%91%E7%8E%B0)
 - [configmap](https://github.com/mykubernetes/kubernetes/blob/master/configmap.md)
 - [secret](https://github.com/mykubernetes/kubernetes/blob/master/secret.md)
 - [pod调度及亲和性](https://github.com/mykubernetes/kubernetes/blob/master/pod%E8%B0%83%E5%BA%A6%E5%8F%8A%E4%BA%B2%E5%92%8C%E6%80%A7.md)

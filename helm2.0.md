@@ -4,20 +4,13 @@ helm安装
 helm官方网站  
 https://helm.sh  
 
-官方使用说明  
-https://daemonza.github.io/2017/02/20/using-helm-to-deploy-to-kubernetes/
 
 官方仓库  
 https://hub.kubeapps.com/  
 https://hub.helm.sh/charts/stable
 https://developer.aliyun.com/hub#/?_k=6zd4g9&tdsourcetag=s_pctim_aiomsg  
-
-阿里github_chart仓库  
 https://github.com/cloudnativeapp/charts  
 
-官方介绍chart适用  
-https://helm.sh/docs/developing_charts/#charts  
-https://github.com/helm/helm/blob/master/docs/charts.md  
 
 一、安装  
 1、下载  

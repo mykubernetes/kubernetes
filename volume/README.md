@@ -7,41 +7,6 @@ https://kubernetes.io/docs/concepts/storage/persistent-volumes/#access-modes
 https://github.com/kubernetes-incubator/external-storage
 ---
 
-hostPath卷指定type类型有多种  
----
-| 值  | 行为 |
-| :------: | :--------: |
-|   | 空字符串（默认）用于向后兼容，这意味着在挂载 hostPath 卷之前不会执行任何检查 |
-| DirectoryOrCreate | 如果在给定的路径上没有任何东西存在，那么将根据需要在那里创建一个空目录，权限设置为 0755，与 Kubelet 具有相同的组和所有权 |
-| Directory | 给定的路径下必须存在目录 |
-| FileOrCreate | 如果在给定的路径上没有任何东西存在，那么会根据需要创建一个空文件，权限设置为 0644，与 Kubelet 具有相同的组和所有权 |
-| File | 给定的路径下必须存在文件 |
-| Socket | 给定的路径下必须存在 UNIX 套接字 |
-| CharDevice | 给定的路径下必须存在字符设备 |
-| BlockDevice | 给定的路径下必须存在块设备 |
-
-hostPath示例
-```
-apiVersion: v1
-kind: Pod
-metadata:
-  name: test-pd
-spec:
-  containers:
-  - image: k8s.gcr.io/test-webserver
-    name: test-container
-    volumeMounts:
-    - mountPath: /test-pd
-      name: test-volume
-  volumes:
-  - name: test-volume
-    hostPath:
-      # directory location on host
-      path: /data
-      # this field is optional
-      type: Directory
-```  
-
 一、存储机制介绍
 ---
 在 Kubernetes 中，存储资源和计算资源(CPU、Memory)同样重要，Kubernetes 为了能让管理员方便管理集群中的存储资源，同时也为了让使用者使用存储更加方便，所以屏蔽了底层存储的实现细节，将存储抽象出两个 API 资源 PersistentVolume 和 PersistentVolumeClaim 对象来对存储进行管理。

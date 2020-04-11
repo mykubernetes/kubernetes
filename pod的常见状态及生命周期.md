@@ -107,3 +107,46 @@ spec:
     - sleep
     - "600"
 ```
+
+PodPreset
+---
+
+有时候需要重复为Pod定义某些自动，可以统一定义某些Pod自动注入。
+
+比如想给web服务统一添加一个缓存目录，如果有很多web服务，每个添加比较麻烦，可以定义PodPreset，自动为Pod注入某些配置。
+
+
+1、定义一个PodPreset对象
+```
+    apiVersion: settings.k8s.io/v1alpha1
+    kind: PodPreset
+    metadata:
+      name: cache-pod-perset
+    spec:
+      selector:
+        matchLabels:
+          role: web
+      volumeMounts:
+      - mountPath: /cache
+        name: cache-volume
+      volumes:
+      - name: cache-volume
+        emptyDir: {}
+```
+
+2、定义一个Pod，在Pod创建时使用上面定义perSet
+```
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: example-pod-perset
+      namespace: default
+      labels:
+        app: example
+        role: web
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:latest
+```
+在PodPreset的定义中，首先是一个selector，这就意味着后面这些追加的字段只会作用于selector所选中的Pod对象。

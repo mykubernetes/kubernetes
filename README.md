@@ -4,6 +4,7 @@
 - [pod健康检查.md](https://github.com/mykubernetes/kubernetes/blob/master/pod%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5.md)
 - [label](https://github.com/mykubernetes/kubernetes/blob/master/label.md)
 - [host文件的域名解析](https://github.com/mykubernetes/kubernetes/blob/master/host%E6%96%87%E4%BB%B6%E7%9A%84%E5%9F%9F%E5%90%8D%E8%A7%A3%E6%9E%90.md)
+- [configmap](https://github.com/mykubernetes/kubernetes/blob/master/configmap.md)
 - [secret](https://github.com/mykubernetes/kubernetes/blob/master/secret.md)
 - [flannel](https://github.com/mykubernetes/kubernetes/blob/master/flannel.md)
 - [hpa](https://github.com/mykubernetes/kubernetes/blob/master/hpa.md)

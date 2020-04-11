@@ -298,33 +298,5 @@ spec:
           storage: 2Gi
 ```  
 
-解析statefulset的pod IP 地址    
-nslookup myapp-0.myapp.default.svc.cluster.local  
-pod_name.svc_name.ns_name.svc.cluster.local  
 
 
-定义Endpoints资源
-```
-apiVersion: v1
-kind: Service
-metadata:
-  name: alertmanager
-  namespace: default
-spec:
-  clusterIP: None
-  ports:
-  - port: 9093
-    protocol: TCP
----
-kind: Endpoints
-apiVersion: v1
-metadata:
-  name: alertmanager
-  namespace: default
-subsets:
-  - addresses:
-      - ip: 10.211.18.5
-    ports:
-      - port:9093
-        protocol: TCP
-```  

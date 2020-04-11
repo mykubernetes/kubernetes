@@ -188,15 +188,15 @@ metadata:
   name: php-apache
   namespace: default
 spec:
-  scaleTargetRef:
+  scaleTargetRef:                      #要缩放的目标资源
     apiVersion: apps/v1
     kind: Deployment
     name: php-apache
-  minReplicas: 1
-  maxReplicas: 10
-  metrics:
-  - type: Resource
-    resource:
+  minReplicas: 1                       #自动伸缩可缩减至的pod副本数的下限
+  maxReplicas: 10                      #自动伸缩可扩展至的pod副本数的上线，其值不能低于minReplicas
+  metrics:                             #用于计算所需pod副本数量的指标列表
+  - type: Resource                     #表示指标源的类型，其值可为Objects、pod或Resource 
+    resource:                          #引用资源指标，即当前被伸缩的pod对象中的requests和limits中定义的指标
       name: cpu
       target:
         type: Utilization

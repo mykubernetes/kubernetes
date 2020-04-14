@@ -1,5 +1,7 @@
 备份 etcd 集群  
 ---
+https://mp.weixin.qq.com/s/SR4ju03uMM28wDHBdNmVDA
+
 所有 Kubernetes 对象都存储在 etcd 上。定期备份 etcd 集群数据对于在灾难场景（例如丢失所有主节点）下恢复 Kubernetes 集群非常重要。快照文件包含所有 Kubernetes 状态和关键信息。为了保证敏感的 Kubernetes 数据的安全，可以对快照文件进行加密。  
 
 一、备份 etcd 集群可以通过两种方式完成：etcd 内置快照和卷快照。  

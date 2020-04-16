@@ -11,7 +11,7 @@ Velero可运行两种方式运行：
 - 服务器： 运行在集群上
 - 命令行工具： 运行在本地
 
-Velero使用对象存储去存储备份，它还集成支持后端存储系统的快照功能。兼容的存储提供商参考：
+Velero使用对象存储去存储备份，它还集成支持后端存储系统的快照功能。兼容的存储提供商参考：  
 https://velero.io/docs/v1.2.0/supported-providers/
 
 安装CLI
@@ -50,7 +50,7 @@ snapshot-location      #快照位置
 version                #版本
 ```
 
-命令行的安装方式
+2、命令行的安装方式
 ```
 # 创建文件名为credentials-velero
 cat credentials-velero

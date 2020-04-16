@@ -43,7 +43,7 @@ get                    #查看有哪些备份
 help                   #帮助
 install                #安装velero
 plugin                 #指定插件
-restic
+restic                 #备份pv数据
 restore                #还原
 schedule               #定时任务，定时备份
 snapshot-location      #快照位置
@@ -67,4 +67,42 @@ velero install \
     --backup-location-config region=US,s3ForcePathStyle="true",s3Url=http://192.168.20.82 \
     --snapshot-loation-config region=US \
     --secret-file ./credentials-velero 
+```
+- --provider 指定提供者
+- --bucket 指定bucket名
+- --backup-location-config 指定备份位置
+- --namespace 指定要部署的名称空间
+在客户端命令行上指定名称空间
+```
+velero client config set namespace=<NAMESPACE_VALUE>
+```
+
+
+3、安装完后查看namespace及pod
+```
+kubectl get ns |grep velero
+velero            Active          7s
+
+kubectl get pods -n velero 
+NAME                         READY    STATUS        RESTARTS       AGE
+velero-65458bc75c-cv96dd     1/1      Running       0              23s
+```
+
+4、Velero删除
+```
+kubectl delete namespace/velero clusterrolebinding/velero
+kubectl delete crds -l component=velero
+```
+
+
+添加卷提供商到Velero
+```
+velero plugin add <registry/image:version>
+```
+
+添加卷快照提供商
+```
+velero snapshot-location-create <NAME>\
+--provider <PROVIDER_NAME> \
+[--config <PROVIDER_CONFIGN>]  #可选
 ```

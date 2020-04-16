@@ -40,14 +40,14 @@ create                 #创建资源
 delete                 #删除资源
 describe               #查看资源相关信息
 get                    #查看有哪些备份
-help
+help                   #帮助
 install                #安装velero
 plugin                 #指定插件
 restic
-restore
-schedule
-snapshot-location
-version
+restore                #还原
+schedule               #定时任务，定时备份
+snapshot-location      #快照位置
+version                #版本
 ```
 
 命令行的安装方式

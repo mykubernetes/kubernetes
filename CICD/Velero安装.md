@@ -67,6 +67,16 @@ velero install \
     --bucket first-bucket \
     --backup-location-config region=US,s3ForcePathStyle="true",s3Url=http://192.168.20.82 \
     --snapshot-loation-config region=US \
+    --velero-pod-cpu-request 200m \
+    --velero-pod-mem-request 200Mi \
+    --velero-pod-cpu-limit 200m \
+    --velero-pod-mem-limit 200Mi \
+    --use-volume-snapshots=false \
+    --use-restic \
+#    --restic-pod-cpu-request 200m \
+#    --restic-pod-mem-request 200Mi \
+#    --restic-pod-cpu-limit 200m \
+#    --restic-pod-mem-limit 200Mi \
     --secret-file ./credentials-velero 
 ```
 - --provider 指定提供者

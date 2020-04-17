@@ -206,3 +206,9 @@ $ velero restore create --from-backup <BACKUP-NAME>
 $ velero restore get
 $ velero restore describe <RESTORE-NAME-FROM-GET-COMMAND>
 ```
+
+创建定期备份：
+---
+```
+velero schedule create <SCHEDULE NAME> --schedule "0 7 * * *"
+```

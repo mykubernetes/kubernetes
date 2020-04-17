@@ -110,38 +110,7 @@ velero snapshot-location-create <NAME>\
 [--config <PROVIDER_CONFIGN>]  #可选
 ```
 
-使用 Velero 进行数据备份和恢复
----
-
-给 Pod 加注解
-
-使用 Restic 给带有 PVC 的 Pod 进行备份，必须先给 Pod 加上注解。
-
-先看一看基本语法：
-```
-$ kubectl -n YOUR_POD_NAMESPACE annotate pod/YOUR_POD_NAME backup.velero.io/backup-volumes=YOUR_VOLUME_NAME_1,YOUR_VOLUME_NAME_2,...
-```
-在来看一个实例，这里使用一个 Elasticsearch 的 Pod 为例：
-```
-$ kubectl -n elasticsearch annotate pod elasticsearch-master-0 backup.velero.io/backup-volumes=elasticsearch-master
-$ kubectl get pod -n elasticsearch elasticsearch-master-0 -o jsonpath='{.metadata.annotations}'
-map[backup.velero.io/backup-volumes:elasticsearch-master]
-```
-
-
-
-备份排除项目
----
-可为资源添加指定标签，添加标签的资源在备份的时候被排除。
-```
-# 添加标签
-kubectl label -n <ITEM_NAMESPACE> <RESOURCE>/<NAME> velero.io/exclude-from-backup=true
-# 为 default namespace 添加标签
-kubectl label -n default namespace/default velero.io/exclude-from-backup=true
-```
-
-
-1、基本命令语法
+1、创建备份的基本命令语法
 ```
 $ velero create backup NAME [flags]
 
@@ -160,19 +129,7 @@ $ velero create backup NAME [flags]
 --volume-snapshot-locations strings               # 指定快照的位置，也就是哪一个公有云驱动
 ```
 
-创建一个备份
-
-这里同样以上面提到的 elasticsearch 为例。
-```
-$ velero create backup es --include-namespaces=elasticsearch
-```
-注：Restic 会使用 Path Style，而阿里云禁止 Path style 需要使用 Virtual-Hosted，所以暂时备份没有办法备份 PV 到 OSS。
-
-备份创建成功后会创建一个名为 backups.velero.io 的 CRD 对象。
-
-恢复一个备份数据
----
-基本命令语法
+2、恢复一个备份数据的基本命令语法
 ```
 $ velero restore create [RESTORE_NAME] [--from-backup BACKUP_NAME | --from-schedule SCHEDULE_NAME] [flags]
 
@@ -194,12 +151,275 @@ $ velero restore create [RESTORE_NAME] [--from-backup BACKUP_NAME | --from-sched
   -w, --wait
 ```
 
+使用 Velero 进行数据备份和恢复
+---
 
-恢复一个备份数据
+部署一个测试nginx资源
+---
+```
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: nginx-example
+  labels:
+    app: nginx
+
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+  namespace: nginx-example
+spec:
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - image: nginx:1.7.9
+        name: nginx
+        ports:
+        - containerPort: 80
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: nginx
+  name: my-nginx
+  namespace: nginx-example
+spec:
+  ports:
+  - port: 80
+    targetPort: 80
+  selector:
+    app: nginx
+  type: LoadBalancer
+```
+
+备份
+---
+可以全量备份，也可以只备份需要备份的一个namespace,本处只备份一个namespace：nginx-example
+```
+velero backup create nginx-example-backup --include-namespaces nginx-example
+
+Backup request "nginx-example-backup" submitted successfully.
+Run `velero backup describe nginx-example-backup` or `velero backup logs nginx-example-backup` for more details.
+```
+
+查看当前状态
+```
+# namespace nginx-example仍然存在
+kubectl get ns
+NAME            STATUS   AGE
+default         Active   2d22h
+kube-public     Active   2d22h
+kube-system     Active   2d22h
+nginx-example   Active   8m34s
+velero          Active   120m
+
+# nginx-example下面pod的相关信息
+kubectl get po -n nginx-example -o wide
+NAME                                READY   STATUS    RESTARTS   AGE     IP             NODE                           NOMINATED NODE
+nginx-deployment-5c689d88bb-855h8   1/1     Running   0          2m31s   172.20.0.114   cn-zhangjiakou.192.168.1.144   <none>
+nginx-deployment-5c689d88bb-k5j9z   1/1     Running   0          2m31s   172.20.0.115   cn-zhangjiakou.192.168.1.144   <none>
+
+# nginx-example下面deployment的相关信息
+kubectl get deployment -n nginx-example -o wide
+NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE    CONTAINERS   IMAGES        SELECTOR
+nginx-deployment   2         2         2            2           5m2s   nginx        nginx:1.7.9   app=nginx
+
+# nginx-example下面service的相关信息
+kubectl get svc -n nginx-example -o wide
+NAME       TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)        AGE     SELECTOR
+my-nginx   LoadBalancer   172.21.9.159   47.92.44.156   80:32088/TCP   6m36s   app=nginx
+```
+
+模拟一次误操作导致namespace nginx-example被误删
+```
+kubectl delete namespaces nginx-example
+```
+
+恢复
+---
+使用velero restore命令来恢复之前的备份
+```
+velero  restore create --from-backup nginx-example-backup
+
+Restore request "nginx-example-backup-20190523200227" submitted successfully.
+Run `velero restore describe nginx-example-backup-20190523200227` or `velero restore logs nginx-example-backup-20190523200227` for more details.
+```
+
+检查下namespace nginx-example及其下面的资源是否被恢复
+```
+# 检查下namespace nginx-example是否已被创建
+kubectl get ns
+NAME            STATUS   AGE
+default         Active   2d22h
+kube-public     Active   2d22h
+kube-system     Active   2d22h
+nginx-example   Active   68s
+velero          Active   112m
+
+# 检查下pod 
+kubectl get po -n nginx-example -o wide
+NAME                                READY   STATUS    RESTARTS   AGE    IP             NODE                           NOMINATED NODE
+nginx-deployment-5c689d88bb-855h8   1/1     Running   0          3m2s   172.20.0.131   cn-zhangjiakou.192.168.1.145   <none>
+nginx-deployment-5c689d88bb-k5j9z   1/1     Running   0          3m2s   172.20.0.132   cn-zhangjiakou.192.168.1.145   <none>
+
+# nginx-example下面deployment的相关信息
+kubectl get deployment -n nginx-example -o wide
+NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES        SELECTOR
+nginx-deployment   2         2         2            2           4m52s   nginx        nginx:1.7.9   app=nginx
+
+# nginx-example下面service的相关信息
+kubectl get svc -n nginx-example -o wide
+NAME       TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)        AGE    SELECTOR
+my-nginx   LoadBalancer   172.21.3.239   39.98.8.5     80:30351/TCP   7m9s   app=nginx
+```
+可以看到resource name都保持不变，但是相关的ip，nodeport，LB地址等都会重新分配
+
+
+验证恢复的形态是什么样的
+---
+额外部署一个tomcat的deployment
+```
+kubectl get deployment -n nginx-example
+NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   2         2         2            2           3m23s
+tomcat             2         2         2            2           27s
+```
+做一次restore，观察下是否会删除掉tomcat这个deployment
+```
+velero  restore create --from-backup nginx-example-backup
+
+kubectl get deployment -n nginx-example
+NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   2         2         2            2           6m32s
+tomcat             2         2         2            2           3m36s
+```
+可以看到，restore的行为不是覆盖
+
+把最初backup中存在的nginx删除掉
+---
+```
+kubectl delete deployment nginx-deployment -n nginx-example
+deployment.extensions "nginx-deployment" deleted
+
+kubectl get deployment -n nginx-example
+NAME     DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+tomcat   2         2         2            2           6m49s
+```
+再来一次restore,之前backup中有nginx，没有tomcat，那restore之后是什么样
+```
+velero  restore create --from-backup nginx-example-backup
+
+kubectl get deployment -n nginx-example
+NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+nginx-deployment   2         2         2            2           3s
+tomcat             2         2         2            2           8m33s
+```
+
+将nginx的image版本升级成latest，那在restore之后是什么样
+---
+```
+# 升级nginx的image从1.7.9到latest，并查看当前的image版本
+kubectl get deployment -n nginx-example -o wide
+NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES          SELECTOR
+nginx-deployment   2         2         2            2           2m29s   nginx        nginx:latest    app=nginx
+tomcat             2         2         2            2           10m     tomcat       tomcat:latest   app=tomcat
+
+# restore backup
+velero  restore create --from-backup nginx-example-backup
+# 再来看下nginx的image版本，并没有恢复到最初的版本
+kubectl get deployment -n nginx-example -o wide
+NAME               DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE     CONTAINERS   IMAGES          SELECTOR
+nginx-deployment   2         2         2            2           3m15s   nginx        nginx:latest    app=nginx
+tomcat             2         2         2            2           11m     tomcat       tomcat:latest   app=tomcat
+```
+结论：velero恢复不是直接覆盖，而是会恢复当前集群中不存在的resource，已有的resource不会回滚到之前的版本，如需要回滚，需在restore之前提前删除现有的resource。
+
+
+
+使用Restic给带有PVC的Pod进行备份，必须先给Pod加上注解。
+---
+基本语法：
+```
+# kubectl -n YOUR_POD_NAMESPACE annotate pod/YOUR_POD_NAME backup.velero.io/backup-volumes=YOUR_VOLUME_NAME_1,YOUR_VOLUME_NAME_2,...
+```
+1、使用Elasticsearch的Pod为例，为Elasticsearch的annotate打标签
+```
+# kubectl -n elasticsearch annotate pod elasticsearch-master-0 backup.velero.io/backup-volumes=elasticsearch-master
+
+# kubectl get pod -n elasticsearch elasticsearch-master-0 -o jsonpath='{.metadata.annotations}'
+map[backup.velero.io/backup-volumes:elasticsearch-master]
+```
+
+
+2、创建一个备份
+```
+# velero create backup es --include-namespaces=elasticsearch
+```
+注：Restic会使用 Path Style，而阿里云禁止Path style需要使用Virtual-Hosted，所以暂时备份没有办法备份 PV 到 OSS。
+
+备份创建成功后会创建一个名为 backups.velero.io 的 CRD 对象。
+
+3、恢复一个备份数据
 ```
 $ velero restore create back --from-backup es
 ```
 恢复成功后，同样也会创建一个 restores.velero.io CRD 对象。
+
+4、备份资源查看
+```
+velero backup get
+```
+
+5、查看可恢复备份
+```
+$ velero restore get
+```
+
+6、备份删除
+```
+velero delete backups <BACKUP_NAME>
+```
+
+
+备份排除项目
+---
+可为资源添加指定标签，添加标签的资源在备份的时候被排除。
+```
+# 添加标签
+kubectl label -n <ITEM_NAMESPACE> <RESOURCE>/<NAME> velero.io/exclude-from-backup=true
+# 为 default namespace 添加标签
+kubectl label -n default namespace/default velero.io/exclude-from-backup=true
+```
+
+定期备份
+---
+
+创建定期备份
+```
+# 每日1点进行备份
+velero create schedule <SCHEDULE NAME> --schedule="0 1 * * *"
+# 每日1点进行备份，备份保留48小时
+velero create schedule <SCHEDULE NAME> --schedule="0 1 * * *" --ttl 48h
+# 每6小时进行一次备份
+velero create schedule <SCHEDULE NAME> --schedule="@every 6h"
+# 每日对 web namespace 进行一次备份
+velero create schedule <SCHEDULE NAME> --schedule="@every 24h" --include-namespaces web
+```
+
+查看定时备份
+```
+$ velero schedule get
+```
+
 
 使用 Velero 进行集群数据迁移
 ---
@@ -222,37 +442,4 @@ $ velero restore get
 $ velero restore describe <RESTORE-NAME-FROM-GET-COMMAND>
 ```
 
-备份删除
-```
-velero delete backups <BACKUP_NAME>
-```
 
-备份资源查看
-```
-velero backup get
-```
-
-查看可恢复备份
-```
-$ velero restore get
-```
-
-定期备份
----
-
-创建定期备份
-```
-# 每日1点进行备份
-velero create schedule <SCHEDULE NAME> --schedule="0 1 * * *"
-# 每日1点进行备份，备份保留48小时
-velero create schedule <SCHEDULE NAME> --schedule="0 1 * * *" --ttl 48h
-# 每6小时进行一次备份
-velero create schedule <SCHEDULE NAME> --schedule="@every 6h"
-# 每日对 web namespace 进行一次备份
-velero create schedule <SCHEDULE NAME> --schedule="@every 24h" --include-namespaces web
-```
-
-查看定时备份
-```
-$ velero schedule get
-```

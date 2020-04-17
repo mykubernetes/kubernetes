@@ -381,23 +381,27 @@ map[backup.velero.io/backup-volumes:elasticsearch-master]
 
 3、恢复一个备份数据
 ```
-$ velero restore create back --from-backup es
+# velero restore create back --from-backup es
 ```
 恢复成功后，同样也会创建一个 restores.velero.io CRD 对象。
 
 4、备份资源查看
 ```
-velero backup get
+# velero backup get
 ```
 
 5、查看可恢复备份
 ```
-$ velero restore get
+# velero restore get
 ```
 
-6、备份删除
+6、删除备份
 ```
+# 通过命令直接删除
 velero delete backups <BACKUP_NAME>
+
+# 设置备份自动过期，在创建备份时，加上TTL参数
+velero backup create <BACKUP-NAME> --ttl <DURATION>
 ```
 
 

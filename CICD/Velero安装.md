@@ -128,6 +128,19 @@ $ kubectl get pod -n elasticsearch elasticsearch-master-0 -o jsonpath='{.metadat
 map[backup.velero.io/backup-volumes:elasticsearch-master]
 ```
 
+
+
+备份排除项目
+---
+可为资源添加指定标签，添加标签的资源在备份的时候被排除。
+```
+# 添加标签
+kubectl label -n <ITEM_NAMESPACE> <RESOURCE>/<NAME> velero.io/exclude-from-backup=true
+# 为 default namespace 添加标签
+kubectl label -n default namespace/default velero.io/exclude-from-backup=true
+```
+
+
 1、基本命令语法
 ```
 $ velero create backup NAME [flags]
@@ -180,6 +193,8 @@ $ velero restore create [RESTORE_NAME] [--from-backup BACKUP_NAME | --from-sched
       --show-labels                                     show labels in the last column
   -w, --wait
 ```
+
+
 恢复一个备份数据
 ```
 $ velero restore create back --from-backup es
@@ -207,8 +222,37 @@ $ velero restore get
 $ velero restore describe <RESTORE-NAME-FROM-GET-COMMAND>
 ```
 
-创建定期备份：
----
+备份删除
 ```
-velero schedule create <SCHEDULE NAME> --schedule "0 7 * * *"
+velero delete backups <BACKUP_NAME>
+```
+
+备份资源查看
+```
+velero backup get
+```
+
+查看可恢复备份
+```
+$ velero restore get
+```
+
+定期备份
+---
+
+创建定期备份
+```
+# 每日1点进行备份
+velero create schedule <SCHEDULE NAME> --schedule="0 1 * * *"
+# 每日1点进行备份，备份保留48小时
+velero create schedule <SCHEDULE NAME> --schedule="0 1 * * *" --ttl 48h
+# 每6小时进行一次备份
+velero create schedule <SCHEDULE NAME> --schedule="@every 6h"
+# 每日对 web namespace 进行一次备份
+velero create schedule <SCHEDULE NAME> --schedule="@every 24h" --include-namespaces web
+```
+
+查看定时备份
+```
+$ velero schedule get
 ```

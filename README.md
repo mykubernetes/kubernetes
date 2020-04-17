@@ -31,3 +31,4 @@ https://kubernetes.io/zh/docs/concepts/
 - [cert-manager](https://github.com/mykubernetes/kubernetes/blob/master/cert-manager.md)
 - [helm](https://github.com/mykubernetes/kubernetes/tree/master/helm)
 - [etcd集群备份与恢复](https://github.com/mykubernetes/kubernetes/blob/master/etcd%E9%9B%86%E7%BE%A4%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D.md)
+- [Velero](https://github.com/mykubernetes/kubernetes/blob/master/Velero%E5%AE%89%E8%A3%85.md)

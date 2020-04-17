@@ -22,13 +22,17 @@ https://velero.io/docs/v1.2.0/supported-providers/
 
 1、安装和配置服务器端组件
 
-支持两种方式安装服务器端组件
+支持二进制和helm方式安装服务器端组件
+```
+# tar xvf velero-v1.2.0-linux-amd64.tar.gz
+# chmod u+x velero-v1.2.0-linux-amd64/velero
+# mv velero-v1.2.0-linux-amd64/velero /usr/local/bin/
+```
+安装shell命令自动补全功能
+```
+# velero completion bash
+```
 
-```
-tar xvf velero-v1.2.0-linux-amd64.tar.gz
-chmod u+x velero-v1.2.0-linux-amd64/velero
-mv velero-v1.2.0-linux-amd64/velero /usr/local/bin/
-```
 
 命令介绍
 ```

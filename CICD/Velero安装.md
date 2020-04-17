@@ -97,6 +97,13 @@ velero install \
 velero client config set namespace=<NAMESPACE_VALUE>
 ```
 
+Restic可以将本地数据加密后传输到指定的仓库。支持的仓库有 Local、SFTP、Aws S3、Minio、OpenStack Swift、Backblaze B2、Azure BS、Google Cloud storage、Rest Server。
+
+restic项目地址：https://github.com/restic/restic
+```
+--use-restic
+--use-volume-snapshots=true
+```
 
 3、安装完后查看namespace及pod
 ```

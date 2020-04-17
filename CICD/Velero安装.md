@@ -108,7 +108,24 @@ NAME                         READY    STATUS        RESTARTS       AGE
 velero-65458bc75c-cv96dd     1/1      Running       0              23s
 ```
 
-4、Velero删除
+4、查看创建的CRD
+```
+# kubectl -n velero get crds -l component=velero
+NAME                                CREATED AT
+backups.velero.io                   2019-08-28T03:19:56Z
+backupstoragelocations.velero.io    2019-08-28T03:19:56Z
+deletebackuprequests.velero.io      2019-08-28T03:19:56Z
+downloadrequests.velero.io          2019-08-28T03:19:56Z
+podvolumebackups.velero.io          2019-08-28T03:19:56Z
+podvolumerestores.velero.io         2019-08-28T03:19:56Z
+resticrepositories.velero.io        2019-08-28T03:19:56Z
+restores.velero.io                  2019-08-28T03:19:56Z
+schedules.velero.io                 2019-08-28T03:19:56Z
+serverstatusrequests.velero.io      2019-08-28T03:19:56Z
+volumesnapshotlocations.velero.io   2019-08-28T03:19:56Z
+```
+
+5、Velero删除
 ```
 kubectl delete namespace/velero clusterrolebinding/velero
 kubectl delete crds -l component=velero

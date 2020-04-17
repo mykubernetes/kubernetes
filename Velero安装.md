@@ -403,8 +403,16 @@ tomcat             2         2         2            2           11m     tomcat  
 # velero restore create --from-backup nginx-backup-volume --restore-volumes
 ```
 
+velero与restic整合
 使用Restic给带有PVC的Pod进行备份，必须先给Pod加上注解。
 ---
+
+您的Restic存储库是否存在，并且准备好
+```
+velero restic repo get
+velero restic repo get REPO_NAME -o yaml
+```
+
 基本语法：
 ```
 # kubectl -n YOUR_POD_NAMESPACE annotate pod/YOUR_POD_NAME backup.velero.io/backup-volumes=YOUR_VOLUME_NAME_1,YOUR_VOLUME_NAME_2,...
@@ -420,26 +428,40 @@ map[backup.velero.io/backup-volumes:elasticsearch-master]
 
 2、创建一个备份
 ```
-# velero create backup es --include-namespaces=elasticsearch
+# velero create backup es --include-namespaces=elasticsearch <OPTIONS>
 ```
 注：Restic会使用 Path Style，而阿里云禁止Path style需要使用Virtual-Hosted，所以暂时备份没有办法备份 PV 到 OSS。
 
 备份创建成功后会创建一个名为 backups.velero.io 的 CRD 对象。
 
-3、恢复一个备份数据
+3、备份资源查看
 ```
-# velero restore create back --from-backup es
-```
-恢复成功后，同样也会创建一个 restores.velero.io CRD 对象。
-
-4、备份资源查看
-```
+# velero backup describe <YOUR_RESTORE_NAME>
+# kubectl -n velero get podvolumebackups -l velero.io/backup-name=YOUR_BACKUP_NAME -o yaml
 # velero backup get
 ```
 
+查看日志
+```
+velero backup logs BACKUP_NAME
+```
+
+4、恢复一个备份数据
+```
+# velero restore create es --from-backup <OPTIONS>
+```
+恢复成功后，同样也会创建一个 restores.velero.io CRD 对象。
+
 5、查看可恢复备份
 ```
+# velero restore describe <YOUR_RESTORE_NAME>
 # velero restore get
+# kubectl -n velero get podvolumerestores -l velero.io/restore-name=YOUR_RESTORE_NAME -o yaml
+```
+
+查看日志
+```
+velero restore logs RESTORE_NAME
 ```
 
 6、删除备份
@@ -451,6 +473,12 @@ velero delete backups <BACKUP_NAME>
 velero backup create <BACKUP-NAME> --ttl <DURATION>
 ```
 
+7、查看的Pod卷备份/还原的状态
+```
+kubectl -n velero get podvolumebackups -l velero.io/backup-name=BACKUP_NAME -o yaml
+
+kubectl -n velero get podvolumerestores -l velero.io/restore-name=RESTORE_NAME -o yaml
+```
 
 备份排除项目
 ---

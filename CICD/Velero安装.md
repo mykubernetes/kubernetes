@@ -71,7 +71,7 @@ velero install \
     --velero-pod-mem-request 200Mi \
     --velero-pod-cpu-limit 200m \
     --velero-pod-mem-limit 200Mi \
-    --use-volume-snapshots=false \
+#    --use-volume-snapshots=true \
     --use-restic \
 #    --restic-pod-cpu-request 200m \
 #    --restic-pod-mem-request 200Mi \

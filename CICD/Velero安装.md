@@ -343,7 +343,18 @@ tomcat             2         2         2            2           11m     tomcat  
 ```
 结论：velero恢复不是直接覆盖，而是会恢复当前集群中不存在的resource，已有的resource不会回滚到之前的版本，如需要回滚，需在restore之前提前删除现有的resource。
 
+备份持久数据卷
+---
+1、备份恢复持久卷
+```
+# velero backup create nginx-backup-volume --snapshot-volumes --include-namespaces nginx-example
+```
+该备份会在集群所在region给云盘创建快照（当前还不支持NAS和OSS存储），快照恢复云盘只能在同region完成。
 
+2、恢复命令
+```
+# velero restore create --from-backup nginx-backup-volume --restore-volumes
+```
 
 使用Restic给带有PVC的Pod进行备份，必须先给Pod加上注解。
 ---
@@ -417,29 +428,19 @@ velero create schedule <SCHEDULE NAME> --schedule="@every 24h" --include-namespa
 
 查看定时备份
 ```
-$ velero schedule get
+# velero schedule get
 ```
+
 
 
 使用 Velero 进行集群数据迁移
 ---
-首先，在集群 1 中创建备份（默认 TTL 是 30 天，你可以使用 --ttl 来修改）：
+在集群1上做一个备份：
 ```
-$ velero backup create <BACKUP-NAME>
+# velero backup create <BACKUP-NAME> --snapshot-volumes
 ```
-然后，为集群 2 配置与集群 1 相同的备份位置 BackupStorageLocations 和快照路径 VolumeSnapshotLocations。
-
-并确保 BackupStorageLocations 是只读的（使用 --access-mode=ReadOnly）。接下来，稍微等一会（默认的同步时间为 1 分钟），等待 Backup 对象创建成功。
+在集群2上做一个恢复：
 ```
-# The default sync interval is 1 minute, so make sure to wait before checking.
-# You can configure this interval with the --backup-sync-period flag to the Velero server.
-$ velero backup describe <BACKUP-NAME>
+# velero restore create --from-backup <BACKUP-NAME> --restore-volumes
 ```
-最后，执行数据恢复：
-```
-$ velero restore create --from-backup <BACKUP-NAME>
-$ velero restore get
-$ velero restore describe <RESTORE-NAME-FROM-GET-COMMAND>
-```
-
 

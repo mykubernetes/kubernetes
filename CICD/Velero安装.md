@@ -71,8 +71,9 @@ velero install \
     --velero-pod-mem-request 200Mi \
     --velero-pod-cpu-limit 200m \
     --velero-pod-mem-limit 200Mi \
-#    --use-volume-snapshots=true \
-    --use-restic \
+    --namespace velero
+    --use-volume-snapshots=true \
+#    --use-restic \                      #注释的为可选参数
 #    --restic-pod-cpu-request 200m \
 #    --restic-pod-mem-request 200Mi \
 #    --restic-pod-cpu-limit 200m \
@@ -80,9 +81,17 @@ velero install \
     --secret-file ./credentials-velero 
 ```
 - --provider 指定提供者
+- --plugins 根据使用的不同对象存储指定不同的插件
 - --bucket 指定bucket名
 - --backup-location-config 指定备份位置
+- --snapshot-loation-config 指定快照位置
+- --use-restic 开启restic集成，默认不开启，如果运行了velero install未开启restic，可以再运行一次开启该集成的命令安装
 - --namespace 指定要部署的名称空间
+- --secret-file 验证机制，文件
+- --no-secret 不使用验证
+- --velero-pod-cpu-request velero使用的cpu or mem 的资源
+- --restic-pod-cpu-request restic使用的cpu or mem 的资源
+- --dry-run -o yaml 不进行创建，只显示yaml文件
 在客户端命令行上指定名称空间
 ```
 velero client config set namespace=<NAMESPACE_VALUE>

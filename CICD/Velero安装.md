@@ -110,7 +110,7 @@ velero snapshot-location-create <NAME>\
 [--config <PROVIDER_CONFIGN>]  #可选
 ```
 
-基本命令语法
+使用 Velero 进行数据备份和恢复
 ---
 
 给 Pod 加注解

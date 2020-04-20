@@ -4,7 +4,18 @@ nginx rpm包：http://nginx.org/packages/rhel/7/x86_64/RPMS/
 ```
 # rpm -vih http://nginx.org/packages/rhel/7/x86_64/RPMS/nginx-1.16.0-1.el7.ngx.x86_64.rpm
 # vim /etc/nginx/nginx.conf
-……
+
+user  nginx;
+worker_processes  4;
+
+error_log  /var/log/nginx/error.log warn;
+pid        /var/run/nginx.pid;
+
+
+events {
+    worker_connections  1024;
+}
+
 stream {
 
     log_format  main  '$remote_addr $upstream_addr - [$time_local] $status $upstream_bytes_sent';
@@ -21,7 +32,29 @@ stream {
        proxy_pass k8s-apiserver;
     }
 }
-……
+
+
+http {
+    include       /etc/nginx/mime.types;
+    default_type  application/octet-stream;
+
+    log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                      '$status $body_bytes_sent "$http_referer" '
+                      '"$http_user_agent" "$http_x_forwarded_for"';
+
+    access_log  /var/log/nginx/access.log  main;
+
+    sendfile        on;
+    #tcp_nopush     on;
+
+    keepalive_timeout  65;
+
+    #gzip  on;
+
+    include /etc/nginx/conf.d/*.conf;
+}
+
+
 
 # systemctl start nginx
 # systemctl enable nginx

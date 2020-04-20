@@ -1,0 +1,11 @@
+https://github.com/containernetworking/plugins/releases
+
+```
+# mkdir /opt/cni/bin /etc/cni/net.d
+# tar zxvf cni-plugins-linux-amd64-v0.8.2.tgz –C /opt/cni/bin
+```
+
+```
+# cat /opt/kubernetes/cfg/kubelet.conf 
+--network-plugin=cni
+```

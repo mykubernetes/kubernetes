@@ -8,3 +8,5 @@ https://www.bookstack.cn/read/etcd/documentation-op-guide-clustering.md
 Etcd3学习笔记  
 https://github.com/mykubernetes/learning-etcd3
 ===
+
+http://www.xuyasong.com/?p=1983#i-7

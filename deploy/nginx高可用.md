@@ -154,3 +154,31 @@ fi
        valid_lft forever preferred_lft forever
 ```
 关闭nginx测试VIP是否漂移到备节点。
+
+测试VIP是否正常工作
+```
+# curl -k https://10.4.192.39:6443/version
+{
+  "kind": "Status",
+  "apiVersion": "v1",
+  "metadata": {
+    
+  },
+  "status": "Failure",
+  "message": "Unauthorized",
+  "reason": "Unauthorized",
+  "code": 401
+}
+```
+
+将Node连接VIP
+```
+# cd /etc/kubernetes/cfg
+# grep 192 *
+bootstrap.kubeconfig:    server: https://192.168.31.63:6443
+kubelet.kubeconfig:    server: https://192.168.31.636443
+kube-proxy.kubeconfig:    server: https://192.168.31.63:6443
+
+批量修改：
+sed -i 's#192.168.31.63#192.168.31.60#g' 
+```

@@ -145,6 +145,7 @@ spec:
   - name: ngxconfig
     configMap:
       name: nginx-config-files
+      defaultMode: 0755
 ```  
 
 

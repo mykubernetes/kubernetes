@@ -12,6 +12,8 @@ https://github.com/NVIDIA/nvidia-docker
 
 https://github.com/NVIDIA/nvidia-container-runtime
 
+https://github.com/NVIDIA/k8s-device-plugin
+
 在kubernetes中使用GPU资源
 
 安装步骤

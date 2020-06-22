@@ -14,11 +14,20 @@ https://github.com/NVIDIA/nvidia-container-runtime
 
 在kubernetes中使用GPU资源
 
-1.前置条件
+安装步骤
 
 1.节点安装NVIDIA驱动
 
-安装nvidia-docker2 # 注意不是nvidia-container-toolkit
+2.安装nvidia-docker2 # 注意不是nvidia-container-toolkit
+```
+distribution=$(. /etc/os-release;echo $ID$VERSION_ID)
+curl -s -L https://nvidia.github.io/nvidia-docker/$distribution/nvidia-docker.repo | sudo tee /etc/yum.repos.d/nvidia-docker.repo
+
+yum install -y nvidia-docker2
+
+pkill -SIGHUP dockerd
+```
+
 
 2.安装Nvidia-device-plugin插件
 ```

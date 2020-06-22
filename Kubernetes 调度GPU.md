@@ -19,6 +19,15 @@ https://github.com/NVIDIA/k8s-device-plugin
 安装步骤
 
 1.节点安装NVIDIA驱动
+```
+rpm --import https://www.elrepo.org/RPM-GPG-KEY-elrepo.org
+rpm -Uvh http://www.elrepo.org/elrepo-release-7.0-3.el7.elrepo.noarch.rpm
+yum install -y kmod-nvidia
+
+验证
+# nvidia-smi 
+```
+
 
 2.安装nvidia-docker2 # 注意不是nvidia-container-toolkit
 ```
@@ -29,6 +38,22 @@ yum install -y nvidia-docker2
 
 pkill -SIGHUP dockerd
 ```
+
+3.修改docker配置文件
+```
+# vim /etc/docker/daemon.json
+{
+    "default-runtime": "nvidia",
+    "runtimes": {
+        "nvidia": {
+            "path": "/usr/bin/nvidia-container-runtime",
+            "runtimeArgs": []
+        }
+}
+
+# systemctl restart docker
+```
+
 
 
 3.安装Nvidia-device-plugin插件

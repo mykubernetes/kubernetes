@@ -60,6 +60,11 @@ pkill -SIGHUP dockerd
 ```
 kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/1.0.0-beta4/nvidia-device-plugin.yml
 # URL https://github.com/NVIDIA/k8s-device-plugin
+
+验证安装
+# kubectl get pod -n kube-system |grep nvidia
+nvidia-device-plugin-daemonset-76gm6            1/1     Running   2          20d
+
 ```
 4.验证node是否成功识别gpu资源
 ```

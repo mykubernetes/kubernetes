@@ -70,3 +70,12 @@ nvidia-device-plugin-daemonset-76gm6            1/1     Running   2          20d
 ```
 kubectl describe node nodeName
 ```
+
+
+多个pod共享一张GPU
+- 不行，pod在创建的时候请求gpu最低是卡级别，一张显卡只能分配给一个pod。但是一个pod是由多个容器组成的，所以同一个pod的容器可以共享分配给当前pod的所有GPU。
+
+多个docker容器共享一张GPU
+- 可以。通过nvidia-docker启动的容器可以共享一张GPU。因为容器是进程级的程序所以分配GPU可以达到显存级。
+
+

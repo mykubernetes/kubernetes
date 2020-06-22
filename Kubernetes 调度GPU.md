@@ -1,0 +1,31 @@
+Kubernetes管理GPU应用
+
+官方说明
+https://devblogs.nvidia.com/gpu-containers-runtime/
+
+https://www.cnblogs.com/breezey/p/11801122.html  
+https://www.jianshu.com/p/8b84c597ce03
+
+
+
+https://github.com/NVIDIA/nvidia-docker
+
+https://github.com/NVIDIA/nvidia-container-runtime
+
+在kubernetes中使用GPU资源
+
+1.前置条件
+
+1.节点安装NVIDIA驱动
+
+安装nvidia-docker2 # 注意不是nvidia-container-toolkit
+
+2.安装Nvidia-device-plugin插件
+```
+kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/1.0.0-beta4/nvidia-device-plugin.yml
+# URL https://github.com/NVIDIA/k8s-device-plugin
+```
+3.验证node是否成功识别gpu资源
+```
+kubectl describe node nodeName
+```

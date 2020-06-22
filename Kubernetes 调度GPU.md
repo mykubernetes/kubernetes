@@ -31,12 +31,12 @@ pkill -SIGHUP dockerd
 ```
 
 
-2.安装Nvidia-device-plugin插件
+3.安装Nvidia-device-plugin插件
 ```
 kubectl create -f https://raw.githubusercontent.com/NVIDIA/k8s-device-plugin/1.0.0-beta4/nvidia-device-plugin.yml
 # URL https://github.com/NVIDIA/k8s-device-plugin
 ```
-3.验证node是否成功识别gpu资源
+4.验证node是否成功识别gpu资源
 ```
 kubectl describe node nodeName
 ```

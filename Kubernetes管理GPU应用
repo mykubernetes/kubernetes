@@ -1,5 +1,8 @@
 Kubernetes管理GPU应用
 
+官方说明
+https://devblogs.nvidia.com/gpu-containers-runtime/
+
 https://www.cnblogs.com/breezey/p/11801122.html
 
 https://github.com/NVIDIA/nvidia-docker

@@ -133,3 +133,22 @@ kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | aw
   ]
 }
 ```
+
+
+```
+# (umask 077; openssl genrsa -out curl.key 2048)
+Generating RSA private key, 2048 bit long modulus
+..............................+++
+......+++
+e is 65537 (0x10001)
+
+# openssl req -new -key curl.key -out curl.csr -subj "/O=curl/CN=www.api.com"
+
+
+# openssl x509 -req -in curl.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out curl.crt -days 365
+Signature ok
+subject=/O=curl/CN=www.api.com
+Getting CA Private Key
+
+
+```

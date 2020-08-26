@@ -138,15 +138,17 @@ HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式
 ```
 # cd /etc/kubernetes/pki/
 
+创建私钥
 # (umask 077; openssl genrsa -out curl.key 2048)
 Generating RSA private key, 2048 bit long modulus
 ..............................+++
 ......+++
 e is 65537 (0x10001)
 
+通过私钥创建证书
 # openssl req -new -key curl.key -out curl.csr -subj "/O=curl/CN=www.api.com"
 
-
+使用k8s的ca颁发证书
 # openssl x509 -req -in curl.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out curl.crt -days 365
 Signature ok
 subject=/O=curl/CN=www.api.com

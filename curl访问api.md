@@ -170,5 +170,20 @@ secret/curl-cert created
     }
   ]
 }
+```
 
+```
+# curl -k --cert apiserver.crt --key apiserver.key https://192.168.101.66:6443/api
+{
+  "kind": "APIVersions",
+  "versions": [
+    "v1"
+  ],
+  "serverAddressByClientCIDRs": [
+    {
+      "clientCIDR": "0.0.0.0/0",
+      "serverAddress": "192.168.101.66:6443"
+    }
+  ]
+}
 ```

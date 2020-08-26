@@ -145,10 +145,10 @@ Generating RSA private key, 2048 bit long modulus
 ......+++
 e is 65537 (0x10001)
 
-通过私钥创建证书
+建立证书签署请求
 # openssl req -new -key curl.key -out curl.csr -subj "/O=curl/CN=www.api.com"
 
-使用k8s的ca颁发证书
+使用k8s的ca.key给之前的证书签证
 # openssl x509 -req -in curl.csr -CA ca.crt -CAkey ca.key -CAcreateserial -out curl.crt -days 365
 Signature ok
 subject=/O=curl/CN=www.api.com

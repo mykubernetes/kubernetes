@@ -150,5 +150,8 @@ Signature ok
 subject=/O=curl/CN=www.api.com
 Getting CA Private Key
 
+# kubectl create secret generic curl-cert -n kube-system --from-file=curl.crt=./curl.crt --from-file=curl.key=./curl.key 
+secret/curl-cert created
+
 
 ```

@@ -134,8 +134,10 @@ kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | aw
 }
 ```
 
-
+HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式 
 ```
+# cd /etc/kubernetes/pki/
+
 # (umask 077; openssl genrsa -out curl.key 2048)
 Generating RSA private key, 2048 bit long modulus
 ..............................+++
@@ -150,8 +152,23 @@ Signature ok
 subject=/O=curl/CN=www.api.com
 Getting CA Private Key
 
+不操作
 # kubectl create secret generic curl-cert -n kube-system --from-file=curl.crt=./curl.crt --from-file=curl.key=./curl.key 
 secret/curl-cert created
 
+
+# curl -k --cert curl.csr --key curl.key https://192.168.101.66:6443/api
+{
+  "kind": "APIVersions",
+  "versions": [
+    "v1"
+  ],
+  "serverAddressByClientCIDRs": [
+    {
+      "clientCIDR": "0.0.0.0/0",
+      "serverAddress": "192.168.101.66:6443"
+    }
+  ]
+}
 
 ```

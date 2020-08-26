@@ -1,7 +1,7 @@
-apiserver有三种级别的客户端认证方式
-1、HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式
-2、HTTP Token认证：通过一个Token来识别合法用户
-3、HTTP Base认证：通过用户名+密码的认证方式
+apiserver有三种级别的客户端认证方式  
+1、HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式  
+2、HTTP Token认证：通过一个Token来识别合法用户  
+3、HTTP Base认证：通过用户名+密码的认证方式  
 
 HTTP Token认证：通过一个Token来识别合法用户
 ```

@@ -80,6 +80,7 @@ spec:
 ```
 
 4、PV 的常用配置参数
+
 （1）、存储能力 （capacity）
 
 PV 可以通过配置 capacity 中的 storage 参数，对 PV 挂多大存储空间进行设置

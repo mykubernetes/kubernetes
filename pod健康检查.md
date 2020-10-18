@@ -5,10 +5,11 @@ Pod 三种探针简介
 - StartupProbe（启动探针）指示容器中的应用是否已经启动。如果提供了启动探针(startup probe)，则禁用所有其他探针，直到它成功为止。如果启动探针失败，kubelet 将杀死容器，容器服从其重启策略进行重启。如果容器没有提供启动探针，则默认状态为成功Success。
 
 
-两种探针的区别
+三种探针的区别
 ---
 - ReadinessProbe： 当检测失败后，将 Pod 的 IP:Port 从对应 Service 关联的 EndPoint 地址列表中删除。
 - LivenessProbe： 当检测失败后将杀死容器，并根据 Pod 的重启策略来决定作出对应的措施。
+- StartupProbe： 当检测失败后将杀死容器，并根据 Pod 的重启策略来决定作出对应的措施。
 
 pod三种健康检查
 ---
@@ -223,6 +224,7 @@ spec:
 ```
 
 启动探针
+---
 ```
 startupProbe:
   httpGet:

@@ -1,7 +1,8 @@
-Pod 两种探针简介
+Pod 三种探针简介
 ---
-- LivenessProbe（存活探针） 存活探针主要作用是，用指定的方式进入容器检测容器中的应用是否正常运行，如果检测失败，则认为容器不健康，那么 Kubelet 将根据 Pod 中设置的 restartPolicy （重启策略）来判断，Pod 是否要进行重启操作，如果容器配置中没有配置 livenessProbe 存活探针，Kubelet 将认为存活探针探测一直为成功状态。
+- LivenessProbe（存活探针） 存活探针主要进入容器检测容器中的应用是否正常运行，如果检测失败，则认为容器不健康，那么 Kubelet 将根据 Pod 中设置的 restartPolicy （重启策略）来判断，Pod 是否要进行重启操作，如果容器配置中没有配置 livenessProbe 存活探针，Kubelet 将认为存活探针探测一直为成功状态。
 - ReadinessProbe（就绪探针） 用于判断容器中应用是否启动完成，当探测成功后才使 Pod 对外提供网络访问，设置容器 Ready 状态为 true，如果探测失败，则设置容器的 Ready 状态为 false。对于被 Service 管理的 Pod，Service 与 Pod、EndPoint 的关联关系也将基于 Pod 是否为 Ready 状态进行设置，如果 Pod 运行过程中 Ready 状态变为 false，则系统自动从 Service 关联的 EndPoint 列表中移除，如果 Pod 恢复为 Ready 状态。将再会被加回 Endpoint 列表。通过这种机制就能防止将流量转发到不可用的 Pod 上。
+- StartupProbe（启动探针）指示容器中的应用是否已经启动。如果提供了启动探针(startup probe)，则禁用所有其他探针，直到它成功为止。如果启动探针失败，kubelet 将杀死容器，容器服从其重启策略进行重启。如果容器没有提供启动探针，则默认状态为成功Success。
 
 
 两种探针的区别
@@ -220,3 +221,16 @@ spec:
             port: 8081
             path: /actuator/health
 ```
+
+启动探针
+```
+startupProbe:
+  httpGet:
+    path: /doc.html
+    port: 40017
+  initialDelaySeconds: 10
+  failureThreshold: 10
+  periodSeconds: 5
+```
+- 创建一个服务，此启动时间为30秒左右，30秒后才能正常提供服务，那么应该在这个时间段设置一个启动探针 StartupProbe。
+- 该容器启动10秒后，startupProbe首先检测，完成启动。一旦成功一次，livenessProbe将接管。如果startupProbe从未成功，则容器将被杀死

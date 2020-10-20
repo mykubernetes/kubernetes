@@ -2,6 +2,8 @@ kubernetes官网
 ===
 https://www.yuque.com/duduniao/k8s
 
+https://www.cnblogs.com/passzhang/
+
 https://www.qikqiak.com/k8strain/maintain/cluster/
 
 https://kubernetes.io/zh/docs/concepts/

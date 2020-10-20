@@ -2,6 +2,8 @@ kubernetes官网
 ===
 https://www.yuque.com/duduniao/k8s
 
+https://www.qikqiak.com/k8strain/maintain/cluster/
+
 https://kubernetes.io/zh/docs/concepts/
 
 - [kubernetes1.13.1+etcd3.3.10+flanneld0.10集群二进制部署](https://github.com/mykubernetes/kubernetes/blob/master/deploy/kubernetes1.13.1%2Betcd3.3.10%2Bflanneld0.10%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2.md)

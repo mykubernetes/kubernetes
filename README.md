@@ -10,6 +10,7 @@ https://kubernetes.io/zh/docs/concepts/
 
 - [kubernetes1.13.1+etcd3.3.10+flanneld0.10集群二进制部署](https://github.com/mykubernetes/kubernetes/blob/master/deploy/kubernetes1.13.1%2Betcd3.3.10%2Bflanneld0.10%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2.md)
 - [k8s添加删除节点](https://github.com/mykubernetes/kubernetes/blob/master/K8S%E9%9B%86%E7%BE%A4%E5%88%A0%E9%99%A4%E4%B8%8E%E6%B7%BB%E5%8A%A0%E8%8A%82%E7%82%B9.md)
+- [升级kubernetes集群](https://github.com/mykubernetes/kubernetes/blob/master/kubeadm%E9%83%A8%E7%BD%B2%E9%9B%86%E7%BE%A4%E5%8D%87%E7%BA%A7.md)
 - [主机维护](https://github.com/mykubernetes/kubernetes/blob/master/deploy/%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86.md)
 - [pod的常见状态及生命周期](https://github.com/mykubernetes/kubernetes/blob/master/pod%E7%9A%84%E5%B8%B8%E8%A7%81%E7%8A%B6%E6%80%81%E5%8F%8A%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.md)
 - [pod升级回滚](https://github.com/mykubernetes/kubernetes/blob/master/pod%E5%8D%87%E7%BA%A7%E5%9B%9E%E6%BB%9A.md)

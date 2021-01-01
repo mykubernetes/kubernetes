@@ -15,7 +15,7 @@ kubectl get pod -o wide
 # kubectl delete nodes node02
 ```
 
-4、然后在node06这个节点上执行如下命令：
+4、然后在node02这个节点上执行如下命令：
 ```
 kubeadm reset
 systemctl stop kubelet

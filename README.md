@@ -13,6 +13,7 @@ https://kubernetes.io/zh/docs/concepts/
 - [k8s添加角色](https://github.com/mykubernetes/kubernetes/blob/master/k8s%E6%B7%BB%E5%8A%A0role.md)
 - [升级kubernetes集群](https://github.com/mykubernetes/kubernetes/blob/master/kubeadm%E9%83%A8%E7%BD%B2%E9%9B%86%E7%BE%A4%E5%8D%87%E7%BA%A7.md)
 - [主机维护](https://github.com/mykubernetes/kubernetes/blob/master/deploy/%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86.md)
+- [故障处理](https://github.com/mykubernetes/kubernetes/blob/master/%E6%95%85%E9%9A%9C%E5%A4%84%E7%90%86.md)
 - [pod的常见状态及生命周期](https://github.com/mykubernetes/kubernetes/blob/master/pod%E7%9A%84%E5%B8%B8%E8%A7%81%E7%8A%B6%E6%80%81%E5%8F%8A%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F.md)
 - [pod升级回滚](https://github.com/mykubernetes/kubernetes/blob/master/pod%E5%8D%87%E7%BA%A7%E5%9B%9E%E6%BB%9A.md)
 - [pod资源及控制器](https://github.com/mykubernetes/kubernetes/blob/master/pod%E8%B5%84%E6%BA%90%E5%8F%8A%E6%8E%A7%E5%88%B6%E5%99%A8.md)

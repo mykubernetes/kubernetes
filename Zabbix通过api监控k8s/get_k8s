@@ -1,0 +1,7 @@
+#!/usr/bin/bash
+/usr/bin/python3 /usr/local/zabbix/share/zabbix/externalscripts/k8s/get_k8s.py get_pod
+/usr/bin/python3 /usr/local/zabbix/share/zabbix/externalscripts/k8s/get_k8s.py get_health
+/usr/bin/python3 /usr/local/zabbix/share/zabbix/externalscripts/k8s/get_k8s.py get_node
+
+
+

@@ -2,7 +2,8 @@ kubeadm部署kubernetes v1.14.1高可用集群
 ===
 基本配置
 ---
-1、以下操作在所有节点执行  
+1、以下操作在所有节点执行
+---
 ```
 #配置主机名
 hostnamectl set-hostname k8s-master01
@@ -30,7 +31,8 @@ yes | cp /etc/fstab /etc/fstab_bak
 cat /etc/fstab_bak | grep -v swap > /etc/fstab
 ```  
 
-2、配置时间同步  
+2、配置时间同步
+---
 ```
 # 安装chrony：
 yum install -y chrony
@@ -54,7 +56,8 @@ systemctl enable chronyd && systemctl restart chronyd
 timedatectl && chronyc sources
 ```  
 
-3、加载IPVS模块  
+3、加载IPVS模块
+---
 ```
 在所有的Kubernetes节点执行以下脚本（若内核大于4.19替换nf_conntrack_ipv4为nf_conntrack）:
 cat > /etc/sysconfig/modules/ipvs.modules <<EOF
@@ -71,7 +74,8 @@ chmod 755 /etc/sysconfig/modules/ipvs.modules && bash /etc/sysconfig/modules/ipv
 yum install ipset ipvsadm -y
 ```  
 
-4、配置内核参数  
+4、配置内核参数
+---
 ```
 cat > /etc/sysctl.d/k8s.conf <<EOF
 net.bridge.bridge-nf-call-ip6tables = 1
@@ -83,7 +87,8 @@ EOF
 sysctl --system
 ```  
 
-5、安装docker  
+5、安装docker
+---
 ```
 # 安装依赖软件包
 yum install -y yum-utils device-mapper-persistent-data lvm2
@@ -122,7 +127,8 @@ mkdir -p /etc/systemd/system/docker.service.d
 systemctl daemon-reload && systemctl restart docker && systemctl enable docker
 ```  
 
-6、安装负载均衡  
+6、安装负载均衡
+---
 1)创建haproxy启动脚本  
 ```
 mkdir -p /data/lb
@@ -180,7 +186,8 @@ EOF
 sh /data/lb/start-haproxy.sh && sh /data/lb/start-keepalived.sh
 ```  
 
-7、验证HA状态  
+7、验证HA状态
+---
 1)查看容器运行状态  
 ```
 [root@k8s-master01 ~]# docker ps
@@ -222,7 +229,8 @@ HAProxy-K8S
 Ncat: Connected to 127.0.0.1:6444.
 ```  
 
-8、安装kubeadm  
+8、安装kubeadm
+---
 以下操作在所有节点执行  
 ```
 #由于官方源国内无法访问，这里使用阿里云yum源进行替换：
@@ -241,7 +249,36 @@ yum install -y kubeadm kubelet kubectl
 systemctl enable kubelet && systemctl start kubelet
 ```  
 
-9、初始化master节点  
+9、查看其所需镜像
+---
+```
+kubeadm config images list --kubernetes-version v1.14.1
+
+拉取镜像：
+
+docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-apiserver-amd64:v1.14.1
+docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-controller-manager-amd64:v1.14.1
+docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler-amd64:v1.14.1
+docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/kube-proxy-amd64:v1.14.1
+
+docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.1	
+docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/etcd-amd64:3.2.24
+docker pull registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.2.6
+
+给镜像打标签
+
+docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-scheduler-amd64:v1.13.2 k8s.gcr.io/kube-scheduler:v1.14.1
+docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-controller-manager-amd64:v1.13.2 k8s.gcr.io/kube-controller-manager:v1.14.1
+docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-apiserver-amd64:v1.13.2 k8s.gcr.io/kube-apiserver:v1.14.1
+docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/kube-proxy-amd64:v1.13.2 k8s.gcr.io/kube-proxy:v1.14.1
+
+docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/pause:3.1 k8s.gcr.io/pause:3.1
+docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/etcd-amd64:3.2.24 k8s.gcr.io/etcd:3.2.24
+docker tag registry.cn-hangzhou.aliyuncs.com/google_containers/coredns:1.2.6 k8s.gcr.io/coredns:1.2.6
+```
+
+10、初始化master节点
+---
 1)创建初始化配置文件  
 ```
 kubeadm config print init-defaults > kubeadm-config.yaml
@@ -419,7 +456,8 @@ sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 sudo chown $(id -u):$(id -g) $HOME/.kube/config
 ```  
 
-10、查看当前状态  
+11、查看当前状态 
+---
 ```
 [root@k8s-master01 ~]# kubectl get nodes             
 NAME           STATUS     ROLES    AGE   VERSION
@@ -441,7 +479,8 @@ etcd-0               Healthy   {"health":"true"}
 ```  
 由于未安装网络插件，coredns处于pending状态，node处于notready状态  
 
-11、安装网络插件  
+12、安装网络插件
+---
 1)安装flannel网络插件  
 ```
 wget https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
@@ -475,7 +514,8 @@ kubectl apply -f \
 https://docs.projectcalico.org/v3.6/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml
 ```  
 
-12、加入master节点  
+13、加入master节点
+---
 从初始化输出或kubeadm-init.log中获取命令
 ```
 kubeadm join 192.168.92.30:6444 --token abcdef.0123456789abcdef \
@@ -551,7 +591,8 @@ Run 'kubectl get nodes' to see this node join the cluster.
 ```  
 
 
-13、加入node节点  
+14、加入node节点
+---
 从kubeadm-init.log中获取命令  
 ```
 kubeadm join 192.168.92.30:6444 --token abcdef.0123456789abcdef \
@@ -578,7 +619,8 @@ This node has joined the cluster:
 Run 'kubectl get nodes' on the control-plane to see this node join the cluster.
 ```  
 
-14、验证集群状态
+15、验证集群状态
+---
 1)查看nodes运行情况  
 ```
 [root@k8s-master01 ~]# kubectl get nodes -o wide     
@@ -624,7 +666,8 @@ NAME                   TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        
 kube-dns               ClusterIP   10.96.0.10      <none>        53/UDP,53/TCP,9153/TCP   51m
 ```  
 
-15、验证IPVS  
+16、验证IPVS
+---
 1)查看kube-proxy日志，第一行输出Using ipvs Proxier  
 ```
 [root@k8s-master01 ~]# kubectl -n kube-system logs -f kube-proxy-4vwbb 
@@ -664,7 +707,8 @@ UDP  10.96.0.10:53 rr
   -> 10.244.0.6:53                Masq    1      0          0       
 ```  
 
-16、etcd集群  
+17、etcd集群
+---
 执行以下命令查看etcd集群状态  
 ```
 kubectl -n kube-system exec etcd-k8s-master01 -- etcdctl \

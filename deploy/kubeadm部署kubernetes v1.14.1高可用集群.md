@@ -340,6 +340,15 @@ mode: ipvs
 - podSubnet:指定的IP地址段与后续部署的网络插件相匹配，这里需要部署flannel插件，所以配置为10.244.0.0/16
 - mode: ipvs:最后追加的配置为开启ipvs模式
 
+忽略此步
+```
+# 查看需要使⽤用的镜像列列表,若⽆无问题，将得到如下列列表,其中
+$ kubeadm config images list --config kubeadm-config.yaml
+
+# 提前下载镜像到本地
+$ kubeadm config images pull --config kubeadm-config.yaml
+```
+
 3)、在集群搭建完成后可以使用如下命令查看生效的配置文件  
 ```
 kubectl -n kube-system get cm kubeadm-config -oyaml

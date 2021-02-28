@@ -200,6 +200,15 @@ ETCD_PEER_KEY_FILE="/k8s/etcd/ssl/server-key.pem"
 ETCD_PEER_TRUSTED_CA_FILE="/k8s/etcd/ssl/ca.pem"
 ETCD_PEER_CLIENT_CERT_AUTH="true"
 ```
+- ETCD_NAME：节点名称，集群中唯一
+- ETCD_DATA_DIR：数据目录
+- ETCD_LISTEN_PEER_URLS：集群通信监听地址
+- ETCD_LISTEN_CLIENT_URLS：客户端访问监听地址
+- ETCD_INITIAL_ADVERTISE_PEER_URLS：集群通告地址
+- ETCD_ADVERTISE_CLIENT_URLS：客户端通告地址
+- ETCD_INITIAL_CLUSTER：集群节点地址
+- ETCD_INITIAL_CLUSTER_TOKEN：集群Token
+- ETCD_INITIAL_CLUSTER_STATE：加入集群的当前状态，new是新集群，existing表示加入已有集群
 
 3）配置etcd启动文件
 ```

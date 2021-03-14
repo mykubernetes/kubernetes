@@ -237,3 +237,78 @@ $ curl http://localhost:8080/api/
 }
 ```
 
+API Resources
+```
+kubectl api-resources -o wide
+NAME                              SHORTNAMES   APIGROUP                       NAMESPACED   KIND                             VERBS
+bindings                                                                      true         Binding                          [create]
+componentstatuses                 cs                                          false        ComponentStatus                  [get list]
+configmaps                        cm                                          true         ConfigMap                        [create delete deletecollection get list patch update watch]
+endpoints                         ep                                          true         Endpoints                        [create delete deletecollection get list patch update watch]
+events                            ev                                          true         Event                            [create delete deletecollection get list patch update watch]
+limitranges                       limits                                      true         LimitRange                       [create delete deletecollection get list patch update watch]
+namespaces                        ns                                          false        Namespace                        [create delete get list patch update watch]
+nodes                             no                                          false        Node                             [create delete deletecollection get list patch proxy update watch]
+persistentvolumeclaims            pvc                                         true         PersistentVolumeClaim            [create delete deletecollection get list patch update watch]
+persistentvolumes                 pv                                          false        PersistentVolume                 [create delete deletecollection get list patch update watch]
+pods                              po                                          true         Pod                              [create delete deletecollection get list patch proxy update watch]
+podtemplates                                                                  true         PodTemplate                      [create delete deletecollection get list patch update watch]
+replicationcontrollers            rc                                          true         ReplicationController            [create delete deletecollection get list patch update watch]
+resourcequotas                    quota                                       true         ResourceQuota                    [create delete deletecollection get list patch update watch]
+secrets                                                                       true         Secret                           [create delete deletecollection get list patch update watch]
+serviceaccounts                   sa                                          true         ServiceAccount                   [create delete deletecollection get list patch update watch]
+services                          svc                                         true         Service                          [create delete get list patch proxy update watch]
+mutatingwebhookconfigurations                  admissionregistration.k8s.io   false        MutatingWebhookConfiguration     [create delete deletecollection get list patch update watch]
+validatingwebhookconfigurations                admissionregistration.k8s.io   false        ValidatingWebhookConfiguration   [create delete deletecollection get list patch update watch]
+customresourcedefinitions         crd          apiextensions.k8s.io           false        CustomResourceDefinition         [create delete deletecollection get list patch update watch]
+apiservices                                    apiregistration.k8s.io         false        APIService                       [create delete deletecollection get list patch update watch]
+controllerrevisions                            apps                           true         ControllerRevision               [create delete deletecollection get list patch update watch]
+daemonsets                        ds           apps                           true         DaemonSet                        [create delete deletecollection get list patch update watch]
+deployments                       deploy       apps                           true         Deployment                       [create delete deletecollection get list patch update watch]
+replicasets                       rs           apps                           true         ReplicaSet                       [create delete deletecollection get list patch update watch]
+statefulsets                      sts          apps                           true         StatefulSet                      [create delete deletecollection get list patch update watch]
+...
+```
+
+```
+kubectl api-resources --api-group apps -o wide
+NAME                  SHORTNAMES   APIGROUP   NAMESPACED   KIND                 VERBS
+controllerrevisions                apps       true         ControllerRevision   [create delete deletecollection get list patch update watch]
+daemonsets            ds           apps       true         DaemonSet            [create delete deletecollection get list patch update watch]
+deployments           deploy       apps       true         Deployment           [create delete deletecollection get list patch update watch]
+replicasets           rs           apps       true         ReplicaSet           [create delete deletecollection get list patch update watch]
+statefulsets          sts          apps       true         StatefulSet
+```
+
+API Versions
+```
+kubectl api-versions
+admissionregistration.k8s.io/v1beta1
+apiextensions.k8s.io/v1beta1
+apiregistration.k8s.io/v1beta1
+apps/v1
+apps/v1beta1
+apps/v1beta2
+authentication.k8s.io/v1
+authentication.k8s.io/v1beta1
+authorization.k8s.io/v1
+authorization.k8s.io/v1beta1
+autoscaling/v1
+autoscaling/v2beta1
+batch/v1
+batch/v1beta1
+certificates.k8s.io/v1beta1
+certmanager.k8s.io/v1alpha1
+enterprises.upmc.com/v1
+events.k8s.io/v1beta1
+extensions/v1beta1
+metrics.k8s.io/v1beta1
+monitoring.coreos.com/v1
+networking.k8s.io/v1
+policy/v1beta1
+rbac.authorization.k8s.io/v1
+rbac.authorization.k8s.io/v1beta1
+storage.k8s.io/v1
+storage.k8s.io/v1beta1
+v1
+```

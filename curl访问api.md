@@ -134,7 +134,42 @@ kubectl describe secrets -n kube-system $(kubectl -n kube-system get secret | aw
 }
 ```
 
-HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式 
+```
+# In Pods with service account.
+$ TOKEN=$(cat /run/secrets/kubernetes.io/serviceaccount/token)
+$ CACERT=/run/secrets/kubernetes.io/serviceaccount/ca.crt
+$ curl --cacert $CACERT --header "Authorization: Bearer $TOKEN"  https://$KUBERNETES_SERVICE_HOST:$KUBERNETES_SERVICE_PORT/api
+{
+  "kind": "APIVersions",
+  "versions": [
+    "v1"
+  ],
+  "serverAddressByClientCIDRs": [
+    {
+      "clientCIDR": "0.0.0.0/0",
+      "serverAddress": "10.0.1.149:443"
+    }
+  ]
+}
+# Outside of Pods.
+$ APISERVER=$(kubectl config view | grep server | cut -f 2- -d ":" | tr -d " ")
+$ TOKEN=$(kubectl describe secret $(kubectl get secrets | grep default | cut -f1 -d ' ') | grep -E '^token'| cut -f2 -d':'| tr -d '\t')
+$ curl $APISERVER/api --header "Authorization: Bearer $TOKEN" --insecure
+{
+  "kind": "APIVersions",
+  "versions": [
+    "v1"
+  ],
+  "serverAddressByClientCIDRs": [
+    {
+      "clientCIDR": "0.0.0.0/0",
+      "serverAddress": "10.0.1.149:443"
+    }
+  ]
+}
+```
+
+4、HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式 
 ```
 # cd /etc/kubernetes/pki/
 
@@ -189,3 +224,16 @@ secret/curl-cert created
   ]
 }
 ```
+
+5、kubectl proxy代理
+```
+$ kubectl proxy --port=8080 &
+
+$ curl http://localhost:8080/api/
+{
+  "versions": [
+    "v1"
+  ]
+}
+```
+

@@ -44,3 +44,4 @@ https://kubernetes.io/zh/docs/concepts/
 - [k8s集群支持GPU](https://github.com/mykubernetes/kubernetes/blob/master/k8s%E9%9B%86%E7%BE%A4GPU%E6%94%AF%E6%8C%81.md)
 - [pause](https://github.com/mykubernetes/kubernetes/blob/master/kubernetes%E4%B9%8Bpause%E5%AE%B9%E5%99%A8.md)
 - [部署kafka](https://github.com/mykubernetes/kubernetes/blob/master/k8s%E9%83%A8%E7%BD%B2kafka.md)
+- [pod运行到master节点](https://github.com/mykubernetes/kubernetes/blob/master/%E5%B0%86pod%E8%BF%90%E8%A1%8C%E5%9C%A8master%E8%8A%82%E7%82%B9.md)

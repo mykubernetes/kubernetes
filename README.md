@@ -41,3 +41,4 @@ https://kubernetes.io/zh/docs/concepts/
 - [helm](https://github.com/mykubernetes/kubernetes/tree/master/helm)
 - [etcd集群备份与恢复](https://github.com/mykubernetes/kubernetes/blob/master/etcd%E9%9B%86%E7%BE%A4%E5%A4%87%E4%BB%BD%E4%B8%8E%E6%81%A2%E5%A4%8D.md)
 - [Velero](https://github.com/mykubernetes/kubernetes/blob/master/Velero%E5%AE%89%E8%A3%85.md)
+- [k8s集群支持GPU](https://github.com/mykubernetes/kubernetes/blob/master/k8s%E9%9B%86%E7%BE%A4GPU%E6%94%AF%E6%8C%81.md)

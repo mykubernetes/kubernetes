@@ -1,6 +1,8 @@
 kubernetes集群部署kafka
 ===
 
+https://github.com/cuishuaigit/k8s-kafka
+
 # 一、部署前准备
 - 创建好的至少三个节点的kubernetes集群(这里我们使用的版本1.13.10)
 - 创建好的存储类StorageClass(这里我们使用的是cephfs)

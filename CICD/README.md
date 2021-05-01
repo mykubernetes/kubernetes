@@ -6,6 +6,3 @@ https://www.cnblogs.com/passzhang/
 
 
 https://www.cnblogs.com/yuhaohao/p/13292085.html
-
-
-mvn clean package -Dmaven.test.skip=true

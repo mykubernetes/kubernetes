@@ -5,10 +5,6 @@ http://www.bookoco.com/read/kubernetes/SUMMARY.md
 ---
 
 
-open-falcon book  
-https://github.com/open-falcon/book
----
-
 Ceph实践  
 https://github.com/mykubernetes/gitbook-ceph
 ---

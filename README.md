@@ -12,6 +12,8 @@ kubernetes官网
 | Envoy 官方文档中文版 | http://www.servicemesher.com/envoy/ |
 | kubernetes-handbook | https://github.com/feiskyer/kubernetes-handbook |
 | Docker — 从入门到实践 | https://github.com/yeasy/docker_practice/blob/master/SUMMARY.md |
+| 博客 | https://blog.csdn.net/qq_32641153 |
+| 小豆丁技术栈 | http://www.mydlq.club/about/menu/ |
 
 
 https://www.yuque.com/duduniao/k8s

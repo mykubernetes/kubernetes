@@ -14,15 +14,11 @@ kubernetes官网
 | Docker — 从入门到实践 | https://github.com/yeasy/docker_practice/blob/master/SUMMARY.md |
 | 博客 | https://blog.csdn.net/qq_32641153 |
 | 小豆丁技术栈 | http://www.mydlq.club/about/menu/ |
-
-
-https://www.yuque.com/duduniao/k8s
+| kubernetes官方中文文档 | https://kubernetes.io/zh/docs/concepts/ |
+| 语雀 | https://www.yuque.com/duduniao/k8s |
+| K8S训练营 | https://www.qikqiak.com/k8strain/maintain/cluster/ |
 
 https://www.cnblogs.com/passzhang/
-
-https://www.qikqiak.com/k8strain/maintain/cluster/
-
-https://kubernetes.io/zh/docs/concepts/
 
 https://www.cnblogs.com/yuhaohao/p/13292085.html
 

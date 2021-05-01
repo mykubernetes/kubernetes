@@ -17,6 +17,7 @@ kubernetes相关资料
 | kubernetes官方中文文档 | https://kubernetes.io/zh/docs/concepts/ |
 | 语雀 | https://www.yuque.com/duduniao/k8s |
 | K8S训练营 | https://www.qikqiak.com/k8strain/maintain/cluster/ |
+| kubernetes入门到实践 | https://www.kancloud.cn/huyipow/kubernetes/531982 |
 
 https://www.cnblogs.com/passzhang/
 

@@ -10,7 +10,30 @@ storageclass是一个存储类，k8s集群管理员通过创建storageclass可�
 每个StorageClass都包含字段provisioner，parameters和reclaimPolicy，当需要动态配置属于该类的PersistentVolume时使用这些字段。StorageClass对象的名称很重要，是用户可以请求特定类的方式。 管理员在首次创建StorageClass对象时设置类的名称和其他参数，并且在创建对象后无法更新这些对象。管理员可以为不请求任何特定类绑定的PVC指定默认的StorageClass
 
 #	Provisioner
-- storageclass需要有一个供应者，用来确定使用的存储来创建pv
+- storageclass需要有一个供应者，用来确定使用的存储来创建pv，常见的provisioner供应者如下
+| Volume Plugin | internal Provisioner | Confing Example |
+|---------------|-----------------------|----------------|
+| AWSElasticBlockStore | √ | AWS EBS |
+| AzureFile | √ | Azure File |
+| AzureDisk | √ | Azure Disk |
+| CephFS | - | - |
+| Cinder | √ | OpensStack Cinder |
+| FC | - | - |
+| FlexVolume | - | - |
+| Flocker | √ | - |
+| GCEPersistentDisk | √ | GCE PD |
+| GlusteFS | √ | Glusterfs |
+| iSCSI | - | - |
+| Quobyte | √ | Quobyte |
+| NFS | - | - |
+| RBD | √ | Ceph RBD |
+| VsphereVolume | √ | vSphere |
+| PortworxVolume | √ | Portworkx Volume |
+| ScaleIO | √ | ScaleIO |
+| StorageOS | √ | StoreageOS |
+| Local | - | Local |
+
+
 - provisioner既可以是内部供应程序，也可以由外部供应商提供，如果是外部供应商可以参考https://github.com/kubernetes-incubator/external-storage/ 下提供的方法创建storageclass的provisioner，例如，NFS不提供内部配置程序，但可以使用外部配置程序。 一些外部供应商列在存储库https://github.com/kubernetes-incubator/external-storage下。 
 - nfs的provisioner：https://github.com/kubernetes-incubator/external-storage/tree/master/nfs/deploy/kubernetes
 

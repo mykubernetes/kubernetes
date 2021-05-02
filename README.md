@@ -18,7 +18,10 @@ kubernetes相关资料
 | 语雀 | https://www.yuque.com/duduniao/k8s |
 | K8S训练营 | https://www.qikqiak.com/k8strain/maintain/cluster/ |
 | kubernetes入门到实践 | https://www.kancloud.cn/huyipow/kubernetes/531982 |
-
+| etcd3学习笔记 | https://skyao.gitbooks.io/learning-etcd3/content/documentation/op-guide/ |
+| Etcd官方文档中文版 | https://www.bookstack.cn/read/etcd/documentation-op-guide-clustering.md |
+| etcd学习笔记 | https://github.com/skyao/learning-etcd3 |
+| etcd选举 | http://www.xuyasong.com/?p=1983#i-7 |
 
 
 - [kubernetes1.13.1+etcd3.3.10+flanneld0.10集群二进制部署](https://github.com/mykubernetes/kubernetes/blob/master/deploy/kubernetes1.13.1%2Betcd3.3.10%2Bflanneld0.10%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2.md)

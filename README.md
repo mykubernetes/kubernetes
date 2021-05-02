@@ -62,3 +62,4 @@ kubernetes相关资料
 - [部署kafka](https://github.com/mykubernetes/kubernetes/blob/master/k8s%E9%83%A8%E7%BD%B2kafka.md)
 - [pod运行到master节点](https://github.com/mykubernetes/kubernetes/blob/master/%E5%B0%86pod%E8%BF%90%E8%A1%8C%E5%9C%A8master%E8%8A%82%E7%82%B9.md)
 - [Docker/K8s 解决容器内时区不一致方案](https://github.com/mykubernetes/kubernetes/blob/master/Docker%E5%92%8CK8s%20%E8%A7%A3%E5%86%B3%E5%AE%B9%E5%99%A8%E5%86%85%E6%97%B6%E5%8C%BA%E4%B8%8D%E4%B8%80%E8%87%B4%E6%96%B9%E6%A1%88.md)
+- [Eviction](https://github.com/mykubernetes/kubernetes/blob/master/K8S%20Pod%20Eviction%20%E6%9C%BA%E5%88%B6.md)

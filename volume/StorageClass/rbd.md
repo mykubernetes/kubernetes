@@ -326,3 +326,63 @@ spec:
 
 # kubectl apply -f pod-sto.yaml
 ```
+
+6、K8s有状态服务StatefulSet+ceph
+```
+# cat state.yaml
+apiVersion: v1
+kind: Service
+metadata: 
+  name: nginx
+  labels:
+     app: nginx
+spec:
+  ports:
+  - port: 80
+    name: web
+  clusterIP: None
+  selector:
+    app: nginx
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata: 
+  name: web
+spec:
+  selector:
+    matchLabels:
+      app: nginx
+  serviceName: "nginx"
+  replicas: 2
+  template:
+    metadata: 
+     labels:
+       app: nginx
+    spec: 
+      containers:
+      - name: nginx
+        image: nginx
+        ports:
+        - containerPort: 80
+          name: web
+        volumeMounts:
+        - name: www
+          mountPath: /usr/share/nginx/html
+  volumeClaimTemplates:                      # sts独有的类型
+  - metadata:
+      name: www
+    spec:
+      accessModes: ["ReadWriteOnce"]
+      volumeMode: Filesystem
+      storageClassName: k8s-rbd
+      resources:
+        requests: 
+          storage: 1Gi
+
+# kubectl apply -f state.yaml
+
+
+# kubectl exec -it web-1 -- /bin/bash
+# yum install dnsutils -y
+# nslookup web-0.nginx.default.svc.cluster.local
+```

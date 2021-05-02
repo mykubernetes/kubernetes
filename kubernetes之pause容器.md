@@ -56,8 +56,7 @@ EOF
 [root@k8s001 ~]# docker ps | grep -E "pause|nginx|ghost"
 f72edf025141         ghost                                                                 "docker-entrypoint.s…"   About a minute ago   Up About a minute                  
 ghost7ac2d677fbf7    nginx                                                                 "/docker-entrypoint.…"   2 minutes ago        Up 2 minutes                       
-nginxb33f3b7c705d    registry.cn-hangzhou.aliyuncs.com/google_containers/pause-amd64:3.1   "/pause"                 15 minutes ago       Up 15 minutes       0.0.0.0:8880->80
-/tcp   pause
+nginxb33f3b7c705d    registry.cn-hangzhou.aliyuncs.com/google_containers/pause-amd64:3.1   "/pause"                 15 minutes ago       Up 15 minutes       0.0.0.0:8880->80/tcp   pause
 # 通过浏览器访问http://ip:8880端口，查看是否可以访问到ghost界面
 # 或者通过curl抓取页面内容
 [root@k8s001 ~]# curl http://localhost:8080

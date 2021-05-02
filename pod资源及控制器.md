@@ -259,6 +259,16 @@ spec:
 
 statefulset
 ---
+| Cluster Domain | Service(ns/name) | Statefulset(ns/name) | StatefulSet Domain | Pod DNS | Pod Hostname |
+|----------------|------------------|---------------------|--------------------|----------|--------------|
+| cluster.local | default/nginx | default/web | nginx.default.svc.cluster.local | web-{0..N-1}.nginx.default.svc.cluster.local | web-{0..N-1} |
+| cluster.local | foo/nginx | foo/web | nginx.foo.svc.cluster.local | web-{0..N-1}.nginx.foo.svc.cluster.local | web-{0..N-1} |
+| kube.local | foo/nginx | foo/web | nginx.foo.svc.kube.local | web-{0..N-1}.nginx.foo.svc.kube.local | web-{0..N-1} |
+
+```
+nslookup web-0.nginx.default.svc.cluster.local
+```
+
 ```
 apiVersion: v1
 kind: Service

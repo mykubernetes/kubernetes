@@ -118,7 +118,7 @@ accessModes:
 | :------: | :--------: | :------: | :--------: |
 | AWSElasticBlockStore | √ | - |	- |
 | AzureFile |	√ |	√ |	√ |
-| AzureDisk	√ |	-	| - |
+| AzureDisk	| √ |	-	| - |
 | CephFS |	√ |	√ |	√ |
 | Cinder |	√ |	- |	- |
 | FC |	√ |	√ |	- |

@@ -1,3 +1,8 @@
+
+官网：
+
+https://docs.ceph.com/en/latest/rbd/rbd-kubernetes/
+
 一、集群和组件版本
 ---
 K8S集群：1.17.3+  

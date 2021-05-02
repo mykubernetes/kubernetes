@@ -224,7 +224,7 @@ spec:
         - '172.16.0.57:6789'
         - '172.16.0.58:6789'
         pool: kube                     #rados存储池名称，默认RBD
-        image: redis                   #rados image的名称，必选字段
+        image: redis                   #rados image的名称，从pool申请的块名称，必选字段
         fsType: ext4                   #要挂载的存储文件系统的类型，如ext4、xfs、ntfs等，默认为ext4
         readOnly: false                #是否为只读方式进行访问
         user: admin                    #rados用户名，默认admin

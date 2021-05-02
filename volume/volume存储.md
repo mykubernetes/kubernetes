@@ -94,7 +94,7 @@ spec:
           mountPath: /var/lib/mysql
   volumes:
     - name: mysqldata
-      cinder:                     #openstack构建的iaas环境中时，Cinder的块存储为pod提供外部持久存储
+      cinder:                                             #openstack构建的iaas环境中时，Cinder的块存储为pod提供外部持久存储
         volumeID: e2b8d2f7-wece-90d1-a505-4acf607a90bc    #用于标识Cinder中的存储卷的卷标识符，必选
         fsType: ext4                                      #要挂载存储卷的文件系统，默认为ext4
 ```

@@ -11,6 +11,7 @@ storageclass是一个存储类，k8s集群管理员通过创建storageclass可�
 
 #	Provisioner
 - storageclass需要有一个供应者，用来确定使用的存储来创建pv，常见的provisioner供应者如下
+
 | Volume Plugin | internal Provisioner | Confing Example |
 |---------------|-----------------------|----------------|
 | AWSElasticBlockStore | √ | AWS EBS |

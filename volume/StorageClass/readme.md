@@ -664,7 +664,7 @@ spec:
 # kubectl apply -f statefulset-storage.yaml
 ```
 
-验证，我自己的操作步骤：
+验证
 ```
 # kubectl get svc
 NAME                TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)        AGE
@@ -673,33 +673,6 @@ my-nginx            NodePort    10.110.201.60   <none>        80:32348/TCP   2d6
 my-nginx-headless   ClusterIP   None            <none>        80/TCP         2d1h
 my-service          ClusterIP   10.108.54.235   <none>        80/TCP         2d2h
 storage             ClusterIP   None            <none>        80/TCP         2m4s
-You have new mail in /var/spool/mail/root
-
-# kubectl get storageclass
-NAME   PROVISIONER       RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
-nfs    example.com/nfs   Delete          Immediate           false                  53m
-
-# kubectl get pods
-NAME                               READY   STATUS              RESTARTS   AGE
-nfs-provisioner-764b7db9c5-wptrk   1/1     Running             0          58m
-pod-taint                          1/1     Running             0          24h
-read-pod                           1/1     Running             0          44m
-storage-0                          1/1     Running             0          32s
-storage-1                          0/1     ContainerCreating   0          13s
-test-hostpath                      2/2     Running             0          47h
-test-nfs-volume                    2/2     Running             0          46h
-test-pod                           1/1     Running             0          2d
-
-# kubectl get pods
-NAME                               READY   STATUS              RESTARTS   AGE
-nfs-provisioner-764b7db9c5-wptrk   1/1     Running             0          58m
-pod-taint                          1/1     Running             0          24h
-read-pod                           1/1     Running             0          44m
-storage-0                          1/1     Running             0          48s
-storage-1                          0/1     ContainerCreating   0          29s
-test-hostpath                      2/2     Running             0          47h
-test-nfs-volume                    2/2     Running             0          46h
-test-pod                           1/1     Running             0          2d
 
 # kubectl get storageclass
 NAME   PROVISIONER       RECLAIMPOLICY   VOLUMEBINDINGMODE   ALLOWVOLUMEEXPANSION   AGE
@@ -720,23 +693,6 @@ v6                                         6G         RWO,RWX        Retain     
 v7                                         7G         RWO,RWX        Retain           Available                                                   31h
 v8                                         8G         RWO,RWX        Retain           Available                                                   31h
 v9                                         9G         RWO,RWX        Retain           Available                                                   31h
-
-# kubectl get pvc
-NAME            STATUS   VOLUME                                     CAPACITY   ACCESS MODES   STORAGECLASS   AGE
-test-claim1     Bound    pvc-0f4a099e-8614-4ad6-b48e-aaac3cbeec10   1G         RWX            nfs            50m
-www-storage-0   Bound    pvc-3e499430-3b6e-4dc2-90bd-9c3e69ccf6af   2Gi        RWX            nfs            77s
-www-storage-1   Bound    pvc-c704f398-2d67-4ef4-b7b8-ea671b48fce1   2Gi        RWX            nfs            58s
-www-web-0       Bound    v4                                         4G         RWO,RWX                       23h
-www-web-1       Bound    v5                                         5G         RWO,RWX                       23h
-www-web-2       Bound    v6                                         6G         RWO,RWX                       23h
-You have new mail in /var/spool/mail/root
-
-# vim st
-statefulset-storage.yaml  statefulset.yaml          storageclass.yaml         
-
-
-# vim statefulset-storage.yaml 
-You have new mail in /var/spool/mail/root
 
 # kubectl get pv
 NAME                                       CAPACITY   ACCESS MODES   RECLAIM POLICY   STATUS      CLAIM                   STORAGECLASS   REASON   AGE

@@ -360,7 +360,7 @@ parameters:
   secretRef: sio-secret
   readOnly: false
   fsType: xfs
-``-
+```
 -	provisioner：属性设置为 kubernetes.io/scaleio
 -	gateway 到 ScaleIO API 网关的地址（必需）
 -	system：ScaleIO 系统的名称（必需）
@@ -391,7 +391,7 @@ parameters:
   fsType: ext4
   adminSecretNamespace: default
   adminSecretName: storageos-secret
-``-
+```
 -	pool：分配卷的 StorageOS 分布式容量池的名称。如果未指定，则使用通常存在的 default 池。
 -	description：分配给动态创建的卷的描述。所有卷描述对于 storage class 都是相同的， 但不同的 storage class 可以使用不同的描述，以区分不同的使用场景。 默认为 Kubernetas volume。
 -	fsType：请求的默认文件系统类型。请注意，在 StorageOS 中用户定义的规则可以覆盖此值。默认为 ext4

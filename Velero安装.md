@@ -523,3 +523,4 @@ velero create schedule <SCHEDULE NAME> --schedule="@every 24h" --include-namespa
 # velero restore create --from-backup <BACKUP-NAME> --restore-volumes
 ```
 
+https://cloud.tencent.com/developer/article/1781525

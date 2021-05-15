@@ -111,51 +111,164 @@ spec:
 
 四、ReadinessProbe 探针使用示例
 ---
+1、pod yaml脚本
 ```
-apiVersion: v1
-kind: Service
-metadata:
-  name: springboot
-  labels:
-    app: springboot
-spec:
-  type: NodePort
-  ports:
-  - name: server
-    port: 8080
-    targetPort: 8080
-    nodePort: 31180
-  - name: management
-    port: 8081
-    targetPort: 8081
-    nodePort: 31181
-  selector:
-    app: springboot
----
+# cat readinessProbe-httpget.yaml 
 apiVersion: v1
 kind: Pod
 metadata:
-  name: springboot
+  name: readiness-httpdget-pod
+  namespace: default
   labels:
-    app: springboot
+    test: readiness-httpdget
 spec:
   containers:
-  - name: springboot
-    image: mydlqclub/springboot-helloworld:0.0.1
-    ports:
-    - name: server
-      containerPort: 8080
-    - name: management
-      containerPort: 8081
+  - name: readiness-httpget
+    image: registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17
+    imagePullPolicy: IfNotPresent
     readinessProbe:
-      initialDelaySeconds: 20   
-      periodSeconds: 5          
-      timeoutSeconds: 10   
       httpGet:
-        scheme: HTTP
-        port: 8081
-        path: /actuator/health
+        path: /index1.html
+        port: 80
+      initialDelaySeconds: 5  #容器启动完成后，kubelet在执行第一次探测前应该等待 5 秒。默认是 0 秒，最小值是 0。
+      periodSeconds: 3  #指定 kubelet 每隔 3 秒执行一次存活探测。默认是 10 秒。最小值是 1
 ```
+
+2、创建 Pod，并查看pod状态
+```
+# kubectl apply -f readinessProbe-httpget.yaml 
+pod/readiness-httpdget-pod created
+
+# kubectl get pod -n default -o wide
+NAME                     READY   STATUS    RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES
+readiness-httpdget-pod   0/1     Running   0          5s    10.244.2.25   k8s-node02   <none>           <none>
+```
+
+3、查看pod详情
+```
+# kubectl describe pod readiness-httpdget-pod
+Name:         readiness-httpdget-pod
+Namespace:    default
+Priority:     0
+Node:         k8s-node02/172.16.1.112
+Start Time:   Sat, 23 May 2020 16:10:04 +0800
+Labels:       test=readiness-httpdget
+Annotations:  kubectl.kubernetes.io/last-applied-configuration:
+                {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"labels":{"test":"readiness-httpdget"},"name":"readiness-httpdget-pod","names...
+Status:       Running
+IP:           10.244.2.25
+IPs:
+  IP:  10.244.2.25
+Containers:
+  readiness-httpget:
+    Container ID:   docker://066d66aaef191b1db08e1b3efba6a9be75378d2fe70e99400fc513b91242089c
+………………
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Sat, 23 May 2020 16:10:05 +0800
+    Ready:          False                                       # 状态为False
+    Restart Count:  0
+    Readiness:      http-get http://:80/index1.html delay=5s timeout=1s period=3s #success=1 #failure=3
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-v48g4 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             False                                       # 为False
+  ContainersReady   False                                       # 为False
+  PodScheduled      True 
+Volumes:
+  default-token-v48g4:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-v48g4
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type     Reason     Age                From                 Message
+  ----     ------     ----               ----                 -------
+  Normal   Scheduled  <unknown>          default-scheduler    Successfully assigned default/readiness-httpdget-pod to k8s-node02
+  Normal   Pulled     49s                kubelet, k8s-node02  Container image "registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17" already present on machine
+  Normal   Created    49s                kubelet, k8s-node02  Created container readiness-httpget
+  Normal   Started    49s                kubelet, k8s-node02  Started container readiness-httpget
+  Warning  Unhealthy  2s (x15 over 44s)  kubelet, k8s-node02  Readiness probe failed: HTTP probe failed with statuscode: 404
+```
+由上可见，容器未就绪。
+
+4、我们进入pod的第一个容器，然后创建对应的文件
+```
+# kubectl exec -it readiness-httpdget-pod -c readiness-httpget bash
+
+root@readiness-httpdget-pod:/# cd /usr/share/nginx/html
+root@readiness-httpdget-pod:/usr/share/nginx/html# ls
+50x.html  index.html
+root@readiness-httpdget-pod:/usr/share/nginx/html# echo "readiness-httpdget info" > index1.html
+root@readiness-httpdget-pod:/usr/share/nginx/html# ls
+50x.html  index.html  index1.html
+```
+
+5、之后看pod状态与详情
+```
+# kubectl get pod -n default -o wide
+NAME                     READY   STATUS    RESTARTS   AGE     IP            NODE         NOMINATED NODE   READINESS GATES
+readiness-httpdget-pod   1/1     Running   0          2m30s   10.244.2.25   k8s-node02   <none>           <none>
+
+# kubectl describe pod readiness-httpdget-pod
+Name:         readiness-httpdget-pod
+Namespace:    default
+Priority:     0
+Node:         k8s-node02/172.16.1.112
+Start Time:   Sat, 23 May 2020 16:10:04 +0800
+Labels:       test=readiness-httpdget
+Annotations:  kubectl.kubernetes.io/last-applied-configuration:
+                {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"labels":{"test":"readiness-httpdget"},"name":"readiness-httpdget-pod","names...
+Status:       Running
+IP:           10.244.2.25
+IPs:
+  IP:  10.244.2.25
+Containers:
+  readiness-httpget:
+    Container ID:   docker://066d66aaef191b1db08e1b3efba6a9be75378d2fe70e99400fc513b91242089c
+………………
+    Port:           <none>
+    Host Port:      <none>
+    State:          Running
+      Started:      Sat, 23 May 2020 16:10:05 +0800
+    Ready:          True                                             # 状态为True
+    Restart Count:  0
+    Readiness:      http-get http://:80/index1.html delay=5s timeout=1s period=3s #success=1 #failure=3
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-v48g4 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True                                             # 为True
+  ContainersReady   True                                             # 为True
+  PodScheduled      True 
+Volumes:
+  default-token-v48g4:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-v48g4
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type     Reason     Age                   From                 Message
+  ----     ------     ----                  ----                 -------
+  Normal   Scheduled  <unknown>             default-scheduler    Successfully assigned default/readiness-httpdget-pod to k8s-node02
+  Normal   Pulled     2m33s                 kubelet, k8s-node02  Container image "registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17" already present on machine
+  Normal   Created    2m33s                 kubelet, k8s-node02  Created container readiness-httpget
+  Normal   Started    2m33s                 kubelet, k8s-node02  Started container readiness-httpget
+  Warning  Unhealthy  85s (x22 over 2m28s)  kubelet, k8s-node02  Readiness probe failed: HTTP probe failed with statuscode: 404
+```
+由上可见，容器已就绪
 
 五、ReadinessProbe + LivenessProbe 配合使用示例
 ---

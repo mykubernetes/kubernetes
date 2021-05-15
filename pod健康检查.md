@@ -31,83 +31,395 @@ Pod 探针的相关属性
 - successThreshold： 探针检测失败后认为成功的最小连接成功次数，默认为 1s，在 Liveness 探针中必须为 1s，最小值为 1s。
 - failureThreshold： 探测失败的重试次数，重试一定次数后将认为失败，在 readiness 探针中，Pod会被标记为未就绪，默认为 3s，最小值为 1s。
 
-一、通过 Exec 方式做健康探测
----
-```
-apiVersion: v1
-kind: Pod
-metadata:
-  name: liveness-exec
-  labels:
-    app: liveness
-spec:
-  containers:
-  - name: liveness
-    image: busybox
-    args:                       #创建测试探针探测的文件
-    - /bin/sh
-    - -c
-    - touch /tmp/healthy; sleep 30; rm -rf /tmp/healthy; sleep 600
-    livenessProbe:
-      initialDelaySeconds: 10   #延迟检测时间
-      periodSeconds: 5          #检测时间间隔
-      failureThreshold: 2       #探测失败的重试次数
-      successThreshold: 1       #探针检测失败后认为成功的最小连接成功次数
-      timeoutSeconds: 5         #探针执行检测请求后，等待响应的超时时间
-      exec:
-        command:
-        - cat
-        - /tmp/healthy
-```
+HTTP 探测器可以在 httpGet 上配置额外的字段：
+- host：连接使用的主机名，默认是 Pod 的 IP。也可以在 HTTP 头中设置 “Host” 来代替。
+- scheme ：用于设置连接主机的方式（HTTP 还是 HTTPS）。默认是 HTTP。
+- path：访问 HTTP 服务的路径。
+- httpHeaders：请求中自定义的 HTTP 头。HTTP 头字段允许重复。
+- port：访问容器的端口号或者端口名。如果数字必须在 1 ～ 65535 之间。
 
-二、通过 HTTP 方式做健康探测
+一、存活检测-执行命令
 ---
+1、pod yaml脚本
 ```
+# cat livenessProbe-exec.yaml 
 apiVersion: v1
 kind: Pod
 metadata:
-  name: liveness-http
+  name: liveness-exec-pod
   labels:
     test: liveness
 spec:
   containers:
-  - name: liveness
-    image: mydlqclub/springboot-helloworld:0.0.1
+  - name: liveness-exec
+    image: registry.cn-beijing.aliyuncs.com/google_registry/busybox:1.24
+    imagePullPolicy: IfNotPresent
+    args:
+    - /bin/sh
+    - -c
+    - touch /tmp/healthy; sleep 30; rm -rf /tmp/healthy; sleep 600
     livenessProbe:
-      initialDelaySeconds: 20   #延迟加载时间
-      periodSeconds: 5          #重试时间间隔
-      timeoutSeconds: 10        #超时时间设置
-      httpGet:
-        scheme: HTTP
-        port: 8081
-        path: /actuator/health
+      exec:
+        command:
+        - cat
+        - /tmp/healthy
+      initialDelaySeconds: 5          # 第一次检测前等待5秒
+      periodSeconds: 3                # 检测周期3秒一次
 ```
-- scheme: 用于测试连接的协议，默认为 HTTP。
-- host： 要连接的主机名，默认为 Pod IP。
-- port： 容器上要访问端口号或名称。
-- path： Http 服务器上的访问 URL。
-- httpHeaders： 自定义 Http 请求 Headers，Http 允许重复 Headers。
+这个容器生命的前 30 秒，/tmp/healthy 文件是存在的。所以在这最开始的 30 秒内，执行命令 cat /tmp/healthy 会返回成功码。30 秒之后，执行命令 cat /tmp/healthy 就会返回失败状态码。
 
+2、创建 Pod
+```
+# kubectl apply -f livenessProbe-exec.yaml 
+pod/liveness-exec-pod created
+```
 
-三、通过 TCP 方式做健康探测
+3、在 30 秒内，查看 Pod 的描述：
+```
+# kubectl get pod -o wide
+NAME                READY   STATUS    RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES
+liveness-exec-pod   1/1     Running   0          17s   10.244.2.21   k8s-node02   <none>           <none>
+
+# kubectl describe pod liveness-exec-pod
+Name:         liveness-exec-pod
+Namespace:    default
+Priority:     0
+Node:         k8s-node02/172.16.1.112
+………………
+Events:
+  Type    Reason     Age   From                 Message
+  ----    ------     ----  ----                 -------
+  Normal  Scheduled  25s   default-scheduler    Successfully assigned default/liveness-exec-pod to k8s-node02
+  Normal  Pulled     24s   kubelet, k8s-node02  Container image "registry.cn-beijing.aliyuncs.com/google_registry/busybox:1.24" already present on machine
+  Normal  Created    24s   kubelet, k8s-node02  Created container liveness-exec
+  Normal  Started    24s   kubelet, k8s-node02  Started container liveness-exec
+```
+输出结果显示：存活探测器成功。
+
+4、35 秒之后，再来看 Pod 的描述：
+```
+# kubectl get pod -o wide   # 显示 RESTARTS 的值增加了 1
+NAME                READY   STATUS    RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES
+liveness-exec-pod   1/1     Running   1          89s   10.244.2.22   k8s-node02   <none>           <none>
+
+# kubectl describe pod liveness-exec-pod
+………………
+Events:
+  Type     Reason     Age              From                 Message
+  ----     ------     ----             ----                 -------
+  Normal   Scheduled  42s              default-scheduler    Successfully assigned default/liveness-exec-pod to k8s-node02
+  Normal   Pulled     41s              kubelet, k8s-node02  Container image "registry.cn-beijing.aliyuncs.com/google_registry/busybox:1.24" already present on machine
+  Normal   Created    41s              kubelet, k8s-node02  Created container liveness-exec
+  Normal   Started    41s              kubelet, k8s-node02  Started container liveness-exec
+  Warning  Unhealthy  2s (x3 over 8s)  kubelet, k8s-node02  Liveness probe failed: cat: can't open '/tmp/healthy': No such file or directory
+  Normal   Killing    2s               kubelet, k8s-node02  Container liveness-exec failed liveness probe, will be restarted
+```
+由上可见，在输出结果的最下面，有信息显示存活探测器失败了，因此这个容器被杀死并且被重建了。
+
+二、存活检测-HTTP请求
 ---
+
+1、pod yaml脚本
 ```
+# cat livenessProbe-httpget.yaml 
 apiVersion: v1
 kind: Pod
 metadata:
-  name: liveness-tcp
+  name: liveness-httpget-pod
   labels:
-    app: liveness
+    test: liveness
 spec:
   containers:
-  - name: liveness
-    image: nginx
+  - name: liveness-httpget
+    image: registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: http
+      containerPort: 80
     livenessProbe:
-      initialDelaySeconds: 15
-      periodSeconds: 20
+      httpGet:                        #任何大于或等于 200 并且小于 400 的返回码表示成功，其它返回码都表示失败。
+        scheme: HTTP
+        path: /index.html
+        port: 80
+        httpHeaders:                  #请求中自定义的 HTTP 头。HTTP 头字段允许重复。
+        - name: Custom-Header
+          value: Awesome
+      initialDelaySeconds: 5
+      periodSeconds: 3
+```
+HTTP 探测器可以在 httpGet 上配置额外的字段：
+- host：连接使用的主机名，默认是 Pod 的 IP。也可以在 HTTP 头中设置 “Host” 来代替。
+- scheme ：用于设置连接主机的方式（HTTP 还是 HTTPS）。默认是 HTTP。
+- path：访问 HTTP 服务的路径。
+- httpHeaders：请求中自定义的 HTTP 头。HTTP 头字段允许重复。
+- port：访问容器的端口号或者端口名。如果数字必须在 1 ～ 65535 之间。
+
+2、创建 Pod，查看pod状态
+```
+# kubectl apply -f livenessProbe-httpget.yaml 
+pod/liveness-httpget-pod created
+
+# kubectl get pod -n default -o wide
+NAME                   READY   STATUS    RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES
+liveness-httpget-pod   1/1     Running   0          3s    10.244.2.27   k8s-node02   <none>           <none>
+```
+
+3、查看pod详情
+```
+# kubectl describe pod liveness-httpget-pod
+Name:         liveness-httpget-pod
+Namespace:    default
+Priority:     0
+Node:         k8s-node02/172.16.1.112
+Start Time:   Sat, 23 May 2020 16:45:25 +0800
+Labels:       test=liveness
+Annotations:  kubectl.kubernetes.io/last-applied-configuration:
+                {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"labels":{"test":"liveness"},"name":"liveness-httpget-pod","namespace":"defau...
+Status:       Running
+IP:           10.244.2.27
+IPs:
+  IP:  10.244.2.27
+Containers:
+  liveness-httpget:
+    Container ID:   docker://4b42a351414667000fe94d4f3166d75e72a3401e549fed723126d2297124ea1a
+………………
+    Port:           80/TCP
+    Host Port:      8080/TCP
+    State:          Running
+      Started:      Sat, 23 May 2020 16:45:26 +0800
+    Ready:          True
+    Restart Count:  0
+    Liveness:       http-get http://:80/index.html delay=5s timeout=1s period=3s #success=1 #failure=3
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-v48g4 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+………………
+Events:
+  Type    Reason     Age        From                 Message
+  ----    ------     ----       ----                 -------
+  Normal  Scheduled  <unknown>  default-scheduler    Successfully assigned default/liveness-httpget-pod to k8s-node02
+  Normal  Pulled     5m52s      kubelet, k8s-node02  Container image "registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17" already present on machine
+  Normal  Created    5m52s      kubelet, k8s-node02  Created container liveness-httpget
+  Normal  Started    5m52s      kubelet, k8s-node02  Started container liveness-httpget
+```
+由上可见，pod存活检测正常
+
+4、我们进入pod的第一个容器，然后删除对应的文件
+```
+# kubectl exec -it liveness-httpget-pod -c liveness-httpget bash
+
+root@liveness-httpget-pod:/# cd /usr/share/nginx/html/
+root@liveness-httpget-pod:/usr/share/nginx/html# ls
+50x.html  index.html
+root@liveness-httpget-pod:/usr/share/nginx/html# rm -f index.html 
+root@liveness-httpget-pod:/usr/share/nginx/html# ls
+50x.html
+```
+
+5、再次看pod状态和详情，可见Pod的RESTARTS从0变为了1。
+```
+# kubectl get pod -n default -o wide   # RESTARTS 从0变为了1
+NAME                   READY   STATUS    RESTARTS   AGE     IP            NODE         NOMINATED NODE   READINESS GATES
+liveness-httpget-pod   1/1     Running   1          8m16s   10.244.2.27   k8s-node02   <none>           <none>
+
+# kubectl describe pod liveness-httpget-pod
+Name:         liveness-httpget-pod
+Namespace:    default
+Priority:     0
+Node:         k8s-node02/172.16.1.112
+Start Time:   Sat, 23 May 2020 16:45:25 +0800
+Labels:       test=liveness
+Annotations:  kubectl.kubernetes.io/last-applied-configuration:
+                {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"labels":{"test":"liveness"},"name":"liveness-httpget-pod","namespace":"defau...
+Status:       Running
+IP:           10.244.2.27
+IPs:
+  IP:  10.244.2.27
+Containers:
+  liveness-httpget:
+    Container ID:   docker://5d0962d383b1df5e59cd3d1100b259ff0415ac37c8293b17944034f530fb51c8
+………………
+    Port:           80/TCP
+    Host Port:      8080/TCP
+    State:          Running
+      Started:      Sat, 23 May 2020 16:53:38 +0800
+    Last State:     Terminated
+      Reason:       Completed
+      Exit Code:    0
+      Started:      Sat, 23 May 2020 16:45:26 +0800
+      Finished:     Sat, 23 May 2020 16:53:38 +0800
+    Ready:          True
+    Restart Count:  1
+    Liveness:       http-get http://:80/index.html delay=5s timeout=1s period=3s #success=1 #failure=3
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-v48g4 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  default-token-v48g4:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-v48g4
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type     Reason     Age                 From                 Message
+  ----     ------     ----                ----                 -------
+  Normal   Scheduled  <unknown>           default-scheduler    Successfully assigned default/liveness-httpget-pod to k8s-node02
+  Normal   Pulled     7s (x2 over 8m19s)  kubelet, k8s-node02  Container image "registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17" already present on machine
+  Normal   Created    7s (x2 over 8m19s)  kubelet, k8s-node02  Created container liveness-httpget
+  Normal   Started    7s (x2 over 8m19s)  kubelet, k8s-node02  Started container liveness-httpget
+  Warning  Unhealthy  7s (x3 over 13s)    kubelet, k8s-node02  Liveness probe failed: HTTP probe failed with statuscode: 404
+  Normal   Killing    7s                  kubelet, k8s-node02  Container liveness-httpget failed liveness probe, will be restarted
+```
+由上可见，当liveness-httpget检测失败，重建了Pod容器
+
+三、存活检测-TCP端口
+---
+
+1、pod yaml脚本
+```
+# cat livenessProbe-tcp.yaml 
+apiVersion: v1
+kind: Pod
+metadata:
+  name: liveness-tcp-pod
+  labels:
+    test: liveness
+spec:
+  containers:
+  - name: liveness-tcp
+    image: registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: http
+      containerPort: 80
+    livenessProbe:
       tcpSocket:
         port: 80
+      initialDelaySeconds: 5
+      periodSeconds: 3
 ```
+TCP探测正常情况
+
+2、创建 Pod，查看pod状态
+```
+# kubectl apply -f livenessProbe-tcp.yaml
+pod/liveness-tcp-pod created
+
+# kubectl get pod -o wide
+NAME               READY   STATUS    RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES
+liveness-tcp-pod   1/1     Running   0          50s   10.244.4.23   k8s-node01   <none>           <none>
+```
+
+3、查看pod详情
+```
+# kubectl describe pod liveness-tcp-pod
+Name:         liveness-tcp-pod
+Namespace:    default
+Priority:     0
+Node:         k8s-node01/172.16.1.111
+Start Time:   Sat, 23 May 2020 18:02:46 +0800
+Labels:       test=liveness
+Annotations:  kubectl.kubernetes.io/last-applied-configuration:
+                {"apiVersion":"v1","kind":"Pod","metadata":{"annotations":{},"labels":{"test":"liveness"},"name":"liveness-tcp-pod","namespace":"default"}...
+Status:       Running
+IP:           10.244.4.23
+IPs:
+  IP:  10.244.4.23
+Containers:
+  liveness-tcp:
+    Container ID:   docker://4de13e7c2e36c028b2094bf9dcf8e2824bfd15b8c45a0b963e301b91ee1a926d
+………………
+    Port:           80/TCP
+    Host Port:      8080/TCP
+    State:          Running
+      Started:      Sat, 23 May 2020 18:03:04 +0800
+    Ready:          True
+    Restart Count:  0
+    Liveness:       tcp-socket :80 delay=5s timeout=1s period=3s #success=1 #failure=3
+    Environment:    <none>
+    Mounts:
+      /var/run/secrets/kubernetes.io/serviceaccount from default-token-v48g4 (ro)
+Conditions:
+  Type              Status
+  Initialized       True 
+  Ready             True 
+  ContainersReady   True 
+  PodScheduled      True 
+Volumes:
+  default-token-v48g4:
+    Type:        Secret (a volume populated by a Secret)
+    SecretName:  default-token-v48g4
+    Optional:    false
+QoS Class:       BestEffort
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type    Reason     Age        From                 Message
+  ----    ------     ----       ----                 -------
+  Normal  Scheduled  <unknown>  default-scheduler    Successfully assigned default/liveness-tcp-pod to k8s-node01
+  Normal  Pulling    74s        kubelet, k8s-node01  Pulling image "registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17"
+  Normal  Pulled     58s        kubelet, k8s-node01  Successfully pulled image "registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17"
+  Normal  Created    57s        kubelet, k8s-node01  Created container liveness-tcp
+  Normal  Started    57s        kubelet, k8s-node01  Started container liveness-tcp
+```
+以上是正常情况，可见存活探测成功。
+
+4、模拟TCP探测失败情况
+
+4.1、将上面yaml文件中的探测TCP端口进行如下修改：
+```
+livenessProbe:
+  tcpSocket:
+    port: 8090  # 之前是80
+```
+
+4.2、删除之前的pod并重新创建，并过一会儿看pod状态
+```
+# kubectl apply -f livenessProbe-tcp.yaml 
+pod/liveness-tcp-pod created
+
+# kubectl get pod -o wide   # 可见RESTARTS变为了1，再过一会儿会变为2，之后依次叠加
+NAME               READY   STATUS    RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES
+liveness-tcp-pod   1/1     Running   1          25s   10.244.2.28   k8s-node02   <none>           <none>
+```
+
+4.3、pod详情
+```
+# kubectl describe pod liveness-tcp-pod
+Name:         liveness-tcp-pod
+Namespace:    default
+Priority:     0
+Node:         k8s-node02/172.16.1.112
+Start Time:   Sat, 23 May 2020 18:08:32 +0800
+Labels:       test=liveness
+………………
+Events:
+  Type     Reason     Age                From                 Message
+  ----     ------     ----               ----                 -------
+  Normal   Scheduled  <unknown>          default-scheduler    Successfully assigned default/liveness-tcp-pod to k8s-node02
+  Normal   Pulled     12s (x2 over 29s)  kubelet, k8s-node02  Container image "registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17" already present on machine
+  Normal   Created    12s (x2 over 29s)  kubelet, k8s-node02  Created container liveness-tcp
+  Normal   Started    12s (x2 over 28s)  kubelet, k8s-node02  Started container liveness-tcp
+  Normal   Killing    12s                kubelet, k8s-node02  Container liveness-tcp failed liveness probe, will be restarted
+  Warning  Unhealthy  0s (x4 over 18s)   kubelet, k8s-node02  Liveness probe failed: dial tcp 10.244.2.28:8090: connect: connection refused
+```
+由上可见，liveness-tcp检测失败，重建了Pod容器。
 
 四、ReadinessProbe 探针使用示例
 ---

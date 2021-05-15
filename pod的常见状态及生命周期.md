@@ -277,6 +277,7 @@ Hello initContainers
 Hello from the postStart handler
 Hello from the preStop handler
 ```
+由上可知，当在容器被终结之前， Kubernetes 将发送一个 preStop 事件。
 
 共享宿主机的Network、IPC 和 PIDNamespace
 ---

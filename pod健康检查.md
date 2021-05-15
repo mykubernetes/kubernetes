@@ -223,16 +223,58 @@ spec:
             path: /actuator/health
 ```
 
-启动探针
+六、启动检测
 ---
+有时候，会有一些现有的应用程序在启动时需要较多的初始化时间【如：Tomcat服务】。这种情况下，在不影响对触发这种探测的死锁的快速响应的情况下，设置存活探测参数是要有技巧的。
+
+技巧就是使用一个命令来设置启动探测。针对HTTP 或者 TCP 检测，可以通过设置 failureThreshold * periodSeconds 参数来保证有足够长的时间应对糟糕情况下的启动时间。
+
+1、pod yaml文件
 ```
-startupProbe:
-  httpGet:
-    path: /doc.html
-    port: 40017
-  initialDelaySeconds: 10
-  failureThreshold: 10
-  periodSeconds: 5
+# cat startupProbe-httpget.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: startup-pod
+  labels:
+    test: startup
+spec:
+  containers:
+  - name: startup
+    image: registry.cn-beijing.aliyuncs.com/google_registry/tomcat:7.0.94-jdk8-openjdk
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: web-port
+      containerPort: 8080
+      hostPort: 8080
+    livenessProbe:
+      httpGet:
+        path: /index.jsp
+        port: web-port
+      initialDelaySeconds: 5
+      periodSeconds: 10
+      failureThreshold: 1
+    startupProbe:
+      httpGet:
+        path: /index.jsp
+        port: web-port
+      periodSeconds: 10      #指定 kubelet 每隔 10 秒执行一次存活探测。默认是 10 秒。最小值是 1
+      failureThreshold: 30   #最大的失败次数
 ```
-- 创建一个服务，此启动时间为30秒左右，30秒后才能正常提供服务，那么应该在这个时间段设置一个启动探针 StartupProbe。
-- 该容器启动10秒后，startupProbe首先检测，完成启动。一旦成功一次，livenessProbe将接管。如果startupProbe从未成功，则容器将被杀死
+
+2、启动pod，并查看状态
+```
+# kubectl apply -f startupProbe-httpget.yaml 
+pod/startup-pod created
+
+# kubectl get pod -o wide
+NAME          READY   STATUS    RESTARTS   AGE     IP            NODE         NOMINATED NODE   READINESS GATES
+startup-pod   1/1     Running   0          8m46s   10.244.4.26   k8s-node01   <none>           <none>
+```
+
+3、查看pod详情
+```
+# kubectl describe pod startup-pod
+```
+
+有启动探测，应用程序将会有最多 5 分钟(30 * 10 = 300s) 的时间来完成它的启动。一旦启动探测成功一次，存活探测任务就会接管对容器的探测，对容器死锁可以快速响应。 如果启动探测一直没有成功，容器会在 300 秒后被杀死，并且根据 restartPolicy 来设置 Pod 状态。

@@ -52,61 +52,85 @@ Init 容器能做什么？
 - 等待其他服务进入就绪状态：这个可以用来解决服务之间的依赖问题，比如有一个Web服务，该服务又依赖于另外一个数据库服务，但是在启动这个Web服务的时候并不能保证依赖的这个数据库服务就已经启动起来，所以可能会出现一段时间内Web服务连接数据库异常。解决这个问题可以在Web服务的Pod中使用一个InitContainer，在这个初始化容器中去检查数据库是否已经准备好了，如果数据库服务准备好了，初始化容器就结束退出，然后主容器Web服务开始启动，这个时候去连接数据库就不会有问题。
 - 做初始化配置：比如集群里检测所有已经存在的成员节点，为主容器准备好集群的配置信息，这样主容器起来后就能用这个配置信息加入集群
 
-```
-apiVersion: v1
-kind: Pod
-metadata:
-  name: example
-  namespace: default
-  labels:
-    app: example
-spec:
-  containers:
-  - name: nginx
-    image: nginx:1.15.12
-    imagePullPolicy: IfNotPresent
-    volumeMounts:
-    - name: workdir
-      mountPath: /usr/share/nginx/html
-  initContainers:
-  - name: install
-    image: busybox
-    command:
-    - wget
-    - "-O"
-    - "/work-dir/index.html"
-    - http://kubernetes.io
-    volumeMounts:
-    - name: workdir
-      mountPath: "/work-dir"
-  volumes:
-  - name: workdir
-    emptyDir: {}
-```
+Init 容器示例
 
-容器的创建，首先会执行initContainers，initContainers容器可以有多个，第一个成功退出后退出码为0，执行第二个initContainers容器
+下面的例子定义了一个具有 2 个 Init 容器的简单 Pod。 第一个等待 myservice 启动，第二个等待 mydb 启动。 一旦这两个 Init容器都启动完成，Pod 将启动spec区域中的应用容器。
+
+Pod yaml文件
 ```
+[root@k8s-master lifecycle]# pwd
+/root/k8s_practice/lifecycle
+[root@k8s-master lifecycle]# cat init_C_pod.yaml
 apiVersion: v1
 kind: Pod
 metadata:
-  name: myapp-pod
+  name: myapp-busybox-pod
   labels:
     app: myapp
 spec:
   containers:
   - name: myapp-container
-    image: busybox
+    image: registry.cn-beijing.aliyuncs.com/google_registry/busybox:1.24
     command: ['sh', '-c', 'echo The app is running! && sleep 3600']
   initContainers:
   - name: init-myservice
-    image: busybox
-    command: ['sh', '-c', 'until nslookup myservice; do echo waiting for myservice; sleep 2;done;']
+    image: registry.cn-beijing.aliyuncs.com/google_registry/busybox:1.24
+    command: ['sh', '-c', "until nslookup myservice; do echo waiting for myservice; sleep 60; done"]
   - name: init-mydb
-    image: busybox
-    command: ['sh', '-c', 'until nslookup mydb; do echo waiting for mydb; sleep 2; done;']
-```  
-
+    image: registry.cn-beijing.aliyuncs.com/google_registry/busybox:1.24
+    command: ['sh', '-c', "until nslookup mydb; do echo waiting for mydb; sleep 60; done"]
 ```
+
+启动这个 Pod，并检查其状态，可以执行如下命令：
+```
+[root@k8s-master lifecycle]# kubectl apply -f init_C_pod.yaml 
+pod/myapp-busybox-pod created 
+[root@k8s-master lifecycle]# kubectl get -f init_C_pod.yaml -o wide  # 或者kubectl get pod myapp-busybox-pod -o wide
+NAME                READY   STATUS     RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES
+myapp-busybox-pod   0/1     Init:0/2   0          55s   10.244.4.16   k8s-node01   <none>           <none>
+```
+
+如需更详细的信息：
+```
+[root@k8s-master lifecycle]# kubectl describe pod myapp-busybox-pod 
+Name:         myapp-busybox-pod
+Namespace:    default
+Priority:     0
+…………
+Node-Selectors:  <none>
+Tolerations:     node.kubernetes.io/not-ready:NoExecute for 300s
+                 node.kubernetes.io/unreachable:NoExecute for 300s
+Events:
+  Type    Reason     Age    From                 Message
+  ----    ------     ----   ----                 -------
+  Normal  Scheduled  2m18s  default-scheduler    Successfully assigned default/myapp-busybox-pod to k8s-node01
+  Normal  Pulled     2m17s  kubelet, k8s-node01  Container image "registry.cn-beijing.aliyuncs.com/google_registry/busybox:1.24" already present on machine
+  Normal  Created    2m17s  kubelet, k8s-node01  Created container init-myservice
+  Normal  Started    2m17s  kubelet, k8s-node01  Started container init-myservice
+```
+
+如需查看Pod内 Init 容器的日志，请执行：
+```
+[root@k8s-master lifecycle]# kubectl logs -f --tail 500 myapp-busybox-pod -c init-myservice   # 第一个 init container 详情
+Server:    10.96.0.10
+Address 1: 10.96.0.10 kube-dns.kube-system.svc.cluster.local
+
+waiting for myservice
+nslookup: can't resolve 'myservice'
+Server:    10.96.0.10
+Address 1: 10.96.0.10 kube-dns.kube-system.svc.cluster.local
+………………
+[root@k8s-master lifecycle]# kubectl logs myapp-busybox-pod -c init-mydb   # 第二个 init container 详情
+Error from server (BadRequest): container "init-mydb" in pod "myapp-busybox-pod" is waiting to start: PodInitializing
+```
+此时Init 容器将会等待直至发现名称为mydb和myservice的 Service。
+
+Service yaml文件
+```
+[root@k8s-master lifecycle]# pwd
+/root/k8s_practice/lifecycle
+[root@k8s-master lifecycle]# cat init_C_service.yaml 
+---
 kind: Service
 apiVersion: v1
 metadata:
@@ -126,7 +150,47 @@ spec:
     - protocol: TCP
       port: 80
       targetPort: 9377
-```  
+```
+
+创建mydb和myservice的 service 命令：
+```
+[root@k8s-master lifecycle]# kubectl create -f init_C_service.yaml 
+service/myservice created
+service/mydb created
+```
+
+之后查看pod状态和service状态，能看到这些 Init容器执行完毕后，随后myapp-busybox-pod的Pod转移进入 Running 状态：
+```
+[root@k8s-master lifecycle]# kubectl get svc -o wide mydb myservice
+NAME        TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE   SELECTOR
+mydb        ClusterIP   10.108.24.84     <none>        80/TCP    72s   <none>
+myservice   ClusterIP   10.105.252.196   <none>        80/TCP    72s   <none>
+[root@k8s-master lifecycle]# 
+[root@k8s-master lifecycle]# kubectl get pod myapp-busybox-pod -o wide 
+NAME                READY   STATUS    RESTARTS   AGE     IP            NODE         NOMINATED NODE   READINESS GATES
+myapp-busybox-pod   1/1     Running   0          7m33s   10.244.4.17   k8s-node01   <none>           <none>
+```
+由上可知：一旦我们启动了 mydb 和 myservice 这两个 Service，我们就能够看到 Init 容器完成，并且 myapp-busybox-pod 被创建。
+
+进入myapp-busybox-pod容器，并通过nslookup查看这两个Service的DNS记录。
+```
+[root@k8s-master lifecycle]# kubectl exec -it myapp-busybox-pod sh
+/ # nslookup mydb 
+Server:    10.96.0.10
+Address 1: 10.96.0.10 kube-dns.kube-system.svc.cluster.local
+
+Name:      mydb
+Address 1: 10.108.24.84 mydb.default.svc.cluster.local
+/ # 
+/ # 
+/ # 
+/ # nslookup myservice
+Server:    10.96.0.10
+Address 1: 10.96.0.10 kube-dns.kube-system.svc.cluster.local
+
+Name:      myservice
+Address 1: 10.105.252.196 myservice.default.svc.cluster.local
+```
 
 
 Lifecycle钩子

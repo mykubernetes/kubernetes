@@ -52,7 +52,7 @@ Init 容器示例
 
 下面的例子定义了一个具有 2 个 Init 容器的简单 Pod。 第一个等待 myservice 启动，第二个等待 mydb 启动。 一旦这两个 Init容器都启动完成，Pod 将启动spec区域中的应用容器。
 
-Pod yaml文件
+1、Pod yaml文件
 ```
 [root@k8s-master lifecycle]# pwd
 /root/k8s_practice/lifecycle
@@ -77,7 +77,7 @@ spec:
     command: ['sh', '-c', "until nslookup mydb; do echo waiting for mydb; sleep 60; done"]
 ```
 
-启动这个 Pod，并检查其状态，可以执行如下命令：
+2、启动这个 Pod，并检查其状态，可以执行如下命令：
 ```
 [root@k8s-master lifecycle]# kubectl apply -f init_C_pod.yaml 
 pod/myapp-busybox-pod created 
@@ -86,7 +86,7 @@ NAME                READY   STATUS     RESTARTS   AGE   IP            NODE      
 myapp-busybox-pod   0/1     Init:0/2   0          55s   10.244.4.16   k8s-node01   <none>           <none>
 ```
 
-如需更详细的信息：
+3、如需更详细的信息：
 ```
 [root@k8s-master lifecycle]# kubectl describe pod myapp-busybox-pod 
 Name:         myapp-busybox-pod
@@ -105,7 +105,7 @@ Events:
   Normal  Started    2m17s  kubelet, k8s-node01  Started container init-myservice
 ```
 
-如需查看Pod内 Init 容器的日志，请执行：
+4、如需查看Pod内 Init 容器的日志，请执行：
 ```
 [root@k8s-master lifecycle]# kubectl logs -f --tail 500 myapp-busybox-pod -c init-myservice   # 第一个 init container 详情
 Server:    10.96.0.10
@@ -121,7 +121,7 @@ Error from server (BadRequest): container "init-mydb" in pod "myapp-busybox-pod"
 ```
 此时Init 容器将会等待直至发现名称为mydb和myservice的 Service。
 
-Service yaml文件
+5、Service yaml文件
 ```
 [root@k8s-master lifecycle]# pwd
 /root/k8s_practice/lifecycle
@@ -148,14 +148,14 @@ spec:
       targetPort: 9377
 ```
 
-创建mydb和myservice的 service 命令：
+6、创建mydb和myservice的 service 命令：
 ```
 [root@k8s-master lifecycle]# kubectl create -f init_C_service.yaml 
 service/myservice created
 service/mydb created
 ```
 
-之后查看pod状态和service状态，能看到这些 Init容器执行完毕后，随后myapp-busybox-pod的Pod转移进入 Running 状态：
+7、之后查看pod状态和service状态，能看到这些 Init容器执行完毕后，随后myapp-busybox-pod的Pod转移进入 Running 状态：
 ```
 [root@k8s-master lifecycle]# kubectl get svc -o wide mydb myservice
 NAME        TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)   AGE   SELECTOR
@@ -168,7 +168,7 @@ myapp-busybox-pod   1/1     Running   0          7m33s   10.244.4.17   k8s-node0
 ```
 由上可知：一旦我们启动了 mydb 和 myservice 这两个 Service，我们就能够看到 Init 容器完成，并且 myapp-busybox-pod 被创建。
 
-进入myapp-busybox-pod容器，并通过nslookup查看这两个Service的DNS记录。
+8、进入myapp-busybox-pod容器，并通过nslookup查看这两个Service的DNS记录。
 ```
 [root@k8s-master lifecycle]# kubectl exec -it myapp-busybox-pod sh
 / # nslookup mydb 

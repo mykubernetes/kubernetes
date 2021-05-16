@@ -85,6 +85,8 @@ Unschedulable:      false
 Pod对象的容忍度  
 ===
 
+- 设置了污点的Node将根据taint的effect：NoSchedule、PreferNoSchedule、NoExecute和Pod之间产生互斥的关系，Pod将在一定程度上不会被调度到Node上。
+
 1、概念
 - 一个 Node 可以有多个污点。
 - 一个 Pod 可以有多个容忍。
@@ -116,9 +118,10 @@ tolerations:
   operator: "Exists"                                #Exists表示key存在就能容忍，无需设置value
   effect: "NoExecute"
   tolerationSeconds: 6000                           #定义延迟驱逐当前Pod对象的时长，只能在NoExecute字段设置
-```  
-- 设置容忍但是没有指定 tolerationSeconds 参数的，那么该容忍永久生效。
-- 设置容忍但是有指定 tolerationSeconds 参数的，那么在指定的时间内容忍有效，超过指定时间后将被剔除
+```
+- 其中key、value、effect要与Node上设置的taint保持一致
+- operator的值为Exists时，将会忽略value；只要有key和effect就行
+- tolerationSeconds：表示pod 能够容忍 effect 值为 NoExecute 的 taint；当指定了 tolerationSeconds【容忍时间】，则表示 pod 还能在这个节点上继续运行的时间长度。
 
 3、Deployment 中设置容忍
 ```

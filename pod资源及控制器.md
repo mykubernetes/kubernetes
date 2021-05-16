@@ -307,6 +307,310 @@ nginx-deployment-76b9d6bcf5-ngpg5   1/1     Running   0          23m   10.244.2.
 nginx-deployment-76b9d6bcf5-rw827   1/1     Running   0          23m   10.244.2.44   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=76b9d6bcf5
 nginx-deployment-76b9d6bcf5-ttf4j   1/1     Running   0          23m   10.244.4.37   k8s-node01   <none>         
 ```
+重点说明
+- 1、ReplicaSet 的名称始终被格式化为[DEPLOYMENT-NAME]-[RANDOM-STRING]。随机字符串是随机生成，并使用 pod-template-hash 作为选择器和标签。
+- 2、Deployment 控制器将 pod-template-hash 标签添加到 Deployment 创建或使用的每个 ReplicaSet 。此标签可确保 Deployment 的子 ReplicaSets 不重叠。因此不可修改。
+- 3、注意Deployment、ReplicaSet和Pod三者的名称关系
+
+6、更新 Deployment
+- Deployment 可确保在更新时仅关闭一定数量的 Pods。默认情况下，它确保至少 75%所需 Pods 运行（25%最大不可用）。
+- Deployment 更新过程中还确保仅创建一定数量的 Pods 且高于期望的 Pods 数。默认情况下，它可确保最多增加 25% 期望 Pods 数（25%最大增量）。
+
+备注：实际操作中如果更新Deployment，那么最好通过yaml文件更新，这样回滚到任何版本都非常便捷，而且更容易追述；而不是通过命令行。
+
+
+6.1、如下Deployment示例，由于只有3个副本。因此更新时不会先删除旧的pod，而是先新建一个pod。新pod运行时，才会删除对应老的pod。一切的前提都是为了满足上述的条件。
+
+需求：更新 nginx Pods，从当前的1.17.1版本改为1.17.5版本。
+```
+# 方式一
+kubectl edit deployment/nginx-deployment    # 然后修改 image 镜像信息 【不推荐】
+# 上述方法不会记录命令，通过kubectl rollout history deployment/nginx-deployment 无法查询
+
+# 方式二如下【可使用】：
+kubectl set image deployment/nginx-deployment nginx=registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5 --record 
+
+# 方式三如下【推荐★★★★★】
+kubectl apply -f nginx-deployment-1.17.5.yaml --record
+
+# --record 参数可以记录命令，通过 kubectl rollout history deployment/nginx-deployment 可查询
+```
+
+6.2、要查看更新状态
+```
+# kubectl rollout status deployment/nginx-deployment
+# 如没有更新完成，则显示更新过程直到更新成功
+Waiting for deployment "nginx-deployment" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "nginx-deployment" rollout to finish: 1 out of 3 new replicas have been updated...
+Waiting for deployment "nginx-deployment" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "nginx-deployment" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "nginx-deployment" rollout to finish: 2 out of 3 new replicas have been updated...
+Waiting for deployment "nginx-deployment" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "nginx-deployment" rollout to finish: 1 old replicas are pending termination...
+deployment "nginx-deployment" successfully rolled out
+
+# 如已更新完毕，直接显示更新成功
+deployment "nginx-deployment" successfully rolled out
+```
+
+6.3、更新中的Deployment、ReplicaSet、Pod信息
+```
+# kubectl get deployment -o wide --show-labels
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                                          SELECTOR    LABELS
+nginx-deployment   3/3     1            3           12m   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5   app=nginx   app=nginx
+
+# kubectl get rs -o wide --show-labels
+NAME                          DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES                                                          SELECTOR                                 LABELS
+nginx-deployment-56d78686f5   1         1         0       23s   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5   app=nginx,pod-template-hash=56d78686f5   app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-76b9d6bcf5   3         3         3       12m   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.1   app=nginx,pod-template-hash=76b9d6bcf5   app=nginx,pod-template-hash=76b9d6bcf5
+
+# kubectl get pod -o wide --show-labels
+NAME                                READY   STATUS              RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES   LABELS
+nginx-deployment-56d78686f5-4kn4c   0/1     ContainerCreating   0          30s   <none>        k8s-node02   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-76b9d6bcf5-7lcr9   1/1     Running             0          12m   10.244.4.41   k8s-node01   <none>           <none>            app=nginx,pod-template-hash=76b9d6bcf5
+nginx-deployment-76b9d6bcf5-jbb5h   1/1     Running             0          12m   10.244.2.48   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=76b9d6bcf5
+nginx-deployment-76b9d6bcf5-rt4m7   1/1     Running             0          12m   10.244.4.42   k8s-node01   <none>           <none>            app=nginx,pod-template-hash=76b9d6bcf5
+```
+
+6.4、更新成功后的Deployment、ReplicaSet、Pod信息
+```
+# kubectl get deployment -o wide --show-labels
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                                          SELECTOR    LABELS
+nginx-deployment   3/3     3            3           15m   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5   app=nginx   app=nginx
+
+# kubectl get rs -o wide --show-labels
+NAME                          DESIRED   CURRENT   READY   AGE     CONTAINERS   IMAGES                                                          SELECTOR                                 LABELS
+nginx-deployment-56d78686f5   3         3         3       3m23s   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5   app=nginx,pod-template-hash=56d78686f5   app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-76b9d6bcf5   0         0         0       15m     nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.1   app=nginx,pod-template-hash=76b9d6bcf5   app=nginx,pod-template-hash=76b9d6bcf5
+
+# kubectl get pod -o wide --show-labels
+NAME                                READY   STATUS    RESTARTS   AGE     IP            NODE         NOMINATED NODE   READINESS GATES   LABELS
+nginx-deployment-56d78686f5-4kn4c   1/1     Running   0          3m25s   10.244.2.49   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-56d78686f5-khsnm   1/1     Running   0          100s    10.244.2.50   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-56d78686f5-t24qw   1/1     Running   0          2m44s   10.244.4.43   k8s-node01   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+```
+
+6.5、通过查询Deployment详情，知晓pod替换过程
+```
+# kubectl describe deploy nginx-deployment
+Name:                   nginx-deployment
+Namespace:              default
+CreationTimestamp:      Thu, 28 May 2020 00:04:09 +0800
+Labels:                 app=nginx
+Annotations:            deployment.kubernetes.io/revision: 2
+                        kubectl.kubernetes.io/last-applied-configuration:
+                          {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"kubernetes.io/change-cause":"kubectl apply --filename=nginx-deploy...
+                        kubernetes.io/change-cause:
+                          kubectl set image deployment/nginx-deployment nginx=registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5 --record=true
+Selector:               app=nginx
+Replicas:               3 desired | 3 updated | 3 total | 3 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=nginx
+  Containers:
+   nginx:
+    Image:        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5
+    Port:         80/TCP
+    Host Port:    0/TCP
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   nginx-deployment-56d78686f5 (3/3 replicas created)
+Events:
+  Type    Reason             Age   From                   Message
+  ----    ------             ----  ----                   -------
+  Normal  ScalingReplicaSet  93s   deployment-controller  Scaled up replica set nginx-deployment-76b9d6bcf5 to 3
+  Normal  ScalingReplicaSet  38s   deployment-controller  Scaled up replica set nginx-deployment-56d78686f5 to 1
+  Normal  ScalingReplicaSet  37s   deployment-controller  Scaled down replica set nginx-deployment-76b9d6bcf5 to 2
+  Normal  ScalingReplicaSet  37s   deployment-controller  Scaled up replica set nginx-deployment-56d78686f5 to 2
+  Normal  ScalingReplicaSet  35s   deployment-controller  Scaled down replica set nginx-deployment-76b9d6bcf5 to 1
+  Normal  ScalingReplicaSet  35s   deployment-controller  Scaled up replica set nginx-deployment-56d78686f5 to 3
+  Normal  ScalingReplicaSet  34s   deployment-controller  Scaled down replica set nginx-deployment-76b9d6bcf5 to 0
+```
+
+6.6、多 Deployment 动态更新
+- 当 Deployment 正在展开进行更新时，Deployment 会为每个更新创建一个新的 ReplicaSet 并开始向上扩展，之前的 ReplicaSet 会被添加到旧 ReplicaSets 队列并开始向下扩展。
+
+
+7、回滚 Deployment
+
+7.1、命令行方式
+
+问题产生
+- 假设在更新 Deployment 时犯了一个拼写错误，将镜像名称命名为了 nginx:1.1710 而不是 nginx:1.17.10
+```
+# kubectl set image deployment/nginx-deployment nginx=registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.1710 --record
+deployment.apps/nginx-deployment image updated
+```
+
+7.2、查看Deployment、ReplicaSet、Pod信息
+```
+# kubectl get deploy -o wide --show-labels
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                                          SELECTOR    LABELS
+nginx-deployment   3/3     1            3           14m   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.1710   app=nginx   app=nginx
+
+# kubectl get rs -o wide --show-labels
+NAME                          DESIRED   CURRENT   READY   AGE     CONTAINERS   IMAGES                                                          SELECTOR                                 LABELS
+nginx-deployment-55c7bdfb86   3         3         3       9m19s   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17     app=nginx,pod-template-hash=55c7bdfb86   app=nginx,pod-template-hash=55c7bdfb86
+nginx-deployment-56d78686f5   0         0         0       12m     nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5   app=nginx,pod-template-hash=56d78686f5   app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-76b9d6bcf5   0         0         0       13m     nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.1   app=nginx,pod-template-hash=76b9d6bcf5   app=nginx,pod-template-hash=76b9d6bcf5
+nginx-deployment-844d7bbb7f   1         1         0       64s     nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.1710   app=nginx,pod-template-hash=844d7bbb7f   app=nginx,pod-template-hash=844d7bbb7f
+
+# kubectl get pod -o wide --show-labels
+NAME                                READY   STATUS             RESTARTS   AGE    IP            NODE         NOMINATED NODE   READINESS GATES   LABELS
+nginx-deployment-55c7bdfb86-bwzk9   1/1     Running            0          10m    10.244.4.49   k8s-node01   <none>           <none>            app=nginx,pod-template-hash=55c7bdfb86
+nginx-deployment-55c7bdfb86-cmvzg   1/1     Running            0          10m    10.244.2.55   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=55c7bdfb86
+nginx-deployment-55c7bdfb86-kjrrw   1/1     Running            0          10m    10.244.2.56   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=55c7bdfb86
+nginx-deployment-844d7bbb7f-pctwr   0/1     ImagePullBackOff   0          2m3s   10.244.4.51   k8s-node01   <none>           <none>            app=nginx,pod-template-hash=844d7bbb7f
+```
+
+7.3、需求：回滚到以前稳定的 Deployment 版本。
+
+7.4、检查 Deployment 修改历史
+```
+# kubectl rollout history deployment/nginx-deployment
+deployment.apps/nginx-deployment 
+REVISION  CHANGE-CAUSE
+1         kubectl apply --filename=nginx-deployment.yaml --record=true
+2         kubectl set image deployment/nginx-deployment nginx=registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5 --record=true
+3         kubectl set image deployment/nginx-deployment nginx=registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17 --record=true
+4         kubectl set image deployment/nginx-deployment nginx=registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.1710 --record=true
+```
+
+7.5、查看修改历史的详细信息，运行
+```
+# kubectl rollout history deployment/nginx-deployment --revision=3
+deployment.apps/nginx-deployment with revision #3
+Pod Template:
+  Labels:	app=nginx
+	pod-template-hash=55c7bdfb86
+  Annotations:	kubernetes.io/change-cause:
+	  kubectl set image deployment/nginx-deployment nginx=registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17 --record=true
+  Containers:
+   nginx:
+    Image:	registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17
+    Port:	80/TCP
+    Host Port:	0/TCP
+    Environment:	<none>
+    Mounts:	<none>
+  Volumes:	<none>
+```
+
+7.6、回滚到上一次修改（即版本 3）或指定版本
+
+现在已决定撤消当前更新并回滚到以前的版本
+```
+# 回滚到上一版本
+# kubectl rollout undo deployment/nginx-deployment
+deployment.apps/nginx-deployment rolled back
+
+# 回滚到指定历史版本
+# kubectl rollout undo deployment/nginx-deployment --to-revision=2
+deployment.apps/nginx-deployment rolled back
+```
+
+7.7、检查回滚是否成功、 Deployment 是否正在运行
+```
+# kubectl get deploy -o wide --show-labels
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                                          SELECTOR    LABELS
+nginx-deployment   3/3     3            3           17h   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5   app=nginx   app=nginx
+```
+
+7.8、获取 Deployment 描述信息
+```
+# kubectl describe deployment
+Name:                   nginx-deployment
+Namespace:              default
+CreationTimestamp:      Thu, 28 May 2020 00:04:09 +0800
+Labels:                 app=nginx
+Annotations:            deployment.kubernetes.io/revision: 7
+                        kubectl.kubernetes.io/last-applied-configuration:
+                          {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{"kubernetes.io/change-cause":"kubectl apply --filename=nginx-deploy...
+                        kubernetes.io/change-cause:
+                          kubectl set image deployment/nginx-deployment nginx=registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5 --record=true
+Selector:               app=nginx
+Replicas:               3 desired | 3 updated | 3 total | 3 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        0
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=nginx
+  Containers:
+   nginx:
+    Image:        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5
+    Port:         80/TCP
+    Host Port:    0/TCP
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   nginx-deployment-56d78686f5 (3/3 replicas created)
+Events:
+  Type    Reason             Age                 From                   Message
+  ----    ------             ----                ----                   -------
+………………
+  Normal  ScalingReplicaSet  107s                deployment-controller  Scaled up replica set nginx-deployment-56d78686f5 to 1
+  Normal  ScalingReplicaSet  104s                deployment-controller  Scaled down replica set nginx-deployment-55c7bdfb86 to 2
+  Normal  ScalingReplicaSet  104s                deployment-controller  Scaled up replica set nginx-deployment-56d78686f5 to 2
+  Normal  ScalingReplicaSet  103s                deployment-controller  Scaled down replica set nginx-deployment-55c7bdfb86 to 1
+  Normal  ScalingReplicaSet  103s                deployment-controller  Scaled up replica set nginx-deployment-56d78686f5 to 3
+  Normal  ScalingReplicaSet  102s                deployment-controller  Scaled down replica set nginx-deployment-55c7bdfb86 to 0
+```
+
+8、扩容/缩容Deployment
+```
+# kubectl scale deployment/nginx-deployment --replicas=10
+deployment.apps/nginx-deployment scaled
+
+# kubectl get deploy -o wide --show-labels
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                                          SELECTOR    LABELS
+nginx-deployment   10/10   10           10          17h   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5   app=nginx   app=nginx
+
+# kubectl get rs -o wide --show-labels
+NAME                          DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES                                                          SELECTOR                                 LABELS
+nginx-deployment-55c7bdfb86   0         0         0       17h   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17     app=nginx,pod-template-hash=55c7bdfb86   app=nginx,pod-template-hash=55c7bdfb86
+nginx-deployment-56d78686f5   10        10        10      17h   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.5   app=nginx,pod-template-hash=56d78686f5   app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-76b9d6bcf5   0         0         0       17h   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.1   app=nginx,pod-template-hash=76b9d6bcf5   app=nginx,pod-template-hash=76b9d6bcf5
+nginx-deployment-844d7bbb7f   0         0         0       17h   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.1710   app=nginx,pod-template-hash=844d7bbb7f   app=nginx,pod-template-hash=844d7bbb7f
+
+# kubectl get pod -o wide --show-labels
+NAME                                READY   STATUS    RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES   LABELS
+nginx-deployment-56d78686f5-4v5mj   1/1     Running   0          44s   10.244.2.64   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-56d78686f5-8m7mx   1/1     Running   0          44s   10.244.4.60   k8s-node01   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-56d78686f5-c7wlb   1/1     Running   0          44s   10.244.4.59   k8s-node01   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-56d78686f5-jg5lt   1/1     Running   0          44s   10.244.2.63   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-56d78686f5-jj58d   1/1     Running   0          11m   10.244.4.56   k8s-node01   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-56d78686f5-k2kts   1/1     Running   0          11m   10.244.4.57   k8s-node01   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-56d78686f5-qltkv   1/1     Running   0          44s   10.244.2.61   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-56d78686f5-r7vmm   1/1     Running   0          11m   10.244.2.60   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-56d78686f5-rxlpm   1/1     Running   0          44s   10.244.2.62   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+nginx-deployment-56d78686f5-vlzrf   1/1     Running   0          44s   10.244.4.58   k8s-node01   <none>           <none>            app=nginx,pod-template-hash=56d78686f5
+```
+
+9、清理策略Policy
+- 可以在 Deployment 中设置 .spec.revisionHistoryLimit，以指定保留多少该 Deployment 的 ReplicaSets数量。其余的将在后台进行垃圾回收。默认情况下，是10。
+
+注意：此字段设置为 0 将导致清理 Deployment 的所有历史记录，因此 Deployment 将无法通过命令行回滚。
+
+
+
+
+
+
+
 
 DaemonSet控制器  
 ---

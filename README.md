@@ -33,6 +33,7 @@ kubernetes相关资料
 - [pod升级回滚](https://github.com/mykubernetes/kubernetes/blob/master/pod%E5%8D%87%E7%BA%A7%E5%9B%9E%E6%BB%9A.md)
 - [pod资源及控制器](https://github.com/mykubernetes/kubernetes/blob/master/pod%E8%B5%84%E6%BA%90%E5%8F%8A%E6%8E%A7%E5%88%B6%E5%99%A8.md)
 - [service](https://github.com/mykubernetes/kubernetes/blob/master/service.md)
+- [Pod跨namespace名称空间访问Service服务](https://github.com/mykubernetes/kubernetes/blob/master/Pod%E8%B7%A8namespace%E5%90%8D%E7%A7%B0%E7%A9%BA%E9%97%B4%E8%AE%BF%E9%97%AEService%E6%9C%8D%E5%8A%A1.md)
 - [volume](https://github.com/mykubernetes/kubernetes/tree/master/volume)
 - [resource限制](https://github.com/mykubernetes/kubernetes/blob/master/resource%E9%99%90%E5%88%B6.md)
 - [pod健康检查](https://github.com/mykubernetes/kubernetes/blob/master/pod%E5%81%A5%E5%BA%B7%E6%A3%80%E6%9F%A5.md)

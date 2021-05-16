@@ -8,6 +8,49 @@ Pod对象
 - spec: 用来描述这个API对象的期望状态。
 - status: Pod的实际运行状态。
 
+通过yaml创建nginx pod对象
+```
+# cat nginx_demo.yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: nginx-demo
+  namespace: default
+  labels:
+    k8s-app: nginx
+    environment: dev
+  annotations:
+    name: nginx-demo
+spec:
+  containers:
+  - name: nginx
+    image: registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17
+    imagePullPolicy: IfNotPresent
+    ports:
+    - name: httpd
+      containerPort: 80
+      #除非绝对必要，否则不要为 Pod 指定 hostPort。 将 Pod 绑定到hostPort时，它会限制 Pod 可以调度的位置数
+      #DaemonSet 中的 Pod 可以使用 hostPort，从而可以通过节点 IP 访问到 Pod；因为DaemonSet模式下Pod不会被调度到其他节点。
+      #一般情况下 containerPort与hostPort值相同
+      hostPort: 8090                    #可以通过宿主机+hostPort的方式访问该Pod。例如：pod在/调度到了k8s-node02【172.16.1.112】，那么该Pod可以通过172.16.1.112:8090方式进行访问。
+      protocol: TCP
+    volumeMounts:                       #定义容器挂载内容
+    - name: nginx-site                  #使用的存储卷名称，跟下面volume字段的某个name值相同，这里表示使用volume的nginx-site这个存储卷
+      mountPath: /usr/share/nginx/html  #挂载至容器中哪个目录
+      readOnly: false                   #读写挂载方式，默认为读写模式false
+    - name: nginx-log
+      mountPath: /var/log/nginx/
+      readOnly: false
+  volumes:                              #volumes字段定义了paues容器关联的宿主机或分布式文件系统存储卷
+  - name: nginx-site                    #存储卷名称
+    hostPath:                           #路径，为宿主机存储路径
+      path: /data/volumes/nginx/html/   #在宿主机上目录的路径
+      type: DirectoryOrCreate           #定义类型，这表示如果宿主机没有此目录，则会自动创建
+  - name: nginx-log
+    hostPath:
+      path: /data/volumes/nginx/log/
+      type: DirectoryOrCreate
+```
 
 yaml格式的pod定义文件完整内容：  
 ---

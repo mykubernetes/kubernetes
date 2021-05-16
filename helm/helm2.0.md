@@ -80,27 +80,40 @@ local http://127.0.0.1:8879/charts
 
 
 5、helm的使用   
-```
-helm下载目录  
-cd ~/.helm/repository/cache/archive
 
-helm常用命令  
-	release管理
-		install       #安装
-		delete        #删除
-		upgrade       #更新
-		rollback      #回滚
-		list          #查
-		history       #release历史
-		status        #获取release状态信息
-	chart管理
-		create        #创建自定义chart
-		fetch         #下载并展开
-		get           #下载不展开
-		inspect       #查了chart详细信息
-		package       #本地打包
-		verify        #校验
-		
+helm下载目录
+```
+cd ~/.helm/repository/cache/archive
+```
+
+release管理
+| 命令 | 说明 |
+|------|-----|
+| get | 下载一个release |
+| delete | 根据给定的release name，从Kubernetes中删除指定的release |
+| install | 安装一个chart |
+| list | 显示release列表 |
+| upgrade | 升级release |
+| rollback | 回滚release到之前的一个版本 |
+| status | 显示release状态信息 |
+| history | Fetch release历史信息 |
+
+chart管理
+| 命令 | 说明 |
+|------|-----|
+| get | 下载一个release |
+| delete | 根据给定的release name，从Kubernetes中删除指定的release |
+| install | 安装一个chart |
+| list | 显示release列表 |
+| upgrade | 升级release |
+| rollback | 回滚release到之前的一个版本 |
+| status | 显示release状态信息 |
+| history | Fetch release历史信息 |
+
+
+
+helm常用命令
+```
 搜索  
 # helm search mysql
 

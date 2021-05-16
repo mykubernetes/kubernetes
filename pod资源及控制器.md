@@ -607,43 +607,95 @@ nginx-deployment-56d78686f5-vlzrf   1/1     Running   0          44s   10.244.4.
 
 
 
-
-
-
-
-
 DaemonSet控制器  
 ---
+- DaemonSet 确保全部（或者某些）节点上运行一个 Pod 的副本。当有节点加入集群时，会为他们新增一个 Pod。当有节点从集群移除时，这些 Pod 也会被回收。删除 DaemonSet 将会删除它创建的所有 Pod。
+
+DaemonSet 的一些典型用法：
+- 在每个节点上运行集群存储 DaemonSet，例如 glusterd、ceph。
+- 在每个节点上运行日志收集 DaemonSet，例如 fluentd、logstash。
+- 在每个节点上运行监控 DaemonSet，例如 Prometheus Node Exporter、Flowmill、Sysdig 代理、collectd、Dynatrace OneAgent、AppDynamics 代理、Datadog 代理、New Relic 代理、Ganglia gmond 或者 Instana 代理。
+
+
+# DaemonSet 中的 Pod 可以使用 hostPort，从而可以通过节点 IP 访问到 Pod；因为DaemonSet模式下Pod不会被调度到其他节点。使用示例如下：
 ```
+ports:
+- name: httpd
+  containerPort: 80
+  #除非绝对必要，否则不要为 Pod 指定 hostPort。 将 Pod 绑定到hostPort时，它会限制 Pod 可以调度的位置数；DaemonSet除外
+  #一般情况下 containerPort与hostPort值相同
+  hostPort: 8090     #可以通过宿主机+hostPort的方式访问该Pod。例如：pod在/调度到了k8s-node02【172.16.1.112】，那么该Pod可以通过172.16.1.112:8090方式进行访问。
+  protocol: TCP
+```
+
+1、DaemonSet示例
+```
+# cat daemonset.yaml 
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: filebeat-ds
+  name: fluentd-elasticsearch
+  namespace: default
   labels:
-    app: filebeat
+    k8s-app: fluentd-logging
 spec:
   selector:
     matchLabels:
-      app: filebeat
-  updateStrategy:
-    rollingUpdate:
-      maxUnavailable: 1
-    type: RollingUpdate
+      name: fluentd-elasticsearch
   template:
     metadata:
       labels:
-        app: filebeat
-      name: filebeat
+        name: fluentd-elasticsearch
     spec:
+      tolerations:
+      # 允许在master节点运行
+      - key: node-role.kubernetes.io/master
+        effect: NoSchedule
       containers:
-      - name: filebeat
-        image: ikubernetes/filebeat:5.6.5-alpine
-        env:
-        - name: REDIS_HOST
-          value: db.ikubernetes.io:6379
-        - name: LOG_LEVEL
-          value: info
-```  
+      - name: fluentd-elasticsearch
+        image: registry.cn-beijing.aliyuncs.com/google_registry/fluentd:v2.5.2
+        resources:
+          limits:
+            cpu: 1
+            memory: 200Mi
+          requests:
+            cpu: 100m
+            memory: 200Mi
+        volumeMounts:
+        - name: varlog
+          mountPath: /var/log
+        - name: varlibdockercontainers
+          mountPath: /var/lib/docker/containers
+          readOnly: true
+      # 优雅关闭应用，时间设置。超过该时间会强制关闭【可选项】，默认30秒
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: varlog
+        hostPath:
+          path: /var/log
+      - name: varlibdockercontainers
+        hostPath:
+          path: /var/lib/docker/containers
+```
+
+2、运行daemonset，并查看状态
+```
+# kubectl apply -f daemonset.yaml 
+daemonset.apps/fluentd-elasticsearch created
+
+# kubectl get daemonset -o wide
+NAME                    DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE   CONTAINERS              IMAGES                                                            SELECTOR
+fluentd-elasticsearch   3         3         3       3            3           <none>          92s   fluentd-elasticsearch   registry.cn-beijing.aliyuncs.com/google_registry/fluentd:v2.5.2   name=fluentd-elasticsearch
+
+# kubectl get pod -o wide
+NAME                          READY   STATUS    RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES
+fluentd-elasticsearch-52b8z   1/1     Running   0          95s   10.244.2.92   k8s-node02   <none>           <none>
+fluentd-elasticsearch-fps95   1/1     Running   0          95s   10.244.0.46   k8s-master   <none>           <none>
+fluentd-elasticsearch-pz8j7   1/1     Running   0          95s   10.244.4.83   k8s-node01   <none>           <none>
+```
+由上可见，在k8s集群所有节点包括master节点都运行了daemonset的pod。
+
+
 
 job控制器  
 ---

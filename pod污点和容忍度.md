@@ -123,43 +123,15 @@ tolerations:
 - operator的值为Exists时，将会忽略value；只要有key和effect就行
 - tolerationSeconds：表示pod 能够容忍 effect 值为 NoExecute 的 taint；当指定了 tolerationSeconds【容忍时间】，则表示 pod 还能在这个节点上继续运行的时间长度。
 
-3、Deployment 中设置容忍
-```
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: web-demo-taint
-  namespace: dev
-spec:
-  selector:
-    matchLabels:
-      app: web-demo-taint
-  replicas: 1
-  template:
-    metadata:
-      labels:
-        app: web-demo-taint
-    spec:
-      containers:
-      - name: web-demo-taint
-        image: hub.mooc.com/kubernetes/web:v1
-        ports:
-        - containerPort: 8080
-      tolerations:
-      - key: "key"
-        operator: "Equal"
-        value: "value"
-        effect: "NoSchedule"
-```
 
-4、当不指定key值时
+3、当不指定key值时
 - 当不指定key值和effect值时，且operator为Exists，表示容忍所有的污点【能匹配污点所有的keys，values和effects】
 ```
 tolerations:
 - operator: "Exists"
 ```  
 
-5、当不指定effect值时
+4、当不指定effect值时
 - 当不指定effect值时，则能匹配污点key对应的所有effects情况
 ```
 tolerations:
@@ -167,7 +139,7 @@ tolerations:
   operator: "Exists"
 ```  
 
-6、当有多个Master存在时
+5、当有多个Master存在时
 - 当有多个Master存在时，为了防止资源浪费，可以进行如下设置：
 ```
 kubectl taint nodes Node-name node-role.kubernetes.io/master=:PreferNoSchedule

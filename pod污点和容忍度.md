@@ -176,8 +176,8 @@ kubectl taint nodes Node-name node-role.kubernetes.io/master=:PreferNoSchedule
 多个Taints污点和多个Tolerations容忍怎么判断
 ---
 可以在同一个node节点上设置多个污点（Taints），在同一个pod上设置多个容忍（Tolerations）。Kubernetes处理多个污点和容忍的方式就像一个过滤器：从节点的所有污点开始，然后忽略可以被Pod容忍匹配的污点；保留其余不可忽略的污点，污点的effect对Pod具有显示效果：特别是：
--如果有至少一个不可忽略污点，effect为NoSchedule，那么Kubernetes将不调度Pod到该节点
--如果没有effect为NoSchedule的不可忽视污点，但有至少一个不可忽视污点，effect为PreferNoSchedule，那么Kubernetes将尽量不调度Pod到该节点
+- 如果有至少一个不可忽略污点，effect为NoSchedule，那么Kubernetes将不调度Pod到该节点
+- 如果没有effect为NoSchedule的不可忽视污点，但有至少一个不可忽视污点，effect为PreferNoSchedule，那么Kubernetes将尽量不调度Pod到该节点
 - 如果有至少一个不可忽视污点，effect为NoExecute，那么Pod将被从该节点驱逐（如果Pod已经在该节点运行），并且不会被调度到该节点（如果Pod还未在该节点运行）
 
 

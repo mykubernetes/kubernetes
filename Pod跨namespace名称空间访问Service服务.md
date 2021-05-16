@@ -231,9 +231,9 @@ spec:
 
 8、运行yaml文件
 ```
-[root@k8s-master cross_ns]# kubectl apply -f svc_ExternalName_visit.yaml
-[root@k8s-master cross_ns]# 
-[root@k8s-master cross_ns]# kubectl get svc -A -o wide | grep -E '(ExternalName)|(NAME)' 
+# kubectl apply -f svc_ExternalName_visit.yaml
+
+# kubectl get svc -A -o wide | grep -E '(ExternalName)|(NAME)' 
 NAMESPACE              NAME                            TYPE           CLUSTER-IP       EXTERNAL-IP                                 PORT(S)                  AGE   SELECTOR
 myns                   myapp-clusterip1-externalname   ExternalName   <none>           myapp-clusterip2.mytest.svc.cluster.local   80/TCP                   28s   <none>
 mytest                 myapp-clusterip2-externalname   ExternalName   <none>           myapp-clusterip1.myns.svc.cluster.local     80/TCP                   28s   <none>

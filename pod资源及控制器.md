@@ -100,50 +100,145 @@ spec:                          #必选，Pod中容器的详细定义
         path: string
 ```  
 
+控制器
+===
+kubernetes中内建了很多controller（控制器），这些相当于一个状态机，用来控制pod的具体状态和行为。
+
+部分控制器类型如下：
+- ReplicationController 和 ReplicaSet
+- Deployment
+- DaemonSet
+- StatefulSet
+- Job/CronJob
+- HorizontalPodAutoscaler
+
+ReplicationController 和 ReplicaSet
+- ReplicationController (RC)用来确保容器应用的副本数始终保持在用户定义的副本数，即如果有容器异常退出，会自动创建新的pod来替代；而异常多出来的容器也会自动回收。
+- 在新版的Kubernetes中建议使用ReplicaSet (RS)来取代ReplicationController。ReplicaSet跟ReplicationController没有本质的不同，只是名字不一样，但ReplicaSet支持集合式selector。
+- 虽然 ReplicaSets 可以独立使用，但如今它主要被Deployments 用作协调 Pod 的创建、删除和更新的机制。当使用 Deployment 时，你不必担心还要管理它们创建的 ReplicaSet，Deployment 会拥有并管理它们的 ReplicaSet。
+- ReplicaSet 是下一代的 Replication Controller。 ReplicaSet 和 Replication Controller 的唯一区别是选择器的支持。ReplicaSet 支持新的基于集合的选择器需求，这在标签用户指南中有描述。而 Replication Controller 仅支持基于相等选择器的需求。
+
+
 
 
 ReplicaSet控制器  
 ---
+
+1、ReplicaSet示例
 ```
+# cat ReplicaSet-01.yaml 
 apiVersion: apps/v1
 kind: ReplicaSet
-metadata:                          #元数据
-  name: rs-example                 #副本控制器名字
-spec:                              #期望状态
-  replicas: 2                      #副本数
-  selector:                        #标签选择器
-     matchLabels:               
-       app: rs-demo                #标签
-  template:                        #定义pod
-    metadata: 
+metadata:
+  name: frontend
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      tier: frontend
+  template:
+    metadata:
       labels:
-        app: rs-demo
+        tier: frontend
     spec:
       containers:
       - name: nginx
-        image: nginx:1.12-alpine
+        image: registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17
+        imagePullPolicy: IfNotPresent
         ports:
-        - name: http
+        - name: httpd
           containerPort: 80
 ```
 
-
-Deployment控制器  
----
+2、创建ReplicaSet，并查看rs状态与详情
 ```
+# kubectl apply -f ReplicaSet-01.yaml 
+replicaset.apps/frontend created
+
+# kubectl get rs -o wide               # 查看状态
+NAME       DESIRED   CURRENT   READY   AGE     CONTAINERS   IMAGES                                                        SELECTOR
+frontend   3         3         3       2m12s   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17   tier=frontend
+
+# kubectl describe rs frontend         # 查看详情
+Name:         frontend
+Namespace:    default
+Selector:     tier=frontend
+Labels:       <none>
+Annotations:  kubectl.kubernetes.io/last-applied-configuration:
+                {"apiVersion":"apps/v1","kind":"ReplicaSet","metadata":{"annotations":{},"name":"frontend","namespace":"default"},"spec":{"replicas":3,"se...
+Replicas:     3 current / 3 desired
+Pods Status:  3 Running / 0 Waiting / 0 Succeeded / 0 Failed
+Pod Template:
+  Labels:  tier=frontend
+  Containers:
+   nginx:
+    Image:        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17
+    Port:         80/TCP
+    Host Port:    0/TCP
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Events:
+  Type    Reason            Age    From                   Message
+  ----    ------            ----   ----                   -------
+  Normal  SuccessfulCreate  10m    replicaset-controller  Created pod: frontend-kltwp
+  Normal  SuccessfulCreate  10m    replicaset-controller  Created pod: frontend-76dbn
+  Normal  SuccessfulCreate  10m    replicaset-controller  Created pod: frontend-jk8td
+```
+
+3、查看pod状态信息
+```
+# kubectl get pod -o wide --show-labels
+NAME             READY   STATUS    RESTARTS   AGE     IP            NODE         NOMINATED NODE   READINESS GATES   LABELS
+frontend-76dbn   1/1     Running   0          5m15s   10.244.4.31   k8s-node01   <none>           <none>            tier=frontend
+frontend-jk8td   1/1     Running   0          5m15s   10.244.2.35   k8s-node02   <none>           <none>            tier=frontend
+frontend-kltwp   1/1     Running   0          5m15s   10.244.2.34   k8s-node02   <none>           <none>            tier=frontend
+```
+
+4、删除一个pod，然后再次查看
+```
+# kubectl delete pod frontend-kltwp
+pod "frontend-kltwp" deleted
+
+# kubectl get pod -o wide --show-labels   # 可见重新创建了一个pod
+NAME             READY   STATUS    RESTARTS   AGE     IP            NODE         NOMINATED NODE   READINESS GATES   LABELS
+frontend-76dbn   1/1     Running   0          7m27s   10.244.4.31   k8s-node01   <none>           <none>            tier=frontend
+frontend-jk8td   1/1     Running   0          7m27s   10.244.2.35   k8s-node02   <none>           <none>            tier=frontend
+frontend-mf79k   1/1     Running   0          16s     10.244.4.32   k8s-node01   <none>           <none>            tier=frontend
+```
+由上可见，rs又新建了一个pod，保证了pod数总是为3.
+
+
+
+Deployments控制器  
+---
+Deployment 控制器为 Pods和 ReplicaSets提供描述性的更新方式。用来替代以前的ReplicationController以方便管理应用。
+
+典型的应用场景包括：
+- 定义Deployment来创建Pod和ReplicaSet
+- 滚动升级和回滚应用
+- 扩容和缩容
+- 暂停和继续Deployment
+
+1、创建 Deployment
+```
+# cat nginx-deployment-1.17.1.yaml 
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: deploy-nginx
+  name: nginx-deployment
+  labels:
+    app: nginx
 spec:
-  replicas: 3                            #副本数
+  replicas: 3
+# 重点关注该字段
   minReadySeconds: 10
   strategy:                              #定义更新策略      
     rollingUpdate:                       #滚动更新策略定义临时减少和增加的pod
       maxSurge: 1                        #最多允许多几个pod
       maxUnavailable: 1                  #最少有几个不可用
-    type: RollingUpdate                  #更新策略
-  selector:                              #标签选择器
+    type: RollingUpdate                  #更新策略  
+  selector:
     matchLabels:
       app: nginx
   template:
@@ -153,17 +248,65 @@ spec:
     spec:
       containers:
       - name: nginx
-        image: nginx:1.10-alpine
+        image: registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.1
         ports:
         - containerPort: 80
-          name: http
-        readinessProbe:
-          periodSeconds: 1
-          httpGet:
-            path: /
-            port: http
 ```
 
+2、启动deployment，并查看状态
+```
+# kubectl apply -f nginx-deployment-1.17.1.yaml --record               # --record 参数可以记录命令，通过 kubectl rollout history deployment/nginx-deployment 可查询
+deployment.apps/nginx-deployment created
+
+# kubectl get deployment -o wide
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                                          SELECTOR
+nginx-deployment   2/3     3            2           10s   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.1   app=nginx
+```
+参数说明：
+-NAME：列出集群中 Deployments 的名称
+-READY：已就绪副本数/期望副本数
+-UP-TO-DATE：显示已更新和正在更新中的副本数
+-AVAILABLE：显示应用程序可供用户使用的副本数
+-AGE：显示运行的时间
+
+3、查看ReplicaSet状态
+```
+# kubectl get rs -o wide
+NAME                          DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES                                                          SELECTOR
+nginx-deployment-76b9d6bcf5   3         3         2       17s   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.1   app=nginx,pod-template-hash=76b9d6bcf5
+```
+参数说明：
+- NAME：列出集群中 ReplicaSet的名称
+- DESIRED：期望副本数
+- CURRENT：当前副本数
+- READY：已就绪副本数
+- AGE：运行时间
+
+4、查看pod状态
+```
+# kubectl get pod -o wide
+NAME                                READY   STATUS              RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES
+nginx-deployment-76b9d6bcf5-ngpg5   1/1     Running             0          26s   10.244.2.43   k8s-node02   <none>           <none>
+nginx-deployment-76b9d6bcf5-rw827   1/1     Running             0          26s   10.244.2.44   k8s-node02   <none>           <none>
+nginx-deployment-76b9d6bcf5-ttf4j   0/1     ContainerCreating   0          26s   <none>        k8s-node01   <none>           <none>
+```
+
+5、过一会儿状态说明
+```
+# kubectl get deployment -o wide --show-labels
+NAME               READY   UP-TO-DATE   AVAILABLE   AGE   CONTAINERS   IMAGES                                                          SELECTOR    LABELS
+nginx-deployment   3/3     3            3           23m   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.1   app=nginx   app=nginx
+
+# kubectl get rs -o wide --show-labels
+NAME                          DESIRED   CURRENT   READY   AGE   CONTAINERS   IMAGES                                                          SELECTOR                                 LABELS
+nginx-deployment-76b9d6bcf5   3         3         3       23m   nginx        registry.cn-beijing.aliyuncs.com/google_registry/nginx:1.17.1   app=nginx,pod-template-hash=76b9d6bcf5   app=nginx,pod-template-hash=76b9d6bcf5
+
+# kubectl get pod -o wide --show-labels
+NAME                                READY   STATUS    RESTARTS   AGE   IP            NODE         NOMINATED NODE   READINESS GATES   LABELS
+nginx-deployment-76b9d6bcf5-ngpg5   1/1     Running   0          23m   10.244.2.43   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=76b9d6bcf5
+nginx-deployment-76b9d6bcf5-rw827   1/1     Running   0          23m   10.244.2.44   k8s-node02   <none>           <none>            app=nginx,pod-template-hash=76b9d6bcf5
+nginx-deployment-76b9d6bcf5-ttf4j   1/1     Running   0          23m   10.244.4.37   k8s-node01   <none>         
+```
 
 DaemonSet控制器  
 ---

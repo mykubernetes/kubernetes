@@ -56,13 +56,161 @@ export ETCD_ENDPOINTS=https://localhost:2379
 127.0.0.1:2379 is healthy: successfully committed proposal: took = 827.031484ms
 ```
 
+
+### 2.2.1 etcdctl 操作
+
+#### 1、读取数据key
+```
+# 1、使用以下命令列出所有的key
+ETCDCTL_API=3 etcdctl --endpoints=<etcd-ip-1>:2379,<etcd-ip-2>:2379,<etcd-ip-3>:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt  --key=/etc/kubernetes/pki/apiserver-etcd-client.key  --cert=/etc/kubernetes/pki/apiserver-etcd-client.crt get / --prefix --keys-only
+
+# 2、可以使用alias来重命名etcdctl一串的命令
+alias ectl='ETCDCTL_API=3 etcdctl --endpoints=<etcd-ip-1>:2379,<etcd-ip-2>:2379,<etcd-ip-3>:2379 --cacert=/etc/kubernetes/pki/etcd/ca.crt  --key=/etc/kubernetes/pki/apiserver-etcd-client.key  --cert=/etc/kubernetes/pki/apiserver-etcd-client.crt'
+```
+
+#### 2. 集群数据
+
+##### node
+```
+/registry/minions/<node-ip-1>
+/registry/minions/<node-ip-2>
+/registry/minions/<node-ip-3>
+```
+
+其他信息：
+```
+/registry/leases/kube-node-lease/<node-ip-1>
+/registry/leases/kube-node-lease/<node-ip-2>
+/registry/leases/kube-node-lease/<node-ip-3>
+
+/registry/masterleases/<node-ip-2>
+/registry/masterleases/<node-ip-3>
+```
+
+##### 3. k8s对象数据
+
+k8s对象数据的格式
+3.1. namespace
+```
+/registry/namespaces/default
+/registry/namespaces/game
+/registry/namespaces/kube-node-lease
+/registry/namespaces/kube-public
+/registry/namespaces/kube-system
+```
+
+##### 3.2. namespace级别对象
+```
+/registry/{resource}/{namespace}/{resource_name}
+```
+
+以下以常见k8s对象为例：
+```
+# deployment
+/registry/deployments/default/game-2048
+/registry/deployments/kube-system/prometheus-operator
+
+# replicasets
+/registry/replicasets/default/game-2048-c7d589ccf
+
+# pod
+/registry/pods/default/game-2048-c7d589ccf-8lsbw
+
+# statefulsets
+/registry/statefulsets/kube-system/prometheus-k8s
+
+# daemonsets
+/registry/daemonsets/kube-system/kube-proxy
+
+# secrets
+/registry/secrets/default/default-token-tbfmb
+
+# serviceaccounts
+/registry/serviceaccounts/default/default
+
+service
+
+# service
+/registry/services/specs/default/game-2048
+
+# endpoints
+/registry/services/endpoints/default/game-2048
+```
+
+service
+```
+# service
+/registry/services/specs/default/game-2048
+
+# endpoints
+/registry/services/endpoints/default/game-2048
+```
+
+
 # 三、Kubernetes资源
 
 ## 3.1、etcdctl ls脚本
 
 v3版本的数据存储没有目录层级关系了，而是采用平展（flat)模式，换句话说/a与/a/b并没有嵌套关系，而只是key的名称差别而已，这个和AWS S3以及OpenStack Swift对象存储一样，没有目录的概念，但是key名称支持/字符，从而实现看起来像目录的伪目录，但是存储结构上不存在层级关系。
 
-也就是说etcdctl无法使用类似v2的ls命令。但是我还是习惯使用v2版本的etcdctl ls查看etcdctl存储的内容，于是写了个性能不怎么好但是可以用的shell脚本etcd_ls.sh:
+### 读取数据value
+
+#### 1、由于k8s默认etcd中的数据是通过protobuf格式存储，因此看到的key和value的值是一串字符串。
+```
+# ectl get /registry/namespaces/test -w json |jq
+{
+  "header": {
+    "cluster_id": 12113422651334595000,
+    "member_id": 8381627376898157000,
+    "revision": 12321629,
+    "raft_term": 20
+  },
+  "kvs": [
+    {
+      "key": "L3JlZ2lzdHJ5L25hbWVzcGFjZXMvdGVzdA==",
+      "create_revision": 11670741,
+      "mod_revision": 11670741,
+      "version": 1,
+      "value": "azhzAAoPCgJ2MRIJTmFtZXNwYWNlElwKQgoEdGVzdBIAGgAiACokYWM1YmJjOTQtNTkxZi0xMWVhLWJiOTQtNmM5MmJmM2I3NmI1MgA4AEIICJuf3fIFEAB6ABIMCgprdWJlcm5ldGVzGggKBkFjdGl2ZRoAIgA="
+    }
+  ],
+  "count": 1
+}
+```
+
+#### 2、其中key可以通过base64解码出来
+```
+echo "L3JlZ2lzdHJ5L25hbWVzcGFjZXMvdGVzdA==" | base64 --decode
+
+# output
+/registry/namespaces/test
+```
+
+#### 3、value是值可以通过安装etcdhelper工具解析出来
+```
+# ehelper get /registry/namespaces/test
+/v1, Kind=Namespace
+{
+  "kind": "Namespace",
+  "apiVersion": "v1",
+  "metadata": {
+    "name": "test",
+    "uid": "ac5bbc94-591f-11ea-bb94-6c92bf3b76b5",
+    "creationTimestamp": "2020-02-27T05:11:55Z"
+  },
+  "spec": {
+    "finalizers": [
+      "kubernetes"
+    ]
+  },
+  "status": {
+    "phase": "Active"
+  }
+}
+```
+
+
+也就是说etcdctl无法使用类似v2的ls命令。但是我还是习惯使用v2版本的etcdctl ls查看etcdctl存储的内容
 ```
 # vim etcd_ls.sh
 #!/bin/bash
@@ -301,4 +449,161 @@ etcdhelper get /registry/secrets/kube-system/istio.kube-proxy \
 >   | sed -n '2,$p' \
 >   | jq '.data."key.pem"' \
 >   | tr -d '"' |base64 -d
+```
+
+
+
+
+
+# RBAC 相关key
+
+clusterrolebindings
+```
+/registry/clusterrolebindings/cluster-admin
+/registry/clusterrolebindings/flannel
+/registry/clusterrolebindings/galaxy
+/registry/clusterrolebindings/helm
+/registry/clusterrolebindings/kube-state-metrics
+/registry/clusterrolebindings/kubeadm:kubelet-bootstrap
+/registry/clusterrolebindings/kubeadm:node-autoapprove-bootstrap
+/registry/clusterrolebindings/kubeadm:node-autoapprove-certificate-rotation
+/registry/clusterrolebindings/kubeadm:node-proxier
+/registry/clusterrolebindings/lbcf-controller
+/registry/clusterrolebindings/prometheus-k8s
+/registry/clusterrolebindings/prometheus-operator
+/registry/clusterrolebindings/system:aws-cloud-provider
+/registry/clusterrolebindings/system:basic-user
+/registry/clusterrolebindings/system:controller:attachdetach-controller
+/registry/clusterrolebindings/system:controller:certificate-controller
+/registry/clusterrolebindings/system:controller:clusterrole-aggregation-controller
+/registry/clusterrolebindings/system:controller:cronjob-controller
+/registry/clusterrolebindings/system:controller:daemon-set-controller
+/registry/clusterrolebindings/system:controller:deployment-controller
+/registry/clusterrolebindings/system:controller:disruption-controller
+/registry/clusterrolebindings/system:controller:endpoint-controller
+/registry/clusterrolebindings/system:controller:expand-controller
+/registry/clusterrolebindings/system:controller:generic-garbage-collector
+/registry/clusterrolebindings/system:controller:horizontal-pod-autoscaler
+/registry/clusterrolebindings/system:controller:job-controller
+/registry/clusterrolebindings/system:controller:namespace-controller
+/registry/clusterrolebindings/system:controller:node-controller
+/registry/clusterrolebindings/system:controller:persistent-volume-binder
+/registry/clusterrolebindings/system:controller:pod-garbage-collector
+/registry/clusterrolebindings/system:controller:pv-protection-controller
+/registry/clusterrolebindings/system:controller:pvc-protection-controller
+/registry/clusterrolebindings/system:controller:replicaset-controller
+/registry/clusterrolebindings/system:controller:replication-controller
+/registry/clusterrolebindings/system:controller:resourcequota-controller
+/registry/clusterrolebindings/system:controller:route-controller
+/registry/clusterrolebindings/system:controller:service-account-controller
+/registry/clusterrolebindings/system:controller:service-controller
+/registry/clusterrolebindings/system:controller:statefulset-controller
+/registry/clusterrolebindings/system:controller:ttl-controller
+/registry/clusterrolebindings/system:coredns
+/registry/clusterrolebindings/system:discovery
+/registry/clusterrolebindings/system:kube-controller-manager
+/registry/clusterrolebindings/system:kube-dns
+/registry/clusterrolebindings/system:kube-scheduler
+/registry/clusterrolebindings/system:node
+/registry/clusterrolebindings/system:node-proxier
+/registry/clusterrolebindings/system:public-info-viewer
+/registry/clusterrolebindings/system:volume-scheduler
+```
+
+clusterroles
+```
+/registry/clusterroles/admin
+/registry/clusterroles/cluster-admin
+/registry/clusterroles/edit
+/registry/clusterroles/flannel
+/registry/clusterroles/kube-state-metrics
+/registry/clusterroles/lbcf-controller
+/registry/clusterroles/prometheus-k8s
+/registry/clusterroles/prometheus-operator
+/registry/clusterroles/system:aggregate-to-admin
+/registry/clusterroles/system:aggregate-to-edit
+/registry/clusterroles/system:aggregate-to-view
+/registry/clusterroles/system:auth-delegator
+/registry/clusterroles/system:aws-cloud-provider
+/registry/clusterroles/system:basic-user
+/registry/clusterroles/system:certificates.k8s.io:certificatesigningrequests:nodeclient
+/registry/clusterroles/system:certificates.k8s.io:certificatesigningrequests:selfnodeclient
+/registry/clusterroles/system:controller:attachdetach-controller
+/registry/clusterroles/system:controller:certificate-controller
+/registry/clusterroles/system:controller:clusterrole-aggregation-controller
+/registry/clusterroles/system:controller:cronjob-controller
+/registry/clusterroles/system:controller:daemon-set-controller
+/registry/clusterroles/system:controller:deployment-controller
+/registry/clusterroles/system:controller:disruption-controller
+/registry/clusterroles/system:controller:endpoint-controller
+/registry/clusterroles/system:controller:expand-controller
+/registry/clusterroles/system:controller:generic-garbage-collector
+/registry/clusterroles/system:controller:horizontal-pod-autoscaler
+/registry/clusterroles/system:controller:job-controller
+/registry/clusterroles/system:controller:namespace-controller
+/registry/clusterroles/system:controller:node-controller
+/registry/clusterroles/system:controller:persistent-volume-binder
+/registry/clusterroles/system:controller:pod-garbage-collector
+/registry/clusterroles/system:controller:pv-protection-controller
+/registry/clusterroles/system:controller:pvc-protection-controller
+/registry/clusterroles/system:controller:replicaset-controller
+/registry/clusterroles/system:controller:replication-controller
+/registry/clusterroles/system:controller:resourcequota-controller
+/registry/clusterroles/system:controller:route-controller
+/registry/clusterroles/system:controller:service-account-controller
+/registry/clusterroles/system:controller:service-controller
+/registry/clusterroles/system:controller:statefulset-controller
+/registry/clusterroles/system:controller:ttl-controller
+/registry/clusterroles/system:coredns
+/registry/clusterroles/system:csi-external-attacher
+/registry/clusterroles/system:csi-external-provisioner
+/registry/clusterroles/system:discovery
+/registry/clusterroles/system:heapster
+/registry/clusterroles/system:kube-aggregator
+/registry/clusterroles/system:kube-controller-manager
+/registry/clusterroles/system:kube-dns
+/registry/clusterroles/system:kube-scheduler
+/registry/clusterroles/system:kubelet-api-admin
+/registry/clusterroles/system:node
+/registry/clusterroles/system:node-bootstrapper
+/registry/clusterroles/system:node-problem-detector
+/registry/clusterroles/system:node-proxier
+/registry/clusterroles/system:persistent-volume-provisioner
+/registry/clusterroles/system:public-info-viewer
+/registry/clusterroles/system:volume-scheduler
+/registry/clusterroles/view
+```
+
+rolebindings
+```
+/registry/rolebindings/kube-public/kubeadm:bootstrap-signer-clusterinfo
+/registry/rolebindings/kube-public/system:controller:bootstrap-signer
+/registry/rolebindings/kube-system/kube-proxy
+/registry/rolebindings/kube-system/kube-state-metrics
+/registry/rolebindings/kube-system/kubeadm:kubeadm-certs
+/registry/rolebindings/kube-system/kubeadm:kubelet-config-1.14
+/registry/rolebindings/kube-system/kubeadm:nodes-kubeadm-config
+/registry/rolebindings/kube-system/system::extension-apiserver-authentication-reader
+/registry/rolebindings/kube-system/system::leader-locking-kube-controller-manager
+/registry/rolebindings/kube-system/system::leader-locking-kube-scheduler
+/registry/rolebindings/kube-system/system:controller:bootstrap-signer
+/registry/rolebindings/kube-system/system:controller:cloud-provider
+/registry/rolebindings/kube-system/system:controller:token-cleaner
+```
+
+roles
+```
+/registry/roles/kube-public/kubeadm:bootstrap-signer-clusterinfo
+/registry/roles/kube-public/system:controller:bootstrap-signer
+/registry/roles/kube-system/extension-apiserver-authentication-reader
+/registry/roles/kube-system/kube-proxy
+/registry/roles/kube-system/kube-state-metrics-resizer
+/registry/roles/kube-system/kubeadm:kubeadm-certs
+/registry/roles/kube-system/kubeadm:kubelet-config-1.14
+/registry/roles/kube-system/kubeadm:nodes-kubeadm-config
+/registry/roles/kube-system/system::leader-locking-kube-controller-manager
+/registry/roles/kube-system/system::leader-locking-kube-scheduler
+/registry/roles/kube-system/system:controller:bootstrap-signer
+/registry/roles/kube-system/system:controller:cloud-provider
+/registry/roles/kube-system/system:controller:token-cleaner
 ```

@@ -149,15 +149,14 @@ service
 
 # 三、Kubernetes资源
 
-## 3.1、etcdctl ls脚本
-
-v3版本的数据存储没有目录层级关系了，而是采用平展（flat)模式，换句话说/a与/a/b并没有嵌套关系，而只是key的名称差别而已，这个和AWS S3以及OpenStack Swift对象存储一样，没有目录的概念，但是key名称支持/字符，从而实现看起来像目录的伪目录，但是存储结构上不存在层级关系。
+## 3.1、手动操作
 
 ### 读取数据value
 
 #### 1、由于k8s默认etcd中的数据是通过protobuf格式存储，因此看到的key和value的值是一串字符串。
 ```
 # ectl get /registry/namespaces/test -w json |jq
+# ectl get /registry/namespaces/test -w json | python -m json.tool
 {
   "header": {
     "cluster_id": 12113422651334595000,
@@ -177,6 +176,7 @@ v3版本的数据存储没有目录层级关系了，而是采用平展（flat)�
   "count": 1
 }
 ```
+- -w指定输出格式
 
 #### 2、其中key可以通过base64解码出来
 ```
@@ -209,6 +209,118 @@ echo "L3JlZ2lzdHJ5L25hbWVzcGFjZXMvdGVzdA==" | base64 --decode
 }
 ```
 
+- 使用--prefix可以看到所有的子目录，如查看集群中的namespace
+```
+# ETCDCTL_API=3 etcdctl get /registry/namespaces --prefix -w=json|python -m json.tool
+
+输出结果中可以看到所有的namespace。
+{
+    "count": 8,
+    "header": {
+        "cluster_id": 12091028579527406772,
+        "member_id": 16557816780141026208,
+        "raft_term": 36,
+        "revision": 29253722
+    },
+    "kvs": [
+        {
+            "create_revision": 24310883,
+            "key": "L3JlZ2lzdHJ5L25hbWVzcGFjZXMvYXV0b21vZGVs",
+            "mod_revision": 24310883,
+            "value": "azhzAAoPCgJ2MRIJTmFtZXNwYWNlEmQKSgoJYXV0b21vZGVsEgAaACIAKiQ1MjczOTU1ZC1iMzEyLTExZTctOTcwYy1mNGU5ZDQ5ZjhlZDAyADgAQgsI7fSWzwUQ6Jv1Z3oAEgwKCmt1YmVybmV0ZXMaCAoGQWN0aXZlGgAiAA==",
+            "version": 1
+        },
+        {
+            "create_revision": 21387676,
+            "key": "L3JlZ2lzdHJ5L25hbWVzcGFjZXMvYnJhbmQ=",
+            "mod_revision": 21387676,
+            "value": "azhzAAoPCgJ2MRIJTmFtZXNwYWNlEmEKRwoFYnJhbmQSABoAIgAqJGNkZmQ1Y2NmLWExYzktMTFlNy05NzBjLWY0ZTlkNDlmOGVkMDIAOABCDAjR9qLOBRDYn83XAXoAEgwKCmt1YmVybmV0ZXMaCAoGQWN0aXZlGgAiAA==",
+            "version": 1
+        },
+        {
+            "create_revision": 5,
+            "key": "L3JlZ2lzdHJ5L25hbWVzcGFjZXMvZGVmYXVsdA==",
+            "mod_revision": 5,
+            "value": "azhzAAoPCgJ2MRIJTmFtZXNwYWNlEmIKSAoHZGVmYXVsdBIAGgAiACokZTU2YzMzMDgtMWVhOC0xMWU3LThjZDctZjRlOWQ0OWY4ZWQwMgA4AEILCIn4sscFEKOg9xd6ABIMCgprdWJlcm5ldGVzGggKBkFjdGl2ZRoAIgA=",
+            "version": 1
+        },
+        {
+            "create_revision": 18504694,
+            "key": "L3JlZ2lzdHJ5L25hbWVzcGFjZXMvZGV2",
+            "mod_revision": 24310213,
+            "value": "azhzAAoPCgJ2MRIJTmFtZXNwYWNlEmwKUgoDZGV2EgAaACIAKiQyOGRlMGVjNS04ZTEzLTExZTctOTcwYy1mNGU5ZDQ5ZjhlZDAyADgAQgwI89CezQUQ0v2fuQNaCwoEbmFtZRIDZGV2egASDAoKa3ViZXJuZXRlcxoICgZBY3RpdmUaACIA",
+            "version": 4
+        },
+        {
+            "create_revision": 10,
+            "key": "L3JlZ2lzdHJ5L25hbWVzcGFjZXMva3ViZS1wdWJsaWM=",
+            "mod_revision": 10,
+            "value": "azhzAAoPCgJ2MRIJTmFtZXNwYWNlEmcKTQoLa3ViZS1wdWJsaWMSABoAIgAqJGU1ZjhkY2I1LTFlYTgtMTFlNy04Y2Q3LWY0ZTlkNDlmOGVkMDIAOABCDAiJ+LLHBRDdrsDPA3oAEgwKCmt1YmVybmV0ZXMaCAoGQWN0aXZlGgAiAA==",
+            "version": 1
+        },
+        {
+            "create_revision": 2,
+            "key": "L3JlZ2lzdHJ5L25hbWVzcGFjZXMva3ViZS1zeXN0ZW0=",
+            "mod_revision": 2,
+            "value": "azhzAAoPCgJ2MRIJTmFtZXNwYWNlEmYKTAoLa3ViZS1zeXN0ZW0SABoAIgAqJGU1NmFhMDVkLTFlYTgtMTFlNy04Y2Q3LWY0ZTlkNDlmOGVkMDIAOABCCwiJ+LLHBRDoq9ASegASDAoKa3ViZXJuZXRlcxoICgZBY3RpdmUaACIA",
+            "version": 1
+        },
+        {
+            "create_revision": 3774247,
+            "key": "L3JlZ2lzdHJ5L25hbWVzcGFjZXMvc3BhcmstY2x1c3Rlcg==",
+            "mod_revision": 3774247,
+            "value": "azhzAAoPCgJ2MRIJTmFtZXNwYWNlEoABCmYKDXNwYXJrLWNsdXN0ZXISABoAIgAqJDMyNjY3ZDVjLTM0YWMtMTFlNy1iZmJkLThhZjFlM2E3YzViZDIAOABCDAiA1cbIBRDU3YuAAVoVCgRuYW1lEg1zcGFyay1jbHVzdGVyegASDAoKa3ViZXJuZXRlcxoICgZBY3RpdmUaACIA",
+            "version": 1
+        },
+        {
+            "create_revision": 15212191,
+            "key": "L3JlZ2lzdHJ5L25hbWVzcGFjZXMveWFybi1jbHVzdGVy",
+            "mod_revision": 15212191,
+            "value": "azhzAAoPCgJ2MRIJTmFtZXNwYWNlEn0KYwoMeWFybi1jbHVzdGVyEgAaACIAKiQ2YWNhNjk1Yi03N2Y5LTExZTctYmZiZC04YWYxZTNhN2M1YmQyADgAQgsI1qiKzAUQkoqxDloUCgRuYW1lEgx5YXJuLWNsdXN0ZXJ6ABIMCgprdWJlcm5ldGVzGggKBkFjdGl2ZRoAIgA=",
+            "version": 1
+        }
+    ]
+}
+
+key的值是经过base64编码，需要解码后才能看到实际值，如：
+# echo L3JlZ2lzdHJ5L25hbWVzcGFjZXMvYXV0b21vZGVs|base64 -d
+/registry/namespaces/automodel
+```
+
+## etcd中kubernetes的元数据
+
+我们使用kubectl命令获取的kubernetes的对象状态实际上是保存在etcd中的，使用下面的脚本可以获取etcd中的所有kubernetes对象的key：
+
+注意，我们使用了ETCD v3版本的客户端命令来访问etcd。
+```
+#!/bin/bash
+# Get kubernetes keys from etcd
+export ETCDCTL_API=3
+keys=`etcdctl get /registry --prefix -w json|python -m json.tool|grep key|cut -d ":" -f2|tr -d '"'|tr -d ","`
+for x in $keys;do
+  echo $x|base64 -d|sort
+done
+```
+
+通过输出的结果我们可以看到kubernetes的原数据是按何种结构包括在kuberentes中的，输出结果如下所示：
+```
+/registry/ThirdPartyResourceData/istio.io/istioconfigs/default/route-rule-details-default
+/registry/ThirdPartyResourceData/istio.io/istioconfigs/default/route-rule-productpage-default
+/registry/ThirdPartyResourceData/istio.io/istioconfigs/default/route-rule-ratings-default
+...
+/registry/configmaps/default/namerctl-script
+/registry/configmaps/default/namerd-config
+/registry/configmaps/default/nginx-config
+...
+/registry/deployments/default/sdmk-page-sdmk
+/registry/deployments/default/sdmk-payment-web
+/registry/deployments/default/sdmk-report
+```
+
+
+## 3.2、etcdctl ls脚本
+
+v3版本的数据存储没有目录层级关系了，而是采用平展（flat)模式，换句话说/a与/a/b并没有嵌套关系，而只是key的名称差别而已，这个和AWS S3以及OpenStack Swift对象存储一样，没有目录的概念，但是key名称支持/字符，从而实现看起来像目录的伪目录，但是存储结构上不存在层级关系。
 
 也就是说etcdctl无法使用类似v2的ls命令。但是我还是习惯使用v2版本的etcdctl ls查看etcdctl存储的内容
 ```
@@ -289,7 +401,7 @@ etcdctl --key="$KEY_FILE" \
         --endpoints "$ENDPOINTS" get "$ORIG_PREFIX"
 ```
 
-## 3.2、获取所有key
+## 3.3、获取所有key
 - 由于Kubernetes的所有数据都以/registry为前缀，因此首先查看/registry
 
 ```
@@ -322,7 +434,7 @@ etcdctl --key="$KEY_FILE" \
 /registry/storageclasses
 ```
 
-## 3.3、获取key值
+## 3.4、获取key值
 ```
 ./etcd_ls.sh /registry/ranges/servicenodeports |strings
 /registry/ranges/servicenodeports

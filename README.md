@@ -8,7 +8,7 @@ kubernetes相关资料
 | 从Docker到Kubernetes进阶 | https://www.qikqiak.com/k8s-book/ |
 | kubernetes中文文档 | https://www.kubernetes.org.cn/k8s |
 | Kubernetes 中文指南/云原生应用架构实践手册 | https://jimmysong.io/kubernetes-handbook/ |
-| 微服务容器化持续交付 | https://jimmysong.io/kubernetes-handbook/ |
+| Kubernetes 学习笔记 | https://www.huweihuang.com/kubernetes-notes/ |
 | Envoy 官方文档中文版 | http://www.servicemesher.com/envoy/ |
 | kubernetes-handbook | https://github.com/feiskyer/kubernetes-handbook |
 | Docker — 从入门到实践 | https://github.com/yeasy/docker_practice/blob/master/SUMMARY.md |

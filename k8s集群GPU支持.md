@@ -285,3 +285,6 @@ nvidia-container-cli 是一个命令行工具，用于配置Linux容器对GPU �
 ```
 kubectl get node 192.18.1.26 -ojson | jq '.status.allocatable'
 ```
+
+
+https://github.com/mykubernetes/kubernetes-handbook/blob/master/setup/addon-list/gpu.md

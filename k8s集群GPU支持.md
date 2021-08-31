@@ -289,4 +289,3 @@ kubectl get node 192.18.1.26 -ojson | jq '.status.allocatable'
 
 https://github.com/mykubernetes/kubernetes-handbook/blob/master/setup/addon-list/gpu.md
 
-https://github.com/feiskyer/kubernetes-handbook/blob/master/practice/gpu.md

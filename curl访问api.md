@@ -350,3 +350,19 @@ kubectl get --raw "/apis/metrics.k8s.io/v1beta1" | jq
   ]
 }
 ```
+
+```
+# kubectl get --raw /api |jq
+{
+  "kind": "APIVersions",
+  "versions": [
+    "v1"
+  ],
+  "serverAddressByClientCIDRs": [
+    {
+      "clientCIDR": "0.0.0.0/0",
+      "serverAddress": "172.20.0.12:6443"
+    }
+  ]
+}
+```

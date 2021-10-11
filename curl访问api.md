@@ -3,7 +3,7 @@ apiserver有三种级别的客户端认证方式
 2、HTTP Token认证：通过一个Token来识别合法用户  
 3、HTTP Base认证：通过用户名+密码的认证方式  
 
-HTTP Token认证：通过一个Token来识别合法用户
+# HTTP Token认证：通过一个Token来识别合法用户
 
 1、创建可以访问api的用户
 ```
@@ -169,7 +169,7 @@ $ curl $APISERVER/api --header "Authorization: Bearer $TOKEN" --insecure
 }
 ```
 
-4、HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式 
+# 4、HTTPS证书认证：基于CA根证书签名的双向数字证书认证方式 
 ```
 # cd /etc/kubernetes/pki/
 
@@ -237,7 +237,7 @@ $ curl http://localhost:8080/api/
 }
 ```
 
-API Resources
+# API Resources
 ```
 kubectl api-resources -o wide
 NAME                              SHORTNAMES   APIGROUP                       NAMESPACED   KIND                             VERBS
@@ -280,7 +280,7 @@ replicasets           rs           apps       true         ReplicaSet           
 statefulsets          sts          apps       true         StatefulSet
 ```
 
-API Versions
+# API Versions
 ```
 kubectl api-versions
 admissionregistration.k8s.io/v1beta1
@@ -313,8 +313,13 @@ storage.k8s.io/v1beta1
 v1
 ```
 
-
+# kubectl
 ```
+kubectl get --raw /
+kubectl get --raw /api/v1/namespaces
+kubectl get --raw /apis/metrics.k8s.io/v1beta1/nodes
+kubectl get --raw /apis/metrics.k8s.io/v1beta1/pods
+
 kubectl get --raw "/apis/metrics.k8s.io/v1beta1" | jq
 
 {

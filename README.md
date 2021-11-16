@@ -27,6 +27,7 @@ kubernetes相关资料
 | 博客 | https://jiangxl.blog.csdn.net/article/details/119828244 |
 | 博客 | https://www.cnblogs.com/yuhaohao/ |
 | 博客 | https://www.cuiliangblog.cn/detail/article/29 |
+| k8s-cluster | https://github.com/qjpoo/k8s-cluster |
 
 - [kubernetes yaml模板与示例](https://github.com/mykubernetes/kubernetes/blob/master/kubernetes%20yaml%E6%A8%A1%E6%9D%BF%E4%B8%8E%E7%A4%BA%E4%BE%8B.md)
 - [kubernetes1.13.1+etcd3.3.10+flanneld0.10集群二进制部署](https://github.com/mykubernetes/kubernetes/blob/master/deploy/kubernetes1.13.1%2Betcd3.3.10%2Bflanneld0.10%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2.md)

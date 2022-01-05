@@ -1,0 +1,80 @@
+本小节演示了如何使用Chiron来管理DNS证书， 一个轻量的组件连接到Istiod, 使用Kubernetes  CA APIs，而不维护它自己的私有key. 使用这个feature有以下优势。
+
+- 不像istiod, 这个功能不会请求维护一个私有签名的key， 它增强了安全。
+
+- 简化了根证书分布到TLS客户端，客户端不再需要等待istiod去产生和分布它的CA证书。
+
+#### 1. 准备工作
+
+1. 安装istio时指定DNS证书配置
+
+```shell
+$ cat <<EOF > ./istio.yaml
+apiVersion: install.istio.io/v1alpha1
+kind: IstioOperator
+spec:
+  values:
+    global:
+      certificates:
+        - secretName: dns.example1-service-account
+          dnsNames: [example1.istio-system.svc, example1.istio-system]
+        - secretName: dns.example2-service-account
+          dnsNames: [example2.istio-system.svc, example2.istio-system]
+EOF
+$ istioctl manifest apply -f ./istio.yaml
+
+```
+
+#### 2. DNS证书提供和管理
+
+Istio根据您提供的配置为DNS证书提供DNS名称和秘密名称。所提供的DNS证书由Kubernetes CA签名，并存储在您的配置之后的密钥中。Istio还管理DNS证书的生命周期，包括它们的循环和重新生成。
+
+#### 3. 配置dns证书
+
+在上面的istioctl manifest apply命令中，用于配置Istio的IstioControlPlane定制资源包含一个示例DNS证书配置。在其中，dnsNames字段指定证书中的DNS名称，而secretName字段指定用于存储证书和密钥的Kubernetes secret的名称。
+
+#### 4. 检查DNS证书的供给
+
+在配置Istio去产生DNS证书后，把它们存储在你选择的密钥中。你可以校验供给的证书，和检查是否工作。
+
+去检查 istio产生的`dns.example1-service-account` DNS证书在本案例中， 这个证书包含配置的dns名称， 你需要从kubernetes中获得密钥，分析它，和解码它， 使用以下命令查看它的内容。
+
+```shell
+$ kubectl get secret dns.example1-service-account -n istio-system -o jsonpath="{.data['cert-chain\.pem']}" | base64 --decode | openssl x509 -in /dev/stdin -text -noout
+```
+
+ 这个文本输出应该包含如下：
+
+```shell
+X509v3 Subject Alternative Name:
+    DNS:example1.istio-system.svc, DNS:example1.istio-system
+```
+
+#### 5. 重新产生DNS证书
+
+如果由于错误操作删除的话，Istio也可以重新产生证书。接下来，我们演示一下
+
+1. 删除存储DNS证书的密钥
+
+```shell
+$ c
+```
+
+2. 然后，使用如下命令查看重新生成的证书
+
+```shell
+$ sleep 10; kubectl get secret dns.example1-service-account -n istio-system -o jsonpath="{.data['cert-chain\.pem']}" | base64 --decode | openssl x509 -in /dev/stdin -text -noout
+```
+
+3. 输出应该包含如下所示
+
+```shell
+X509v3 Subject Alternative Name:
+    DNS:example1.istio-system.svc, DNS:example1.istio-system
+```
+
+#### 6. 移除本实验
+
+```shell
+$ kubectl delete ns istio-system
+```

@@ -74,3 +74,4 @@ kubernetes相关资料
 - [Eviction](https://github.com/mykubernetes/kubernetes/blob/master/K8S%20Pod%20Eviction%20%E6%9C%BA%E5%88%B6.md)
 - [Kubernetes之etcd操作](https://github.com/mykubernetes/kubernetes/blob/master/Kubernetes%E4%B9%8Betcd%E6%93%8D%E4%BD%9C.md)
 - [etcd实践操作记录](https://github.com/mykubernetes/kubernetes/blob/master/etcd%E5%AE%9E%E8%B7%B5%E6%93%8D%E4%BD%9C%E8%AE%B0%E5%BD%95.md)
+- [Kubernetes 映射外部服务到集群内部的场景.md](Kubernetes 映射外部服务到集群内部的场景.md)

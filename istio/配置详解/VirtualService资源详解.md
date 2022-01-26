@@ -1476,7 +1476,7 @@ spec:
 
 1、exact
 ```
-# cat virtaulservice/match/
+# cat virtaulservice/match/vs-match-header-exact.yaml
 
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
@@ -1550,6 +1550,75 @@ spec:
     - destination:
         host: reviews
         subset: v3
+```
+
+4、cookie
+```
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: bookinfo
+spec:
+  gateways:
+  - bookinfo-gateway
+  hosts:
+  - '*'
+  http:
+  - match:
+    - headers:
+        cookie:
+          regex: "^(.*?;)?(session=.*)(;.*)?$"
+  - route:
+    - destination:
+        host: productpage
+        port:
+          number: 9080
+```
+
+5、user-agent
+
+header user-agent例子
+
+safari 5.1 - MAC
+- User-Agent:Mozilla/5.0 (Macintosh; U；Intel Mac OS X 10_6_8;en-us) AppleWebKit/534.50(KHTML, like Gecko) Version/5.1 Safari/534.50
+
+safari 5.1 - Windows
+- User-Agent:Mozilla/5.0 (Windows; U；Windows NT 6.1;en-us) AppleWebKit/534.50(KHTML, like Gecko) Version/5.1 Safari/534.50
+
+IE 9.0
+- User-Agent:Mozilla/5.0 (compatible; MSIE 9.0; Windows NT 6.1; Trident/5.0)
+
+IE 8.0
+- User-Agent:Mozilla/4.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident4.0)
+
+IE 7.0
+- User-Agent:Mozilla/4.0 (compatible; MSIE 7.0; Windows NT 6.0)
+
+IE 7.0
+- User-Agent:Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1)
+
+```
+# cat virtaulservice/match/vs-match-headers-user-agent.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: bookinfo
+spec:
+  gateways:
+  - bookinfo-gateway
+  hosts:
+  - '*'
+  http:
+  - match:
+    - headers:
+        user-agent:
+          regex: ".*chrome"
+  - route:
+    - destination:
+        host: productpage
+        port:
+          number: 9080
 ```
 
 ## ignoreUriCase

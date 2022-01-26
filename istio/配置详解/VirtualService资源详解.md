@@ -1367,12 +1367,14 @@ spec:
           number: 9080
 ```
 
-## 5)match.
+## 5)match 匹配规则
 
-authority.exact
+### authority
 
-virtaulservice/match/vs-match-authority-exact.yaml
+1、exact
 ```
+# cat virtaulservice/match/vs-match-authority-exact.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1385,7 +1387,7 @@ spec:
   http:
   - match:
     - authority:
-        exact: "bookinfo.demo:27941"
+        exact: "bookinfo.demo:27941"                          # 匹配域名加端口
     route:
     - destination:
         host: productpage
@@ -1393,10 +1395,10 @@ spec:
           number: 9080
 ```
 
-## prefix
-
-virtaulservice/match/vs-match-authority-prefix.yaml
+2、prefix
 ```
+# cat virtaulservice/match/vs-match-authority-prefix.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1417,10 +1419,10 @@ spec:
           number: 9080
 ```
 
-## regex
-
-virtaulservice/match/vs-match-authority-regex.yaml
+3、regex
 ```
+# cat virtaulservice/match/vs-match-authority-regex.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1441,10 +1443,10 @@ spec:
           number: 9080
 ```
 
-## gateways
-
-virtaulservice/match/vs-match-gateways.yaml
+### gateways
 ```
+# cat virtaulservice/match/vs-match-gateways.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1470,10 +1472,12 @@ spec:
           number: 9080
 ```
 
-## headers.exact
+### headers
 
-virtaulservice/match/
+1、exact
 ```
+# cat virtaulservice/match/
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -1496,7 +1500,7 @@ spec:
         subset: v3
 ```
 
-## prefix
+2、prefix
 
 virtaulservice/match/vs-match-headers-prefix.yaml
 ```
@@ -1522,7 +1526,7 @@ spec:
         subset: v3
 ```
 
-## regex
+3、regex
 
 virtaulservice/match/vs-match-headers-regex.yaml
 ```

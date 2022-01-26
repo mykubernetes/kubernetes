@@ -974,12 +974,12 @@ http://bookinfo.com:30986/productpage
 
 http://bookinfo.com:30986/reviews/1
 
-### 3）fault
+### 3）fault 故障注入
 
-1、abort
-
-virtaulservice/fault/vs-productpage-fault-abort.yaml
+1、abort 错误注入
 ```
+# cat virtaulservice/fault/vs-productpage-fault-abort.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1013,10 +1013,10 @@ spec:
         subset: v1
 ```
 
-2、delay
-
-virtaulservice/fault/vs-productpage-fault-delay.yaml
+2、delay 延时注入
 ```
+# cat virtaulservice/fault/vs-productpage-fault-delay.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:

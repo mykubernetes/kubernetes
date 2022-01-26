@@ -1554,6 +1554,8 @@ spec:
 
 4、cookie
 ```
+# cat virtaulservice/match/vs-match-header-cookie-bookinfo.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1621,7 +1623,7 @@ spec:
           number: 9080
 ```
 
-## ignoreUriCase
+### ignoreUriCase 忽略URI大小写
 
 virtaulservice/match/vs-match-ignoreUriCase.yaml
 ```
@@ -1646,10 +1648,12 @@ spec:
           number: 9080
 ```
 
-## method.exact
+### method
 
-virtaulservice/match/vs-match-method-exact.yaml
+1、exact
 ```
+# cat virtaulservice/match/vs-match-method-exact.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1670,10 +1674,10 @@ spec:
           number: 9080
 ```
 
-## prefix
-
-virtaulservice/match/vs-match-method-prefix.yaml
+2、prefix
 ```
+# cat virtaulservice/match/vs-match-method-prefix.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1694,10 +1698,10 @@ spec:
           number: 9080
 ```
 
-## regex
-
-virtaulservice/match/vs-match-method-regex.yaml
+3、regex
 ```
+# cat virtaulservice/match/vs-match-method-regex.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1718,10 +1722,10 @@ spec:
           number: 9080
 ```
 
-## name
-
-virtaulservice/match/vs-match-name.yaml
+### name 名称标识，具体不起作用
 ```
+# cat virtaulservice/match/vs-match-name.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1743,10 +1747,10 @@ spec:
           number: 9080
 ```
 
-## port
-
-virtaulservice/match/vs-match-port.yaml
+### port
 ```
+# cat virtaulservice/match/vs-match-port.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1766,10 +1770,12 @@ spec:
           number: 9080
 ```
 
-## queryParams.exact
+### queryParams 查询参数
 
-virtaulservice/match/vs-match-queryParams-exact.yaml
+1、exact
 ```
+# cat virtaulservice/match/vs-match-queryParams-exact.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1791,10 +1797,10 @@ spec:
           number: 9080
 ```
 
-## prefix
-
-virtaulservice/match/vs-match-queryParams-prefix.yaml
+2、prefix
 ```
+# cat virtaulservice/match/vs-match-queryParams-prefix.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1817,10 +1823,10 @@ spec:
 ```
 不起作用，只要有queryParams为test就能访问
 
-## regex
-
-virtaulservice/match/vs-match-queryParams-regex.yaml
+3、regex
 ```
+# cat virtaulservice/match/vs-match-queryParams-regex.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1843,14 +1849,12 @@ spec:
 ```
 test值必须是数字
 
-## scheme
+### scheme
 
-访问404，放弃，有待研究
-
-exact
-
-vs-match-scheme-exact.yaml
+1、exact
 ```
+cat vs-match-scheme-exact.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1871,10 +1875,10 @@ spec:
           number: 9080
 ```
 
-prefix
-
-vs-match-scheme-prefix.yaml
+2、prefix
 ```
+# cat vs-match-scheme-prefix.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1895,10 +1899,10 @@ spec:
           number: 9080
 ```
 
-regex
-
-vs-match-scheme-regex.yaml
+3、regex
 ```
+# cat vs-match-scheme-regex.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1919,10 +1923,10 @@ spec:
           number: 9080
 ```
 
-## sourceLabels
-
-virtaulservice/match/vs-match-sourceLabels.yaml
+### sourceLabels
 ```
+# cat virtaulservice/match/vs-match-sourceLabels.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -1941,7 +1945,7 @@ spec:
         subset: v2
 ```
 
-## sourceNamespace
+### sourceNamespace
 
 virtaulservice/match/vs-match-sourceNamespace.yaml
 ```
@@ -1964,10 +1968,12 @@ spec:
           number: 9080
 ```
 
-## uri.exact
+### uri
 
-virtaulservice/match/vs-match-uri-exact.yaml
+1、exact
 ```
+# cat virtaulservice/match/vs-match-uri-exact.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1988,10 +1994,10 @@ spec:
           number: 9080
 ```
 
-## prefix
-
-virtaulservice/match/vs-match-uri-prefix.yaml
+2、prefix
 ```
+# cat virtaulservice/match/vs-match-uri-prefix.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -2012,10 +2018,10 @@ spec:
           number: 9080
 ```
 
-## regex
-
-virtaulservice/match/vs-match-uri-regex.yaml
+3、regex
 ```
+# cat virtaulservice/match/vs-match-uri-regex.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -2036,14 +2042,14 @@ spec:
           number: 9080
 ```
 
-## withoutHeaders
+### withoutHeaders
 
 测试不成功，放弃，有待研究
 
-## exact
-
-vs-match-withoutHeaders-exact.yaml
+1、exact
 ```
+# cat vs-match-withoutHeaders-exact.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2066,10 +2072,10 @@ spec:
         subset: v3
 ```
 
-## prefix
-
-vs-match-withoutHeaders-prefix.yaml
+2、prefix
 ```
+# cat vs-match-withoutHeaders-prefix.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2092,10 +2098,10 @@ spec:
         subset: v3
 ```
 
-# regex
-
-vs-match-withoutHeaders-regex.yaml
+3、regex
 ```
+# cat vs-match-withoutHeaders-regex.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2118,7 +2124,7 @@ spec:
         subset: v3
 ```
 
-## mirror
+### mirror
 
 virtaulservice/mirror/vs-http-mirror.yaml
 ```
@@ -2188,7 +2194,7 @@ kubectl apply -f vs-http-mirror.yaml -n istio
 
 http://192.168.198.154:27941/productpage
 
-## subset
+### subset
 
 1、创建dr
 ```
@@ -2206,7 +2212,7 @@ http://192.168.198.154:27941/productpage
 
 4、观察日志
 
-## name
+### name
 
 virtaulservice/vs-bookinfo-name.yaml
 ```
@@ -2239,7 +2245,7 @@ spec:
           number: 9080
 ```
 
-## redirect
+### redirect
 
 virtaulservice/redirect/vs-productpage-redirect.yaml
 ```

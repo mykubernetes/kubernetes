@@ -1090,6 +1090,44 @@ spec:
         subset: v1
 ```
 
+exponentialDelay
+```
+# cat virtaulservice/fault/vs-productpage-fault-delay-exponentialDelay.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: bookinfo
+  namespace: istio
+spec:
+  gateways:
+  - bookinfo-gateway
+  hosts:
+  - '*'
+  http:
+  - fault:
+      delay:
+        percentage:
+          value: 100.0
+        exponentialDelay: 7s
+    match:
+    - uri:
+        exact: /productpage
+    - uri:
+        prefix: /static
+    - uri:
+        exact: /login
+    - uri:
+        exact: /logout
+    - uri:
+        prefix: /api/v1/products
+    route:
+    - destination:
+        host: productpage
+        subset: v1
+```
+- exponentialDelay not supported yet 目前不支持
+
 ### 4）headers
 
 #### request

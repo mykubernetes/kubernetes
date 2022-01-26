@@ -1013,7 +1013,47 @@ spec:
         subset: v1
 ```
 
-2、delay 延时注入
+2、http2 abort
+```
+# cat virtaulservice/fault/vs-productpage-fault-abort-http2Error.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: bookinfo
+  namespace: istio
+spec:
+  gateways:
+  - bookinfo-gateway
+  hosts:
+  - '*'
+  http:
+  - fault:
+      abort:
+        #grpcStatus: "test"
+        http2Error: "test"
+        #httpStatus: 500
+        percentage:
+          value: 100
+    match:
+    - uri:
+        exact: /productpage
+    - uri:
+        prefix: /static
+    - uri:
+        exact: /login
+    - uri:
+        exact: /logout
+    - uri:
+        prefix: /api/v1/products
+    route:
+    - destination:
+        host: productpage
+        subset: v1
+```
+- HTTP/2 abort fault injection not supported yet 目前不支持http2
+
+3、delay 延时注入
 ```
 # cat virtaulservice/fault/vs-productpage-fault-delay.yaml
 

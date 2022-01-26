@@ -2042,9 +2042,8 @@ spec:
           number: 9080
 ```
 
-### withoutHeaders
+### withoutHeaders 无头匹配
 
-测试不成功，放弃，有待研究
 
 1、exact
 ```
@@ -2072,6 +2071,12 @@ spec:
         subset: v3
 ```
 
+```
+curl http://bookinfo.demo:30986/productpage -H "end-user: mark" -I
+curl http://bookinfo.demo:30986/productpage -H "end-user: hxp"
+```
+- 如果header不存在也是不匹配
+
 2、prefix
 ```
 # cat vs-match-withoutHeaders-prefix.yaml
@@ -2097,6 +2102,12 @@ spec:
         host: reviews
         subset: v3
 ```
+
+```
+curl http://bookinfo.demo:30986/productpage -H "end-user: mark" -I
+curl http://bookinfo.demo:30986/productpage -H "end-user: hxp"
+```
+- 如果header不存在也是不匹配
 
 3、regex
 ```
@@ -2124,10 +2135,16 @@ spec:
         subset: v3
 ```
 
-### mirror
-
-virtaulservice/mirror/vs-http-mirror.yaml
 ```
+curl http://bookinfo.demo:30986/productpage -H "end-user: mark" -I
+curl http://bookinfo.demo:30986/productpage -H "end-user: hxp"
+```
+- 如果header不存在也是不匹配
+
+## mirror 流量镜像
+```
+# cat virtaulservice/mirror/vs-http-mirror.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -2163,7 +2180,6 @@ spec:
     mirrorPercentage:
       value: 100
 ```
-
 
 1、创建namespace
 ```
@@ -2212,7 +2228,7 @@ http://192.168.198.154:27941/productpage
 
 4、观察日志
 
-### name
+## name 标识名称，不起作用
 
 virtaulservice/vs-bookinfo-name.yaml
 ```
@@ -2245,7 +2261,7 @@ spec:
           number: 9080
 ```
 
-### redirect
+## redirect 重定向
 
 virtaulservice/redirect/vs-productpage-redirect.yaml
 ```
@@ -2289,7 +2305,8 @@ spec:
 
 http://192.168.198.154:27941/mypage
 
-## retries
+## retries 重试
+
 - attempts：必选字段，定义重试的次数
 - perTryTimeout：每次重试超时的时间，单位可以是ms、s、m和h
 - retryOn：进行重试的条件，可以是多个条件，以逗号分隔
@@ -2305,10 +2322,10 @@ http://192.168.198.154:27941/mypage
 - resource-exhausted：在gRPC应答的Header中状态码是resource-exhausted时执行重试
 - unavailable：在gRPC应答的Header中状态码是unavailable时执行重试。
 
-设置延迟错误：
-
-virtaulservice/retry/vs-reviews.yaml
+1、设置延迟错误
 ```
+# cat virtaulservice/retry/vs-reviews.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -2328,10 +2345,10 @@ spec:
         fixedDelay: 7s
 ```
 
-设置重试
-
-virtaulservice/retry/vs-bookinfo.yaml
+2、设置重试
 ```
+# cat virtaulservice/retry/vs-bookinfo.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -2363,11 +2380,15 @@ spec:
       retryOn: 5xx,connect-failure
 ```
 
+查看重试日志
+```
+kubectl logs -f productpage-v1-6b746f74dc-nb8sg -n istio
+```
 
 是否重试其他机子
-
-virtaulservice/retry/vs-bookinfo-retryRemoteLocalities.yaml
 ```
+# cat virtaulservice/retry/vs-bookinfo-retryRemoteLocalities.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -2400,10 +2421,12 @@ spec:
       retryRemoteLocalities: true
 ```
 
-## rewrite.uri
+## rewrite 重写
 
-virtaulservice/rewrite/vs-http-rewrite.yaml
+1、uri
 ```
+# cat virtaulservice/rewrite/vs-http-rewrite.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -2426,10 +2449,10 @@ spec:
           number: 9080
 ```
 
-## authority
-
-virtaulservice/rewrite/vs-http-rewrite-authority.yaml
+2、authority
 ```
+# cat virtaulservice/rewrite/vs-http-rewrite-authority.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -2453,10 +2476,14 @@ spec:
           number: 9080
 ```
 
-## route.destination.host
+## route 路由
 
-virtaulservice/route/vs-reviews-host.yaml
+### destination
+
+1、host
 ```
+# cat virtaulservice/route/vs-reviews-host.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2470,10 +2497,10 @@ spec:
         host: reviews
 ```
 
-## port
-
-virtaulservice/route/vs-reviews-port.yaml
+2、port
 ```
+# cat virtaulservice/route/vs-reviews-port.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2489,10 +2516,10 @@ spec:
           number: 9080
 ```
 
-subset
-
-virtaulservice/route/vs-reviews-subset.yaml
+3、subset
 ```
+# cat virtaulservice/route/vs-reviews-subset.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2507,10 +2534,14 @@ spec:
         subset: v1
 ```
 
-## headers.request.add
+### headers
 
-virtaulservice/route/vs-reviews-headers-request-add.yaml
+#### request
+
+1、add
 ```
+# cat virtaulservice/route/vs-reviews-headers-request-add.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2529,10 +2560,10 @@ spec:
             test: test
 ```
 
-## remove
-
-virtaulservice/route/vs-reviews-headers-request-remove.yaml
+2、remove
 ```
+# cat virtaulservice/route/vs-reviews-headers-request-remove.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2551,10 +2582,10 @@ spec:
           - test
 ```
 
-## set
-
-virtaulservice/route/vs-reviews-headers-request-set.yaml
+3、set
 ```
+# cat virtaulservice/route/vs-reviews-headers-request-set.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2573,10 +2604,12 @@ spec:
             test: test
 ```
 
-## response.add
+#### response
 
-virtaulservice/route/vs-bookinfo-headers-response-add.yaml
+1、add
 ```
+# cat virtaulservice/route/vs-bookinfo-headers-response-add.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2609,10 +2642,10 @@ spec:
             test: test
 ```
 
-## remove
-
-virtaulservice/route/vs-bookinfo-headers-response-remove.yaml
+2、remove
 ```
+# cat virtaulservice/route/vs-bookinfo-headers-response-remove.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2645,10 +2678,10 @@ spec:
           - x-envoy-upstream-service-time
 ```
 
-## set
-
-virtaulservice/route/vs-bookinfo-headers-response-set.yaml
+3、set
 ```
+# cat virtaulservice/route/vs-bookinfo-headers-response-set.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2684,7 +2717,7 @@ spec:
 ~
 ```
 
-## weight
+### weight 权重
 
 virtaulservice/route/vs-reviews-weight.yaml
 ```
@@ -2707,7 +2740,7 @@ spec:
       weight: 50
 ```
 
-## timeout
+## timeout 超时
 
 virtaulservice/timeout/vs-http-timeout.yaml
 ```
@@ -2887,7 +2920,9 @@ spec:
 
 https://nginx.example.com:39329/
 
-## match.destinationSubnets
+## match
+
+### destinationSubnets
 
 1.7.0/virtaulservice/tls/vs-nginx-destinationSubnets.yaml
 ```
@@ -2914,7 +2949,7 @@ spec:
           number: 443
 ```
 
-## gateways
+## #gateways
 
 1.7.0/virtaulservice/tls/vs-nginx-gateways.yaml
 ```

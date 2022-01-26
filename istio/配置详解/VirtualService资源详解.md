@@ -1,8 +1,8 @@
-# 什么是virtualService
+# 一、什么是virtualService
 
 `VirtualService`中文名称虚拟服务，是istio中一个重要的资源， 它定义了一系列针对指定服务的流量路由规则。每个路由规则都针对特定协议的匹配规则。如果流量符合这些特征，就会根据规则发送到服务注册表中的目标服务（或者目标服务的子集或版本）。
 
-# vs和k8s service的区别
+# 二、vs和k8s service的区别
 
 如果没有 Istio virtual service，仅仅使用 k8s service 的话，那么只能实现最基本的流量负载均衡转发，但是就不能实现类似按百分比来分配流量等更加复杂、丰富、细粒度的流量控制了。
 
@@ -29,7 +29,7 @@ spec:
       weight: 75
 ```
 
-# 配置详解
+# 三、配置详解
 
 ## exportTo
 
@@ -66,7 +66,6 @@ spec:
         port:
           number: 9080
 ```
-
 
 2、所有名称空间有效
 
@@ -281,7 +280,7 @@ spec:
 
 必要字段：流量的目标主机。可以是带有通配符前缀的 DNS 名称，也可以是 IP 地址。根据所在平台情况，还可能使用短名称来代替 FQDN。这种场景下，短名称到 FQDN 的具体转换过程是要靠下层平台完成的。**一个主机名只能在一个 VirtualService 中定义。** 同一个`VirtualService`中可以用于控制多个 HTTP 和 TCP 端口的流量属性。 Kubernetes 用户注意：当使用服务的短名称时（例如使用 reviews，而不是 reviews.default.svc.cluster.local），Istio 会根据规则所在的命名空间来处理这一名称，而非服务所在的命名空间。假设 “default” 命名空间的一条规则中包含了一个 reviews 的 host引用，就会被视为 reviews.default.svc.cluster.local，而不会考虑 reviews 服务所在的命名空间。**为了避免可能的错误配置，建议使用 FQDN 来进行服务引用。** hosts 字段对 HTTP 和 TCP 服务都是有效的。网格中的服务也就是在服务注册表中注册的服务，必须使用他们的注册名进行引用；只有 Gateway 定义的服务才可以使用 IP 地址。
 
-## ip
+1、ip
 
 virtaulservice/vs-bookinfo-hosts-ip.yaml
 ```
@@ -313,7 +312,7 @@ spec:
           number: 9080
 ```
 
-## 多个hosts
+2、多个hosts
 
 virtaulservice/vs-bookinfo-hosts-multi.yaml
 ```
@@ -346,7 +345,7 @@ spec:
           number: 9080
 ```
 
-## 匹配所有域名
+3、匹配所有域名
 
 virtaulservice/vs-bookinfo-hosts-star.yaml
 ```
@@ -377,7 +376,7 @@ spec:
           number: 9080
 ```
 
-## 短fqdn
+4、短fqdn
 
 virtaulservice/vs-bookinfo-hosts-fqdn-short.yaml
 
@@ -427,7 +426,7 @@ spec:
     app: productpage
 ```
 
-## 长fqdn
+5、长fqdn
 
 virtaulservice/vs-bookinfo-hosts-fqdn-long.yaml
 
@@ -483,11 +482,11 @@ spec:
 
 HTTP 流量规则的有序列表。这个列表对名称前缀为 http-、http2-、grpc- 的服务端口，或者协议为 HTTP、HTTP2、GRPC 以及终结的 TLS，另外还有使用 HTTP、HTTP2 以及 GRPC 协议的 ServiceEntry 都是有效的。进入流量会使用匹配到的第一条规则。
 
-## corsPolicy
+### 1）corsPolicy
 
 cors介绍 https://blog.csdn.net/java_green_hand0909/article/details/78740765
 
-### 配置httpd服务
+1、配置httpd服务
 ```
 [root@master01 html]# cat index.html 
 <html>
@@ -566,7 +565,7 @@ $(function(){
 systemctl start httpd
 ```
 
-简单请求，配置cors
+2、简单请求，配置cors
 
 virtaulservice/corsPolicy/vs-productpage-cors.yaml
 ```

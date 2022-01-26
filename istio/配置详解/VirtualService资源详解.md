@@ -2824,6 +2824,8 @@ kubectl create configmap nginx-configmap --from-file=nginx.conf=./nginx.conf -ni
 
 4、创建deploy
 ```
+# cat nginx-deploy.yaml
+
 apiVersion: v1
 kind: Service
 metadata:
@@ -2874,6 +2876,8 @@ spec:
 
 5、创建gateway
 ```
+# cat virtaulservice/tls/gw-mode-passthrough.yaml
+
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
@@ -2892,40 +2896,12 @@ spec:
       mode: PASSTHROUGH
 ```
 
-
-6、创建vs
-```
-apiVersion: networking.istio.io/v1alpha3
-kind: VirtualService
-metadata:
-  name: nginx
-spec:
-  hosts:
-  - nginx.example.com
-  gateways:
-  - bookinfo-gateway
-  tls:
-  - match:
-    - port: 443
-      sniHosts:
-      - nginx.example.com
-    route:
-    - destination:
-        host: my-nginx
-        port:
-          number: 443
-```
-
-7、访问url
-
-https://nginx.example.com:39329/
-
 ## match
 
-### destinationSubnets
-
-1.7.0/virtaulservice/tls/vs-nginx-destinationSubnets.yaml
+1、sinHosts
 ```
+# cat virtaulservice/tls/vs-nginx-sniHosts.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2940,8 +2916,6 @@ spec:
     - port: 443
       sniHosts:
       - nginx.example.com
-      destinationSubnets: 
-      - 172.20.1.78/32
     route:
     - destination:
         host: my-nginx
@@ -2949,10 +2923,41 @@ spec:
           number: 443
 ```
 
-## #gateways
+访问url https://nginx.example.com:39329/
 
-1.7.0/virtaulservice/tls/vs-nginx-gateways.yaml
+2、port
 ```
+# cat virtaulservice/tls/vs-nginx-port.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: nginx
+spec:
+  hosts:
+  - nginx.example.com
+  gateways:
+  - bookinfo-gateway
+  tls:
+  - match:
+    - port: 443
+      sniHosts:
+      - nginx.example.com
+    route:
+    - destination:
+        host: my-nginx
+        port:
+          number: 443
+        subset: v1
+```
+
+访问url https://nginx.example.com:39329
+
+
+3、gateways
+```
+# cat 1.7.0/virtaulservice/tls/vs-nginx-gateways.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -2974,12 +2979,90 @@ spec:
         host: my-nginx
         port:
           number: 443
+        subset: v1
 ```
 
-## sourceLabels
+4、destinationSubnets 目标子集
 
-1.7.0/virtaulservice/tls/vs-nginx-sourceLabels.yaml
+只对mesh traffic有效， destinationSubnets为svc ip
 ```
+openssh req -out nginx.example.com.csr -newkey rsa:2048 -nodes -keyout nginx.example.com.key -subj "/CN=my-nginx/O=some organization"
+
+opensshl x509 -req -days 365 -CA example.com.crt -CAkey example.com.key -set_serial 0 -in nginx.example.com.csr -out  nginx.example.com.crt
+```
+
+创建secret
+```
+kubectl create secret tls nginx-server-certs --key  nginx.example.com.key --cert  nginx.example.com.crt -n istio
+```
+
+部署v2
+```
+kubectl apply -f nginx-deploy-v2.yaml -n istio
+kubectl exec -it -n istio my-nginx-57fb7765cb-nfxb7 -- /bin/bash
+echo "nginx-01" > /usr/share/nginx/html/index.html
+
+kubectl exec -it -n istio my-nginx-v2-78bdfbf89f-slcmx -- /bin/bash
+echo "nginx-02" > /usr/share/nginx/html/index.html
+
+kubectl cp certs/example.com.crt -n istio sleep-557747455f-p23hz:/tmp/
+```
+
+创建规则
+```
+dr-my-nginx-v1-v2.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: my-gninx
+spec:
+  hosts: my-nginx
+  subsets:
+  - name: v1
+    labels:
+      run: my-nginx
+      version: v1
+   - name: v12
+    labels:
+      run: my-nginx
+      version: v2 
+```
+
+```
+# cat 1.7.0/virtaulservice/tls/vs-nginx-destinationSubnets.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: my-nginx
+spec:
+  hosts:
+  - my-nginx
+  tls:
+  - match:
+    - port: 443
+      sniHosts:
+      - my-nginx
+      destinationSubnets: 
+      - 10.0.0.0/8
+    route:
+    - destination:
+        host: my-nginx
+        subset: v2
+```
+
+```
+kubectl cp certs/example.com.crt -n istio sleep-557747455f-p24hz:/tmp/
+kubectl exec -it -n istio sleep-557747455f-p24hz --/bin/sh
+
+curl -v --cacert /tmp/example.com.crt "https://my-nginx"
+```
+
+5、sourceLabels
+```
+# cat 1.7.0/virtaulservice/tls/vs-nginx-sourceLabels.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -3003,10 +3086,10 @@ spec:
           number: 443
 ```
 
-## sourceNamespace
-
-1.7.0/virtaulservice/tls/vs-nginx-sourceNamespace.yaml
+6、sourceNamespace
 ```
+1.7.0/virtaulservice/tls/vs-nginx-sourceNamespace.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:

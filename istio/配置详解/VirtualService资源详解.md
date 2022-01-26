@@ -895,16 +895,16 @@ spec:
           number: 9080
 ```
 
-## delegate
+### 2）delegate
 
-向istiod容器设置环境变量
+1、向istiod容器设置环境变量
 ```
 PILOT_ENABLE_VIRTUAL_SERVICE_DELEGATE=true
 kubectl set env deploy istiod -n istio-system --list
 kubectl set env deploy istiod -n istio-system PILOT_ENABLE_VIRTUAL_SERVICE_DELEGATE=true
 ```
 
-配置文件
+2、配置文件
 
 virtaulservice/delegate/vs-delegate.yaml
 ```
@@ -935,9 +935,9 @@ spec:
 ```
 测试不成功，有待研究
 
-## fault
+### 3）fault
 
-## abort
+1、abort
 
 virtaulservice/fault/vs-productpage-fault-abort.yaml
 ```
@@ -974,7 +974,7 @@ spec:
         subset: v1
 ```
 
-## delay
+2、delay
 
 virtaulservice/fault/vs-productpage-fault-delay.yaml
 ```
@@ -1011,7 +1011,11 @@ spec:
         subset: v1
 ```
 
-## headers.request.add
+### 4）headers
+
+#### request
+
+1、add
 
 virtaulservice/headers/vs-headers-request-add.yaml
 ```
@@ -1049,7 +1053,7 @@ spec:
           number: 9080
 ```
 
-## remove
+2、remove
 
 virtaulservice/headers/vs-headers-request-remove.yaml
 ```
@@ -1087,7 +1091,7 @@ spec:
           number: 9080
 ```
 
-## set
+3、set
 
 virtaulservice/headers/vs-headers-request-set.yaml
 ```
@@ -1125,7 +1129,9 @@ spec:
           number: 9080
 ```
 
-## response.add
+#### response
+
+1、add
 
 virtaulservice/headers/vs-headers-response-add.yaml
 ```
@@ -1163,10 +1169,10 @@ spec:
           number: 9080
 ```
 
-## remove
+2、remove
 
 virtaulservice/headers/vs-headers-response-remove.yaml
-
+```
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
@@ -1199,10 +1205,10 @@ spec:
         host: productpage
         port:
           number: 9080
+```
 
 
-
-set
+3、set
 
 virtaulservice/headers/vs-headers-response-set.yaml
 
@@ -1244,7 +1250,9 @@ spec:
           number: 9080
 ```
 
-## match.authority.exact
+## 5)match.
+
+authority.exact
 
 virtaulservice/match/vs-match-authority-exact.yaml
 ```

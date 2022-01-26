@@ -560,12 +560,12 @@ $(function(){
 ```
 注意替换端口 url:“http://bookinfo.demo:27941/productpage”,
 
-启动nginx
+2、启动nginx
 ```
 systemctl start httpd
 ```
 
-2、简单请求，配置cors
+3、简单请求，配置cors
 
 virtaulservice/corsPolicy/vs-productpage-cors.yaml
 ```
@@ -602,11 +602,11 @@ spec:
           number: 9080
 ```
 
-访问：
+4、访问：
 
 http://mytest.com:8081/
 
-### 简单请求allowCredentials
+5、简单请求allowCredentials
 
 virtaulservice/corsPolicy/vs-productpage-cors-allowCredentials.yaml
 ```
@@ -644,7 +644,7 @@ spec:
           number: 9080
 ```
 
-### 简单请求allowOrigins prefix
+6、简单请求allowOrigins prefix
 
 virtaulservice/corsPolicy/vs-productpage-cors-allowOrigins-prefix.yaml
 ```
@@ -681,7 +681,7 @@ spec:
           number: 9080
 ```
 
-### 简单请求allowOrigins regex
+7、简单请求allowOrigins regex
 
 virtaulservice/corsPolicy/vs-productpage-cors-allowOrigins-regex.yaml
 ```
@@ -718,7 +718,7 @@ spec:
           number: 9080
 ```
 
-### 简单请求exposeHeaders
+8、简单请求exposeHeaders
 
 virtaulservice/corsPolicy/vs-productpage-cors-exposeHeaders.yaml
 ```
@@ -758,7 +758,7 @@ spec:
           number: 9080
 ```
 
-### 非简单请求
+9、非简单请求
 
 virtaulservice/corsPolicy/vs-reviews-cors.yaml
 ```
@@ -791,7 +791,7 @@ spec:
           number: 9080
 ```
 
-### 非简单请求allowMethods
+10、非简单请求allowMethods
 
 virtaulservice/corsPolicy/vs-reviews-cors-allowMethods.yaml
 ```
@@ -824,7 +824,7 @@ spec:
           number: 9080
 ```
 
-### 非简单请求allowHeaders
+11、非简单请求allowHeaders
 
 virtaulservice/corsPolicy/vs-reviews-cors-allowHeaders.yaml
 ```
@@ -860,7 +860,7 @@ spec:
           number: 9080
 ```
 
-### 非简单请求maxAge
+12、非简单请求maxAge
 
 virtaulservice/corsPolicy/vs-reviews-cors-maxAge.yaml
 ```

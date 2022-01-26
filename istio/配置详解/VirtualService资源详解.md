@@ -932,8 +932,47 @@ spec:
     delegate:
       name: productpage
       namespace: istio
+  - match:
+    - uri:
+        prefix: /reviews
+    delegate:
+      name: reviews
+      namespace: istio
 ```
-测试不成功，有待研究
+
+vs productpage
+
+virtaulservice/delegate/vs-productpage.yaml
+```
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: productpage
+spec:
+  http:
+  - match:
+    - uri:
+        exact: /productpage
+    - uri:
+        prefix: /static
+    - uri:
+        exact: /login
+    - uri:
+        exact: /logout
+    - uri:
+        prefix: /api/v1/products
+    route:
+    - destination:
+      host: productpage.istio.svc.cluster.local
+      port:
+        number: 9080
+```
+
+访问url
+
+http://bookinfo.com:30986/productpage
+
+http://bookinfo.com:30986/reviews/1
 
 ### 3）fault
 

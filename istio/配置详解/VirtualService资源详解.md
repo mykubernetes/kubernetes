@@ -3121,14 +3121,16 @@ kubectl exec -it -n istio sleep-55747455f-p24hz --/bin/sh
 curl -v --cacert /tmp/example.com.crt "https://my-nginx"
 ```
 
-## route
+### route
 - 和http鸡巴一样
 
 ## tcp
 
 一个针对透传 TCP 流量的有序路由列表。TCP 路由对所有 HTTP 和 TLS 之外的端口生效。进入流量会使用匹配到的第一条规则。
 
-## match.port
+### match
+
+1）port
 
 1、部署deploy
 ```
@@ -3275,7 +3277,7 @@ spec:
 
 telnet 192.168.198.154 37048
 
-## destinationSubnets
+2）destinationSubnets
 
 virtaulservice/tcp/vs-destinationSubnets.yaml
 ```
@@ -3300,7 +3302,7 @@ spec:
         subset: v2
 ```
 
-## sourceSubnet
+3）sourceSubnet
 
 virtaulservice/tcp/vs-sourceSubnet.yaml
 ```
@@ -3324,7 +3326,7 @@ spec:
         subset: v2
 ```
 
-## sourceLabels
+4）sourceLabels
 
 virtaulservice/tcp/vs-sourceLabels.yaml
 ```
@@ -3349,7 +3351,7 @@ spec:
         subset: v2
 ```
 
-## sourceNamespace
+5）sourceNamespace
 
 virtaulservice/tcp/vs-sourceNamespace.yaml
 ```
@@ -3373,7 +3375,7 @@ spec:
         subset: v2
 ```
 
-## gateways
+6）gateways
 
 virtaulservice/tcp/vs-gateways.yaml
 ```
@@ -3398,10 +3400,14 @@ spec:
         subset: v2
 ```
 
-## route.destination.host
+### route
 
-virtaulservice/tcp/vs-route-host.yaml
+#### destination
+
+1、host
 ```
+# cat virtaulservice/tcp/vs-route-host.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -3419,10 +3425,10 @@ spec:
           number: 9000
 ```
 
-## port
-
-virtaulservice/tcp/vs-route-port.yaml
+2、port
 ```
+# cat virtaulservice/tcp/vs-route-port.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -3440,10 +3446,10 @@ spec:
           number: 9000
 ```
 
-## subset
-
-virtaulservice/tcp/vs-route-subset.yaml
+3、subset
 ```
+# cat virtaulservice/tcp/vs-route-subset.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:
@@ -3462,10 +3468,10 @@ spec:
           number: 9000
 ```
 
-## weight
-
-virtaulservice/tcp/tcp-echo-20-v2.yaml
+4、 weight
 ```
+# cat virtaulservice/tcp/tcp-echo-20-v2.yaml
+
 apiVersion: networking.istio.io/v1alpha3
 kind: VirtualService
 metadata:

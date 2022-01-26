@@ -3060,33 +3060,39 @@ curl -v --cacert /tmp/example.com.crt "https://my-nginx"
 ```
 
 5、sourceLabels
+- 只对mesh traffic有效
 ```
 # cat 1.7.0/virtaulservice/tls/vs-nginx-sourceLabels.yaml
 
-apiVersion: networking.istio.io/v1alpha3
+apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
   name: nginx
 spec:
   hosts:
-  - nginx.example.com
-  gateways:
-  - bookinfo-gateway
+  - my-nginx
   tls:
   - match:
     - port: 443
       sniHosts:
-      - nginx.example.com
+      - my-nginx
       sourceLabels:
-        istio: ingressgateway
+        app: sleep
     route:
     - destination:
         host: my-nginx
         port:
           number: 443
+        subset: v2
+```
+
+```
+kubectl exec -it -n istio sleep-55747455f-p24hz --/bin/sh
+curl -v --cacert /tmp/example.com.crt "https://my-nginx"
 ```
 
 6、sourceNamespace
+- 只对mesh traffic有效
 ```
 1.7.0/virtaulservice/tls/vs-nginx-sourceNamespace.yaml
 
@@ -3096,21 +3102,27 @@ metadata:
   name: nginx
 spec:
   hosts:
-  - nginx.example.com
-  gateways:
-  - bookinfo-gateway
+  - my-nginx
   tls:
   - match:
     - port: 443
       sniHosts:
-      - nginx.example.com
-      sourceNamespace: istio-system
+      - my-nginx
+      sourceNamespace: istio
     route:
     - destination:
         host: my-nginx
         port:
           number: 443
+        subset: v1
 ```
+```
+kubectl exec -it -n istio sleep-55747455f-p24hz --/bin/sh
+curl -v --cacert /tmp/example.com.crt "https://my-nginx"
+```
+
+## route
+- 和http鸡巴一样
 
 ## tcp
 

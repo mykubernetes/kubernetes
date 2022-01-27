@@ -96,24 +96,24 @@ spec:
 
 1.7.0/destinationrule/hosts/dr-details-hosts-short.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: details
-    spec:
-      host: details
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: details
+spec:
+  host: details
 ```
 
 - 长名称
 
 1.7.0/destinationrule/hosts/dr-details-hosts-long.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: details
-    spec:
-      host: details.istio.svc.cluster.local
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: details
+spec:
+  host: details.istio.svc.cluster.local
 ```
 
 # 五、trafficPolicy
@@ -466,20 +466,20 @@ spec:
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/consistentHash/dr-productpage-httpQueryParameterName.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        loadBalancer:
-          consistentHash:
-            httpQueryParameterName: test
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpQueryParameterName: test
 ```
 
 5）minimumRingSize
@@ -488,21 +488,21 @@ spec:
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/consistentHash/dr-productpage-minimumRingSize.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        loadBalancer:
-          consistentHash:
-            minimumRingSize: 100
-            httpQueryParameterName: test
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        minimumRingSize: 100
+        httpQueryParameterName: test
 ```
 
 ### localityLbSetting 基于位置的负载均衡
@@ -530,15 +530,15 @@ topology.istio.io/subzone`
 - Sub-zone
 
 ```
-    distribute:
-        - from: us-west/zone1/*
-          to:
-            "us-west/zone1/*": 80
-            "us-west/zone2/*": 20
-        - from: us-west/zone2/*
-          to:
-            "us-west/zone1/*": 20
-            "us-west/zone2/*": 80
+distribute:
+    - from: us-west/zone1/*
+      to:
+        "us-west/zone1/*": 80
+        "us-west/zone2/*": 20
+    - from: us-west/zone2/*
+      to:
+        "us-west/zone1/*": 20
+        "us-west/zone2/*": 80
 ```
 
 ```
@@ -551,30 +551,30 @@ NAME              STATUS   ROLES    AGE   VERSION   LABELS
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/localityLbSetting/dr-productpage-distribute.yaml
 ```
-    apiVersion: networking.istio.io/v1alpha3
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        loadBalancer:
-          localityLbSetting:
-            enabled: true
-            distribute:
-            - from: "us-central2/z2/*"
-              to:
-                "us-central3/z3/*": 100
-                #"us-central2/z2/*": 100
-                #"us-central1/z1/*": 100
-        outlierDetection:
-          consecutive5xxErrors: 1
-          interval: 5m
-          baseEjectionTime: 15m
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    loadBalancer:
+      localityLbSetting:
+        enabled: true
+        distribute:
+        - from: "us-central2/z2/*"
+          to:
+            "us-central3/z3/*": 100
+            #"us-central2/z2/*": 100
+            #"us-central1/z1/*": 100
+    outlierDetection:
+      consecutive5xxErrors: 1
+      interval: 5m
+      baseEjectionTime: 15m
 ```
 
 ```
@@ -595,29 +595,29 @@ kubectl logs -f productpage-v1-75bdc58c9c-wcdgv -n istio -c istio-proxy
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/localityLbSetting/dr-productpage-failover.yaml
 ```
-    apiVersion: networking.istio.io/v1alpha3
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        loadBalancer:
-          localityLbSetting:
-            enabled: true
-            failover:
-            - from: us-central1
-              to: us-central2
-            - from: us-central2
-              to: us-central1
-        outlierDetection:
-          consecutive5xxErrors: 1
-          interval: 5m
-          baseEjectionTime: 15m
+apiVersion: networking.istio.io/v1alpha3
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    loadBalancer:
+      localityLbSetting:
+        enabled: true
+        failover:
+        - from: us-central1
+          to: us-central2
+        - from: us-central2
+          to: us-central1
+    outlierDetection:
+      consecutive5xxErrors: 1
+      interval: 5m
+      baseEjectionTime: 15m
 ```
 
 ### simple 简单负责均衡
@@ -629,61 +629,62 @@ kubectl logs -f productpage-v1-75bdc58c9c-wcdgv -n istio -c istio-proxy
 | PASSTHROUGH | This option will forward the connection to the original IP address requested by the caller without doing any form of load balancing. This option must be used with care. It is meant for advanced use cases. Refer to Original Destination load balancer in Envoy for further details. |
 
 1) LEAST_CONN
-
-1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-leastconn.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        loadBalancer:
-          simple: LEAST_CONN
+# cat 1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-leastconn.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    loadBalancer:
+      simple: LEAST_CONN
 ```
 
 2) ROUND_ROBIN
-
-1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-roundrobin.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        loadBalancer:
-          simple: ROUND_ROBIN
+# cat 1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-roundrobin.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    loadBalancer:
+      simple: ROUND_ROBIN
 ```
 
 3) RANDOM
+```
+# cat 1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-random.yaml
 
-1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-random.yaml
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    loadBalancer:
+      simple: RANDOM
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        loadBalancer:
-          simple: RANDOM
-```
+
 4) PASSTHROUGH
 
 不使用负载均衡策略

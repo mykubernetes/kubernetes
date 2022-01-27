@@ -508,6 +508,7 @@ spec:
 ### localityLbSetting 基于位置的负载均衡
 
 | Field | Type | Description | Required |
+|-------|------|-------------|----------|
 | distribute | Distribute[] | Optional: only one of distribute or failover can be set. Explicitly specify loadbalancing weight across different zones and geographical locations. Refer to Locality weighted load balancing If empty, the locality weight is set according to the endpoints number within it. | No |
 | failover | Failover[] | Optional: only failover or distribute can be set. Explicitly specify the region traffic will land on when endpoints in local region becomes unhealthy. Should be used together with OutlierDetection to detect unhealthy endpoints. Note: if no OutlierDetection specified, this will not take effect. | No |
 
@@ -541,11 +542,11 @@ topology.istio.io/subzone`
 ```
 
 ```
-    [root@master01 localityLbSetting]# kubectl get node --show-labels
-    NAME              STATUS   ROLES    AGE   VERSION   LABELS
-    192.168.198.154   Ready    master   22d   v1.20.5   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=192.168.198.154,kubernetes.io/os=linux,kubernetes.io/role=master,topology.istio.io/subzone=sz01,topology.kubernetes.io/region=us-central1,topology.kubernetes.io/zone=z1
-    192.168.198.155   Ready    master   22d   v1.20.5   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=192.168.198.155,kubernetes.io/os=linux,kubernetes.io/role=master,topology.istio.io/subzone=sz02,topology.kubernetes.io/region=us-central2,topology.kubernetes.io/zone=z2
-    192.168.198.156   Ready    node     22d   v1.20.5   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=192.168.198.156,kubernetes.io/os=linux,kubernetes.io/role=node,topology.istio.io/subzone=sz03,topology.kubernetes.io/region=us-central3,topology.kubernetes.io/zone=z3
+[root@master01 localityLbSetting]# kubectl get node --show-labels
+NAME              STATUS   ROLES    AGE   VERSION   LABELS
+192.168.198.154   Ready    master   22d   v1.20.5   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=192.168.198.154,kubernetes.io/os=linux,kubernetes.io/role=master,topology.istio.io/subzone=sz01,topology.kubernetes.io/region=us-central1,topology.kubernetes.io/zone=z1
+192.168.198.155   Ready    master   22d   v1.20.5   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=192.168.198.155,kubernetes.io/os=linux,kubernetes.io/role=master,topology.istio.io/subzone=sz02,topology.kubernetes.io/region=us-central2,topology.kubernetes.io/zone=z2
+192.168.198.156   Ready    node     22d   v1.20.5   beta.kubernetes.io/arch=amd64,beta.kubernetes.io/os=linux,kubernetes.io/arch=amd64,kubernetes.io/hostname=192.168.198.156,kubernetes.io/os=linux,kubernetes.io/role=node,topology.istio.io/subzone=sz03,topology.kubernetes.io/region=us-central3,topology.kubernetes.io/zone=z3
 ```
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/localityLbSetting/dr-productpage-distribute.yaml

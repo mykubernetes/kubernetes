@@ -1,4 +1,4 @@
-# 什么是DestinationRule
+# 一、什么是DestinationRule
 
 与VirtualService一样，DestinationRule也是 Istio 流量路由功能的关键部分。您可以将虚拟服务视为将流量如何路由到给定目标地址，然后使用目标规则来配置该目标的流量。在评估虚拟服务路由规则之后，目标规则将应用于流量的“真实”目标地址。
 
@@ -6,7 +6,7 @@
 
 目标规则还允许您在调用整个目的地服务或特定服务子集时定制 Envoy 的流量策略，比如您喜欢的负载均衡模型、TLS 安全模式或熔断器设置。在目标规则参考中可以看到目标规则选项的完整列表。
 
-# 资源详解
+# 二、资源详解
 
 | Field | Type | Description | Required |
 |-------|------|-------------|----------|
@@ -15,81 +15,81 @@
 | subsets | Subset[] | 是定义的一个服务的子集，经常用来定义一个服务版本，结合 VirtualService 使用 | No
 | exportTo | string[] | 当前destination rule要导出的 namespace 列表。 应用于 service 的 destination rule 的解析发生在 namespace 层次结构的上下文中。 destination rule 的导出允许将其包含在其他 namespace 中的服务的解析层次结构中。 此功能为服务所有者和网格管理员提供了一种机制，用于控制跨 namespace 边界的 destination rule 的可见性 如果未指定任何 namespace，则默认情况下将 destination rule 导出到所有 namespace 值. 被保留，用于定义导出到 destination rule 被声明所在的相同 namespace 。类似的值*保留，用于定义导出到所有 namespaces NOTE：在当前版本中，exportTo值被限制为.或*（即， 当前namespace或所有namespace）| No |
 
-## exportTo
+## 四、exportTo
 
 1、名称空间
-
-1.7.0/destinationrule/dr-productpage-exportto-namespace.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      exportTo:
-      - 'istio-system'
-      host: productpage
-      subsets:
-      - name: v1
-        labels:
-          version: v1
+# cat 1.7.0/destinationrule/dr-productpage-exportto-namespace.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  exportTo:
+  - 'istio-system'
+  host: productpage
+  subsets:
+  - name: v1
+    labels:
+      version: v1
 ```
 
 2、当前名称空间
-
-1.7.0/destinationrule/dr-productpage-exportto-dot.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      exportTo:
-      - '.'
-      host: productpage.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
+#cat 1.7.0/destinationrule/dr-productpage-exportto-dot.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  exportTo:
+  - '.'
+  host: productpage.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
 ```
 
 3、所有名称空间
 
 1.7.0/destinationrule/dr-productpage-exportto-star.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      exportTo:
-      - '*'
-      host: productpage
-      subsets:
-      - name: v1
-        labels:
-          version: v1
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  exportTo:
+  - '*'
+  host: productpage
+  subsets:
+  - name: v1
+    labels:
+      version: v1
 ```
 
-## host
+# 五、host
 
 - 短名称
 
 1、部署vs
-
-1.7.0/destinationrule/hosts/vs-details.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: VirtualService
-    metadata:
-      name: details
-    spec:
-      hosts:
-      - details
-      http:
-      - route:
-        - destination:
-            host: details
+# cat 1.7.0/destinationrule/hosts/vs-details.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: details
+spec:
+  hosts:
+  - details
+  http:
+  - route:
+    - destination:
+        host: details
 ```
 
 2、部署dr
@@ -116,13 +116,13 @@
       host: details.istio.svc.cluster.local
 ```
 
-## trafficPolicy.connectionPool
+# 六、trafficPolicy
 
-连接池策略
+## 1、connectionPool 连接池策略有2种TCP,HTTP
 
-tcp
+### TCP 策略
 
-tcp连接池设置
+1）tcp连接池设置
 
 | Field | Type | Description | Required |
 |-------|------|--------------|---------|
@@ -130,7 +130,7 @@ tcp连接池设置
 | connectTimeout | Duration | TCP connection timeout. | No |
 | tcpKeepalive | TcpKeepalive | If set then set SO_KEEPALIVE on the socket to enable TCP Keepalives. | No |
 
-TcpKeepalive
+2）TcpKeepalive
 
 | Field | Type | Description | Required |
 |-------|------|-------------|----------|
@@ -138,30 +138,31 @@ TcpKeepalive
 | time | Duration | The time duration a connection needs to be idle before keep-alive probes start being sent. Default is to use the OS level configuration (unless overridden, Linux defaults to 7200s (ie 2 hours.) | No |
 | interval | Duration | The time duration between keep-alive probes. Default is to use the OS level configuration (unless overridden, Linux defaults to 75s.) | No |
 
-1.7.0/destinationrule/trafficPolicy/dr-productpage-connectionPool-tcp.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        connectionPool:
-          tcp:
-            maxConnections: 100
-            connectTimeout: 30ms
-            tcpKeepalive:
-              time: 7200s
-              interval: 75s
-              probes: 10
+# cat 1.7.0/destinationrule/trafficPolicy/dr-productpage-connectionPool-tcp.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 100
+        connectTimeout: 30ms
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+          probes: 10
 ```
 
-## http
+## http 策略
 
 | Field | Type | Description | Required |
 |-------|------|-------------|-----------|
@@ -172,7 +173,7 @@ TcpKeepalive
 | idleTimeout | Duration | The idle timeout for upstream connection pool connections. The idle timeout is defined as the period in which there are no active requests. If not set, the default is 1 hour. When the idle timeout is reached the connection will be closed. Note that request based timeouts mean that HTTP/2 PINGs will not keep the connection alive. Applies to both HTTP1.1 and HTTP2 connections. | No |
 | h2UpgradePolicy | H2UpgradePolicy | Specify if http1.1 connection should be upgraded to http2 for the associated destination. | No |
 
-## h2UpgradePolicy
+h2UpgradePolicy
 
 | Name | Description |
 |------|--------------|
@@ -180,73 +181,74 @@ TcpKeepalive
 | DO_NOT_UPGRADE | Do not upgrade the connection to http2. This opt-out option overrides the default. |
 | UPGRADE	Upgrade | the connection to http2. This opt-in option overrides the default. |
 
-connectionPool-http.
-
-1.7.0/destinationrule/trafficPolicy/dr-productpage-connectionPool-http.yaml
+1）connectionPool-http
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        connectionPool:
-          tcp:
-            maxConnections: 10
-            connectTimeout: 30ms
-            tcpKeepalive:
-              time: 7200s
-              interval: 75s
-              probes: 10
-          http:
-            http2MaxRequests: 10
-            maxRequestsPerConnection: 1
-            http1MaxPendingRequests: 1
-            maxRetries: 1
-            idleTimeout: 10s
-            h2UpgradePolicy: DEFAULT
+# cat 1.7.0/destinationrule/trafficPolicy/dr-productpage-connectionPool-http.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    connectionPool:
+      tcp:
+        maxConnections: 10
+        connectTimeout: 30ms
+        tcpKeepalive:
+          time: 7200s
+          interval: 75s
+          probes: 10
+      http:
+        http2MaxRequests: 10
+        maxRequestsPerConnection: 1
+        http1MaxPendingRequests: 1
+        maxRetries: 1
+        idleTimeout: 10s
+        h2UpgradePolicy: DEFAULT
 ```
 
 ```
 upstream connect error or disconnect/reset before headers. reset reason: overflow
 ```
 
-destinationrule/trafficPolicy/dr-productpage-connectionPool-http-overflow.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        connectionPool:
-          http:
-            h2UpgradePolicy: DEFAULT
-            http1MaxPendingRequests: 0
-            http2MaxRequests: 1
-            idleTimeout: 10s
-            maxRequestsPerConnection: 1
-            maxRetries: 1
-          tcp:
-            connectTimeout: 3ms
-            maxConnections: 0
-            tcpKeepalive:
-              interval: 75s
-              probes: 10
-              time: 7200s
+# cat destinationrule/trafficPolicy/dr-productpage-connectionPool-http-overflow.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    connectionPool:
+      http:
+        h2UpgradePolicy: DEFAULT
+        http1MaxPendingRequests: 0
+        http2MaxRequests: 1
+        idleTimeout: 10s
+        maxRequestsPerConnection: 1
+        maxRetries: 1
+      tcp:
+        connectTimeout: 3ms
+        maxConnections: 0
+        tcpKeepalive:
+          interval: 75s
+          probes: 10
+          time: 7200s
 ```
 
-## h2UpgradePolicy
+h2UpgradePolicy
 
 | Name | Description |
 |------|-------------|
@@ -254,77 +256,82 @@ destinationrule/trafficPolicy/dr-productpage-connectionPool-http-overflow.yaml
 | DO_NOT_UPGRADE | Do not upgrade the connection to http2. This opt-out option overrides the default. |
 | UPGRADE	Upgrade | the connection to http2. This opt-in option overrides the default. |
 
-destinationrule/trafficPolicy/dr-productpage-h2UpgradePolicy-DEFAULT.yaml
+1）DEFAULT 默认是不升级的
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        connectionPool:
-          http:
-            h2UpgradePolicy: DEFAULT
+# cat destinationrule/trafficPolicy/dr-productpage-h2UpgradePolicy-DEFAULT.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    connectionPool:
+      http:
+        h2UpgradePolicy: DEFAULT
 ```
 
 ```
 kubectl logs --tail 10 -f -n istio productpage-v1-6b746f74dc-gvkpz -c istio-proxy
+
 [2021-05-11T04:38:18.116Z] "GET /productpage HTTP/1.1" 200 - via_upstream - "-" 0 5183 149 148 "172.20.0.0" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36" "346116de-c68d-40a5-84fa-0fbe51635264" "192.168.198.154:31545" "127.0.0.1:9080" inbound|9080|| 127.0.0.1:36154 172.20.2.84:9080 172.20.0.0:0 outbound.9080._.productpage.istio.svc.cluster.local default
 ```
 
-destinationrule/trafficPolicy/dr-productpage-h2UpgradePolicy-DO_NOT_UPGRADE.yaml
+2）DO_NOT_UPGRADE 不升级
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        connectionPool:
-          http:
-            h2UpgradePolicy: DO_NOT_UPGRADE
+destinationrule/trafficPolicy/dr-productpage-h2UpgradePolicy-DO_NOT_UPGRADE.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    connectionPool:
+      http:
+        h2UpgradePolicy: DO_NOT_UPGRADE
 ```
 
 ```
 [2021-05-11T04:39:15.100Z] "GET /productpage HTTP/1.1" 200 - via_upstream - "-" 0 5179 246 246 "172.20.0.0" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36" "5df1f8a7-ab0a-4b62-8505-e808130505d5" "192.168.198.154:31545" "127.0.0.1:9080" inbound|9080|| 127.0.0.1:36756 172.20.2.84:9080 172.20.0.0:0 outbound.9080._.productpage.istio.svc.cluster.local default
 ```
 
-destinationrule/trafficPolicy/dr-productpage-h2UpgradePolicy-UPGRADE.yaml
+3）UPGRADE 升级
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        connectionPool:
-          http:
-            h2UpgradePolicy: UPGRADE
+# cat destinationrule/trafficPolicy/dr-productpage-h2UpgradePolicy-UPGRADE.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    connectionPool:
+      http:
+        h2UpgradePolicy: UPGRADE
 ```
 ```
 [2021-05-11T04:36:08.846Z] "GET /productpage HTTP/2" 200 - via_upstream - "-" 0 5183 344 341 "172.20.0.0" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/90.0.4430.93 Safari/537.36" "2a53e429-0fee-4b49-9609-6ac24c886b96" "192.168.198.154:31545" "127.0.0.1:9080" inbound|9080|| 127.0.0.1:34824 172.20.2.84:9080 172.20.0.0:0 outbound.9080._.productpage.istio.svc.cluster.local default
 ```
 
-## loadBalancer
+## 2、loadBalancer 负载均衡策略
 
-负载均衡策略
-
-consistentHash
+### consistentHash 一次性哈希负载均衡
 
 | Field | Type | Description | Required |
 |-------|------|-------------|----------|
@@ -333,7 +340,7 @@ consistentHash
 | useSourceIp | bool (oneof) | Hash based on the source IP address. | Yes |
 | minimumRingSize | uint64 | The minimum number of virtual nodes to use for the hash ring. Defaults to 1024. Larger ring sizes result in more granular load distributions. If the number of hosts in the load balancing pool is larger than the ring size, each host will be assigned a single virtual node. | No |
 
-httpCookie
+1）httpCookie
 
 | Field | Type | Description | Required |
 |-------|------|-------------|-----------|
@@ -341,24 +348,26 @@ httpCookie
 | path | string | Path to set for the cookie. | No |
 | ttl | Duration | Lifetime of the cookie. | Yes |
 
-1.7.0/destinationrule/trafficPolicy/loadBalancer/consistentHash/dr-productpage-loadBalancer-consistentHash-httpCookie.yaml
+
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        loadBalancer:
-          consistentHash:         
-            httpCookie:
-              name: user
-              ttl: 0s
+# cat 1.7.0/destinationrule/trafficPolicy/loadBalancer/consistentHash/dr-productpage-loadBalancer-consistentHash-httpCookie.yaml
+
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:         
+        httpCookie:
+          name: user
+          ttl: 0s
 ```
 
 1、增加pod
@@ -390,24 +399,25 @@ http://bookinfo.demo:nodeport/productpage
 
 7、查看日志
 
-## httpHeaderName
+
+2） httpHeaderName
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/consistentHash/dr-details-httpHeaderName.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: details
-    spec:
-      host: details.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        loadBalancer:
-          consistentHash:
-            httpHeaderName: end-user
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: details
+spec:
+  host: details.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        httpHeaderName: end-user
 ```
 
 1、增加pod
@@ -432,28 +442,27 @@ kubectl logs -f details-v1-79f774bdb9-wqz6j -n istio
 
 6、查看日志
 
-## useSourceIp
+3）useSourceIp
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/consistentHash/dr-productpage-useSourceIp.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        loadBalancer:
-          consistentHash:
-            useSourceIp: true
-    ~
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    loadBalancer:
+      consistentHash:
+        useSourceIp: true
 ```
 
-## httpQueryParameterName
+4）httpQueryParameterName
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/consistentHash/dr-productpage-httpQueryParameterName.yaml
 ```
@@ -473,7 +482,7 @@ kubectl logs -f details-v1-79f774bdb9-wqz6j -n istio
             httpQueryParameterName: test
 ```
 
-## minimumRingSize
+5）minimumRingSize
 
 哈希环中最小虚拟节点数
 
@@ -496,13 +505,13 @@ kubectl logs -f details-v1-79f774bdb9-wqz6j -n istio
             httpQueryParameterName: test
 ```
 
-localityLbSetting
+### localityLbSetting 基于位置的负载均衡
 
 | Field | Type | Description | Required |
 | distribute | Distribute[] | Optional: only one of distribute or failover can be set. Explicitly specify loadbalancing weight across different zones and geographical locations. Refer to Locality weighted load balancing If empty, the locality weight is set according to the endpoints number within it. | No |
 | failover | Failover[] | Optional: only failover or distribute can be set. Explicitly specify the region traffic will land on when endpoints in local region becomes unhealthy. Should be used together with OutlierDetection to detect unhealthy endpoints. Note: if no OutlierDetection specified, this will not take effect. | No |
 
-## distribute
+1) distribute
 
 failure-domain.beta.kubernetes.io/region=us-east-1
 
@@ -577,11 +586,11 @@ kubectl logs --tail 10 -f productpage-v1-75bdc58c9c-fgb2n -n istio -c istio-prox
 kubectl logs -f productpage-v1-75bdc58c9c-wcdgv -n istio -c istio-proxy
 ```
 
-## enabled
+2) enabled
 
 是否启用
 
-## failover
+3) failover
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/localityLbSetting/dr-productpage-failover.yaml
 ```
@@ -610,7 +619,7 @@ kubectl logs -f productpage-v1-75bdc58c9c-wcdgv -n istio -c istio-proxy
           baseEjectionTime: 15m
 ```
 
-## simple
+### simple 简单负责均衡
 
 | Name | Description |
 | ROUND_ROBIN | Round Robin policy. Default |
@@ -618,7 +627,7 @@ kubectl logs -f productpage-v1-75bdc58c9c-wcdgv -n istio -c istio-proxy
 | RANDOM | The random load balancer selects a random healthy host. The random load balancer generally performs better than round robin if no health checking policy is configured. |
 | PASSTHROUGH | This option will forward the connection to the original IP address requested by the caller without doing any form of load balancing. This option must be used with care. It is meant for advanced use cases. Refer to Original Destination load balancer in Envoy for further details. |
 
-## LEAST_CONN
+1) LEAST_CONN
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-leastconn.yaml
 ```
@@ -637,7 +646,7 @@ kubectl logs -f productpage-v1-75bdc58c9c-wcdgv -n istio -c istio-proxy
           simple: LEAST_CONN
 ```
 
-## ROUND_ROBIN
+2) ROUND_ROBIN
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-roundrobin.yaml
 ```
@@ -656,7 +665,7 @@ kubectl logs -f productpage-v1-75bdc58c9c-wcdgv -n istio -c istio-proxy
           simple: ROUND_ROBIN
 ```
 
-## RANDOM
+3) RANDOM
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-random.yaml
 ```
@@ -674,8 +683,7 @@ kubectl logs -f productpage-v1-75bdc58c9c-wcdgv -n istio -c istio-proxy
         loadBalancer:
           simple: RANDOM
 ```
-
-## PASSTHROUGH
+4) PASSTHROUGH
 
 不使用负载均衡策略
 
@@ -1807,7 +1815,7 @@ kubectl exec "$(kubectl get pod -l app=sleep -o jsonpath={.items..metadata.name}
 
 ## tls
 
-subsets
+# 七、subsets
 
 1.7.0/destinationrule/subsets/dr-productpage-subsets.yaml
 ```

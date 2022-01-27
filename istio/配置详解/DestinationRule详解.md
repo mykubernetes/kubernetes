@@ -623,6 +623,7 @@ spec:
 ### simple 简单负责均衡
 
 | Name | Description |
+|------|-------------|
 | ROUND_ROBIN | Round Robin policy. Default |
 | LEAST_CONN | The least request load balancer uses an O(1) algorithm which selects two random healthy hosts and picks the host which has fewer active requests. |
 | RANDOM | The random load balancer selects a random healthy host. The random load balancer generally performs better than round robin if no health checking policy is configured. |

@@ -740,7 +740,7 @@ curl -H "x-envoy-original-dst-host:172.20.0.38:9080" http://bookinfo.demo:30986/
 curl http://bookinfo.demo:30986/productpage -I
 ```
 
-## outlierDetection
+## outlierDetection 断路器
 
 异常点检查
 
@@ -788,11 +788,12 @@ Warning: outlier detection consecutive errors is deprecated, use consecutiveGate
           maxEjectionPercent: 100
           #minHealthPercent: 0
 ```
+
+```
 upstream connect error or disconnect/reset before headers. reset reason: overflow
+```
+- no healthy upstream说明断路器生效
 
-no healthy upstream说明断路器生效
-
-用jmeter做测试
 
 ## portLevelSettings
 

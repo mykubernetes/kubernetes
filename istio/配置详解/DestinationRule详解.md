@@ -629,7 +629,7 @@ spec:
 | RANDOM | The random load balancer selects a random healthy host. The random load balancer generally performs better than round robin if no health checking policy is configured. |
 | PASSTHROUGH | This option will forward the connection to the original IP address requested by the caller without doing any form of load balancing. This option must be used with care. It is meant for advanced use cases. Refer to Original Destination load balancer in Envoy for further details. |
 
-1) LEAST_CONN
+1) LEAST_CONN 最小连接数
 ```
 # cat 1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-leastconn.yaml
 
@@ -648,7 +648,7 @@ spec:
       simple: LEAST_CONN
 ```
 
-2) ROUND_ROBIN
+2) ROUND_ROBIN 轮询
 ```
 # cat 1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-roundrobin.yaml
 
@@ -667,7 +667,7 @@ spec:
       simple: ROUND_ROBIN
 ```
 
-3) RANDOM
+3) RANDOM 随机
 ```
 # cat 1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-random.yaml
 
@@ -694,45 +694,46 @@ no healthy upstream
 
 1.7.0/destinationrule/trafficPolicy/loadBalancer/simple/dr-productpage-passthrough.yaml
 ```
-    apiVersion: networking.istio.io/v1beta1
-    kind: DestinationRule
-    metadata:
-      name: productpage
-    spec:
-      host: productpage.istio.svc.cluster.local
-      subsets:
-      - name: v1
-        labels:
-          version: v1
-      trafficPolicy:
-        loadBalancer:
-          simple: PASSTHROUGH
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: productpage
+spec:
+  host: productpage.istio.svc.cluster.local
+  subsets:
+  - name: v1
+    labels:
+      version: v1
+  trafficPolicy:
+    loadBalancer:
+      simple: PASSTHROUGH
 ```
 
 使用方法，现在cluster配置中设置use_http_header为true，然后在请求中加入header。x-envoy-original-dst-host=10.195.16.237:8888 指向up stream
 
 ef-passthrouth.yaml
 ```
-    apiVersion: networking.istio.io/v1alpha3
-    kind: EnvoyFilter
-    metadata:
-      name: lb-passthrough
-      namespace: istio-system
-    spec:
-      workloadSelector:
-        labels:
-          istio: ingressgateway
-      configPatches:
-      - applyTo: CLUSTER
-        match:
-          cluster:
-            name: outbound|9080||productpage.istio.svc.cluster.local
-        patch:
-            operation: MERGE
-            value:
-              original_dst_lb_config:
-                use_http_header: true
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: lb-passthrough
+  namespace: istio-system
+spec:
+  workloadSelector:
+    labels:
+      istio: ingressgateway
+  configPatches:
+  - applyTo: CLUSTER
+    match:
+      cluster:
+        name: outbound|9080||productpage.istio.svc.cluster.local
+    patch:
+        operation: MERGE
+        value:
+          original_dst_lb_config:
+            use_http_header: true
 ```
+
 ```
 curl -H "x-envoy-original-dst-host:172.20.0.38:9080" http://bookinfo.demo:30986/productpage
 
@@ -803,7 +804,9 @@ no healthy upstream说明断路器生效
 | outlierDetection | OutlierDetection	Settings controlling eviction of unhealthy hosts from the load balancing pool | No |
 | tls | TLSSettings | TLS related settings for connections to the upstream service. | No |
 
-## connectionPool.http
+## connectionPool
+
+http
 
 1.7.0/destinationrule/trafficPolicy/portLevelSettings/connectionPool/dr-productpage-http.yaml
 ```
@@ -866,7 +869,9 @@ tcp
                 probes: 10
 ```
 
-## loadBalancer.consistentHash.httpCookie
+## loadBalancer
+
+consistentHash.httpCookie
 
 1.7.0/destinationrule/trafficPolicy/portLevelSettings/loadBalancer/dr-productpage-httpCookie.yaml
 ```

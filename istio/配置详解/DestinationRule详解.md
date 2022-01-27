@@ -15,7 +15,7 @@
 | subsets | Subset[] | 是定义的一个服务的子集，经常用来定义一个服务版本，结合 VirtualService 使用 | No
 | exportTo | string[] | 当前destination rule要导出的 namespace 列表。 应用于 service 的 destination rule 的解析发生在 namespace 层次结构的上下文中。 destination rule 的导出允许将其包含在其他 namespace 中的服务的解析层次结构中。 此功能为服务所有者和网格管理员提供了一种机制，用于控制跨 namespace 边界的 destination rule 的可见性 如果未指定任何 namespace，则默认情况下将 destination rule 导出到所有 namespace 值. 被保留，用于定义导出到 destination rule 被声明所在的相同 namespace 。类似的值*保留，用于定义导出到所有 namespaces NOTE：在当前版本中，exportTo值被限制为.或*（即， 当前namespace或所有namespace）| No |
 
-## 四、exportTo
+## 三、exportTo
 
 1、名称空间
 ```
@@ -71,7 +71,7 @@ spec:
       version: v1
 ```
 
-# 五、host
+# 四、host
 
 - 短名称
 
@@ -116,7 +116,7 @@ spec:
       host: details.istio.svc.cluster.local
 ```
 
-# 六、trafficPolicy
+# 五、trafficPolicy
 
 ## 1、connectionPool 连接池策略有2种TCP,HTTP
 
@@ -1815,7 +1815,7 @@ kubectl exec "$(kubectl get pod -l app=sleep -o jsonpath={.items..metadata.name}
 
 ## tls
 
-# 七、subsets
+# 六、subsets
 
 1.7.0/destinationrule/subsets/dr-productpage-subsets.yaml
 ```

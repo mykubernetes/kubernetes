@@ -9,6 +9,7 @@ namespace是Linux系统的底层概念，在内核层实现，即有一些不同
 linux内核提拱了6种namespace隔离的系统调用，如下图所示，但是真正的容器还需要处理许多其他工作。
 
 | namespace | 系统调用参数 | 隔离内容 | 功能 | 内核版本 |
+|-----------|-------------|---------|------|---------|
 | UTS Namespace (UNIX Timesharing System) | CLONE_NEWUTS | 主机名或域名 | 提供主机名隔离能力 | Linux 2.6.19 |
 | IPC Namespace (Inter-Process Communication) | CLONE_NEWIPC | 信号量、消息队列和共享内存 | 提供进程间通信的隔离能力 | Linux 2.6.19 |
 | PID Namespace (Process Identification) | CLONE_NEWPID | 进程编号 | 提供进程隔离能力 | Linux 2.6.24 |

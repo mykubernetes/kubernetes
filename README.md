@@ -30,6 +30,8 @@ kubernetes相关资料
 | k8s-cluster | https://github.com/qjpoo/k8s-cluster |
 | 博客 | https://blog.51cto.com/goome/p_1 |
 | 运维 | https://github.com/miaocunfa/OpsNotes |
+| 博客 | https://www.zhangzhuo.ltd/ |
+
 
 - [docker内核知识](https://github.com/mykubernetes/kubernetes/blob/master/Docker%E7%9A%84%E5%86%85%E6%A0%B8%E7%9F%A5%E8%AF%86.md)
 - [kubernetes yaml模板与示例](https://github.com/mykubernetes/kubernetes/blob/master/kubernetes%20yaml%E6%A8%A1%E6%9D%BF%E4%B8%8E%E7%A4%BA%E4%BE%8B.md)

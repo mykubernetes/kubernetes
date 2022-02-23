@@ -31,7 +31,7 @@ kubernetes相关资料
 | 博客 | https://blog.51cto.com/goome/p_1 |
 | 运维 | https://github.com/miaocunfa/OpsNotes |
 | 博客 | https://www.zhangzhuo.ltd/ |
-
+| 博客 | https://mp.weixin.qq.com/mp/appmsgalbum?__biz=MzIwNDA3ODg3OQ==&action=getalbum&album_id=1835825486392770561&scene=173&from_msgid=2647999703&from_itemidx=1&count=3&nolastread=1#wechat_redirect |
 
 - [docker内核知识](https://github.com/mykubernetes/kubernetes/blob/master/Docker%E7%9A%84%E5%86%85%E6%A0%B8%E7%9F%A5%E8%AF%86.md)
 - [kubernetes yaml模板与示例](https://github.com/mykubernetes/kubernetes/blob/master/kubernetes%20yaml%E6%A8%A1%E6%9D%BF%E4%B8%8E%E7%A4%BA%E4%BE%8B.md)

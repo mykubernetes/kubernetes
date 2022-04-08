@@ -2,7 +2,6 @@
 
 ###### APIServer安全控制
 
-![](C:/Users/liyongxin/Desktop/wework/老男孩/线下直播/第三天/images/k8s-apiserver-access-control-overview.svg)
 
 - Authentication：身份认证
 
@@ -169,7 +168,6 @@ Certificate:
 
  kubeadm在init初始引导集群启动过程中，创建了许多默认的RBAC规则， 在k8s有关RBAC的官方文档中，我们看到下面一些`default clusterrole`列表: 
 
-![](C:\Users\liyongxin\Desktop\wework\老男孩\训练营\images\kubeadm-default-clusterrole-list.png)
 
 其中第一个cluster-admin这个cluster role binding绑定了system:masters group，这和authentication环节传递过来的身份信息不谋而合。 沿着system:masters group对应的cluster-admin clusterrolebinding“追查”下去，真相就会浮出水面。
 

@@ -453,13 +453,13 @@ kube-apiserver --authorization-mode=Node,RBAC  --enable-admission-plugins=NodeRe
 ```
 
 查看一下官网对Node authorizer的介绍：
-
+```
 *Node authorization is a special-purpose authorization mode that specifically authorizes API requests made by kubelets.*
 
 *In future releases, the node authorizer may add or remove permissions to ensure kubelets have the minimal set of permissions required to operate correctly.*
 
 *In order to be authorized by the Node authorizer, kubelets must use a credential that identifies them as being in the `system:nodes` group, with a username of `system:node:<nodeName>`*
-
+```
 
 
 ###### Service Account及K8S Api调用

@@ -44,7 +44,7 @@ spec:
 ```  
 
 ```
-# kubectl create -f https://kubernetes.io/docs/user-guide/nginx-deployment.yaml --record
+# kubectl create -f https://kubernetes.io/docs/user-guide/nginx-deployment.yaml --record=true
 ```  
 - --record参数可以记录命令，我们可以很方便的查看每次revision的变化
 
@@ -60,12 +60,15 @@ spec:
 
 4、更新镜像  
 ```
+# 语法：kubectl set image deployment/nginx-deployment containers-name=image -n namespace
 # kubectl set image deployment/nginx-deployment nginx=nginx:1.9.1
+deployment.extensions/nginx-deployment image updated
 ```  
 
 5、回滚  
 ```
 # kubectl rollout undo deployment/nginx-deployment
+deployment.extensions/nginx-deployment rolled back
 ```  
 
 6、查看回滚的状态  
@@ -76,12 +79,15 @@ spec:
 7、查看历史更新版本
 ```
 # kubectl rollout history deployment/nginx-deployment
+deployment.extensions/nginx-deployment
+REVISION  CHANGE-CAUSE
+1         kubectl apply --filename=nginx-deployment.yaml --record=true
 ```  
 
 8、回滚上一个版本和回滚指定版本
 ```
 # kubectl rollout undo deployment/nginx-deployment
-# kubectl rollout undo deployment/nginx-deployment --to-revision=2 ## 可以使用 --revision参数指定某个历史版本
+# kubectl rollout undo deployment/nginx-deployment --to-revision=2     # 可以使用 --revision参数指定某个历史版本
 ```  
 
 9、暂停的更新  

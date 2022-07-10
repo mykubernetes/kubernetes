@@ -207,3 +207,7 @@ spec:
 kubectl create -f prometheus-etcdRules.yaml
 ```
 
+
+
+参考：
+- https://blog.csdn.net/shigf_2015/article/details/110383821

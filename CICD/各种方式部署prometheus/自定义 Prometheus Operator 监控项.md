@@ -174,3 +174,36 @@ subsets:
 ```
 $ kubectl create -f prometheus-etcdService.yaml
 ```
+
+
+# 自定义报警规则
+
+# vim prometheus-etcdRules.yaml 
+```
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  labels:
+    prometheus: k8s
+    role: alert-rules
+  name: etcd-rules
+  namespace: monitoring
+spec:
+  groups:
+  - name: etcd
+    rules:
+    - alert: EtcdClusterUnavailable
+      annotations:
+        summary: etcd cluster small
+        description: If one more etcd peer goes down the cluster will be inavailable
+      expr: |
+        count(up{job="etcd"} == 0) > (count(up{job="etcd"}) / 2 - 1)
+      for: 2m
+      lables:
+        serverity: critical
+```
+
+```
+kubectl create -f prometheus-etcdRules.yaml
+```
+

@@ -1,5 +1,6 @@
 # kubernetes相关资料
 
+- [kubectl命令](kubectl.md)
 - [docker内核知识](https://github.com/mykubernetes/kubernetes/blob/master/Docker%E7%9A%84%E5%86%85%E6%A0%B8%E7%9F%A5%E8%AF%86.md)
 - [kubernetes yaml模板与示例](https://github.com/mykubernetes/kubernetes/blob/master/kubernetes%20yaml%E6%A8%A1%E6%9D%BF%E4%B8%8E%E7%A4%BA%E4%BE%8B.md)
 - [kubernetes1.13.1+etcd3.3.10+flanneld0.10集群二进制部署](https://github.com/mykubernetes/kubernetes/blob/master/deploy/kubernetes1.13.1%2Betcd3.3.10%2Bflanneld0.10%E9%9B%86%E7%BE%A4%E9%83%A8%E7%BD%B2.md)

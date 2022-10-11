@@ -47,7 +47,7 @@
 - [etcd实践操作记录](etcd%E5%AE%9E%E8%B7%B5%E6%93%8D%E4%BD%9C%E8%AE%B0%E5%BD%95.md)
 - [Kubernetes 映射外部服务到集群内部的场景.md](Kubernetes%20%E6%98%A0%E5%B0%84%E5%A4%96%E9%83%A8%E6%9C%8D%E5%8A%A1%E5%88%B0%E9%9B%86%E7%BE%A4%E5%86%85%E9%83%A8%E7%9A%84%E5%9C%BA%E6%99%AF.md)
 - [hybridnet](https://github.com/alibaba/hybridnet/wiki)
-- [基于Containerd实现Kubernetes-v1.25.0高可用集群](基于Containerd实现%20Kubernetes-v1.25.0高可用集群.md)
+- [基于Containerd实现Kubernetes-v1.25.0高可用集群](基于Containerd实现Kubernetes-v1.25.0高可用集群.md)
 - [基于Docker实现Kubernetes-v1.25.0高可用集群](基于Docker实现Kubernetes-v1.25.0高可用集群.md)
 
 参考：

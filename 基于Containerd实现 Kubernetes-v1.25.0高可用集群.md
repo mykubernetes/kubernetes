@@ -88,39 +88,49 @@ EOF
 ### 3.1.2 安装 Keepalived
 
 安装 keepalived 实现 HAProxy的高可用
-
 ```
 [root@ha1 ~]#apt update
 [root@ha1 ~]#apt -y install keepalived 
 [root@ha1 ~]#vim /etc/keepalived/keepalived.conf
 ! Configuration File for keepalived
 global_defs {
-   router_id ha1.wang.org  #指定router_id,#在ha2上为ha2.wang.org
+   router_id ha1.wang.org                    #指定router_id,#在ha2上为ha2.wang.org
 }
-vrrp_script check_haproxy { #定义脚本
+vrrp_script check_haproxy {                  #定义脚本
    script "/etc/keepalived/check_haproxy.sh"
    interval 1
    weight -30
    fall 3
    rise 2
    timeout 2
+}
+vrrp_instance VI_1 {
+   state MASTER                              #在ha2上为BACKUP
+   interface eth0
+   garp_master_delay 10
+   smtp_alert
+   virtual_router_id 66                      #指定虚拟路由器ID,ha1和ha2此值必须相同
+   priority 100                              #在ha2上为80
+   advert_int 1
+   authentication {
+       auth_type PASS
+       auth_pass 123456                      #指定验证密码,ha1和ha2此值必须相同
+   }
+   virtual_ipaddress {
+        10.0.0.100/24 dev eth0 label eth0:1  #指定VIP,ha1和ha2此值必须相同
+   }
+   track_script {
+       check_haproxy                         #调用上面定义的脚本
+ }
 }
 
-[root@ha1 ~]#apt update
-[root@ha1 ~]#apt -y install keepalived 
-[root@ha1 ~]#vim /etc/keepalived/keepalived.conf
-! Configuration File for keepalived
-global_defs {
-   router_id ha1.wang.org  #指定router_id,#在ha2上为ha2.wang.org
-}
-vrrp_script check_haproxy { #定义脚本
-   script "/etc/keepalived/check_haproxy.sh"
-   interval 1
-   weight -30
-   fall 3
-   rise 2
-   timeout 2
-}
+[root@ha1 ~]# cat > /etc/keepalived/check_haproxy.sh <<EOF
+#!/bin/bash
+/usr/bin/killall -0 haproxy || systemctl restart haproxy
+EOF
+
+[root@ha1 ~]# chmod a+x /etc/keepalived/check_haproxy.sh 
+[root@ha1 ~]# systemctl restart keepalived
 ```
 
 ### 3.1.3 测试访问
@@ -579,7 +589,7 @@ Kubernetes系统上Pod网络的实现依赖于第三方插件进行，这类插�
 NAME               STATUS     ROLES           AGE   VERSION
 master1.wang.org   NotReady   control-plane   17m   v1.25.0
 
-[root@master1 ~]#kubectl apply -f https://raw.githubusercontent.com/flannelio/flannel/master/Documentation/kube-flannel.yml
+[root@master1 ~]#kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
 
 #稍等一会儿,可以看到下面状态
 [root@master1 ~]#kubectl get nodes 
